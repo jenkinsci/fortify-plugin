@@ -1,0 +1,225 @@
+<?jelly escape-by-default='true'?>
+<!--
+    (c) Copyright 2019 Micro Focus or one of its affiliates.
+
+    Licensed under the MIT License (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    https://opensource.org/licenses/MIT
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+  <style type="text/css">
+        .comboBoxList {
+            display:block;
+            background-color: #fff;
+            color: #000;
+        }
+  </style>
+
+  <f:entry field="buildId" title="Build ID" help="/plugin/fortify/help-buildID.html">
+    <f:textbox/>
+  </f:entry>
+
+  <f:entry field="scanFile" title="Results file" help="/plugin/fortify/help-fpr.html">
+    <f:textbox/>
+  </f:entry>
+
+  <f:entry field="maxHeap" title="Maximum heap memory (MB)" help="/plugin/fortify/help-maxHeap.html">
+    <f:textbox/>
+  </f:entry>
+
+  <f:entry field="addJVMOptions" title="Additional JVM options" help="/plugin/fortify/help-addJVMOptions.html">
+    <f:textbox/>
+  </f:entry>
+
+  <f:optionalBlock field="updateContent" title="Update Fortify Security Content" help="/plugin/fortify/help-updateContent.html">
+    <f:nested>
+    <f:entry title="Update server URL" field="updateServerUrl" help="/plugin/fortify/help-updateServerUrl.html">
+      <f:textbox/>
+    </f:entry>
+    <f:optionalBlock field="updateUseProxy" title="Configure update server proxy">
+      <f:nested>
+        <f:entry field="updateProxyUrl" title="Proxy server host:port">
+          <f:textbox/>
+        </f:entry>
+        <f:entry field="updateProxyUsername" title="Proxy server username">
+          <f:textbox/>
+        </f:entry>
+        <f:entry field="updateProxyPassword" title="Proxy server password">
+          <f:password/>
+        </f:entry>
+      </f:nested>
+    </f:optionalBlock>
+    </f:nested>
+  </f:optionalBlock>
+
+  <f:block>
+    <f:checkbox field="runSCAClean" title="Run Fortify SCA clean" value="true" help="/plugin/fortify/help-runSCAClean.html"/>
+  </f:block>
+
+  <f:optionalBlock field="runTranslation" title="Run Fortify SCA translation" help="/plugin/fortify/help-runSCATranslation.html">
+    <f:nested>
+      <f:dropdownList title="Translation type" name="translationType">
+        <f:dropdownListBlock title="Basic" value="translationBasic" staplerClass="com.fortify.plugin.jenkins.FortifyPlugin$BasicTranslationBlock" selected="${instance.isBasicTranslationType}">
+          <f:dropdownList title="Application type" name="translationAppType">
+            <f:dropdownListBlock title="Java" value="basicJavaTranslationAppType" staplerClass="com.fortify.plugin.jenkins.FortifyPlugin$BasicJavaTranslationAppTypeBlock" selected="${instance.isBasicJavaTranslationType}">
+              <f:entry title="Java source version" help="/plugin/fortify/help-javaSourceVersion.html">
+                <f:select field="translationJavaVersion"/>
+              </f:entry>
+              <f:entry field="translationJavaClasspath" title="Java classpath" help="/plugin/fortify/help-javaClasspath.html">
+                <f:textbox/>
+              </f:entry>
+              <f:entry field="translationJavaSourceFiles" title="Source files" help="/plugin/fortify/help-javaSourceFiles.html">
+                <f:textbox/>
+              </f:entry>
+              <f:entry field="translationJavaAddOptions" title="Fortify SCA translation options" help="/plugin/fortify/help-javaAddOptions.html">
+                <f:textbox/>
+              </f:entry>
+            </f:dropdownListBlock>
+            <f:dropdownListBlock title=".NET" value="basicDotNetTranslationAppType" staplerClass="com.fortify.plugin.jenkins.FortifyPlugin$BasicDotNetTranslationAppTypeBlock" selected="${instance.isBasicDotNetTranslationType}">
+              <f:dropdownList title="Scan type" name="dotNetScanType">
+                <f:dropdownListBlock title="Project Solution Scan" value="basicDotNetProjectSolutionScanType" staplerClass="com.fortify.plugin.jenkins.FortifyPlugin$BasicDotNetProjectSolutionScanTypeBlock" selected="${instance.isBasicDotNetProjectSolutionScanType}">
+                  <f:dropdownList title="Build type" name="dotNetBuildType">
+                    <f:dropdownListBlock title="devenv" value="basicDotNetDevenvBuildType" staplerClass="com.fortify.plugin.jenkins.FortifyPlugin$BasicDotNetDevenvBuildTypeBlock" selected="${instance.isBasicDotNetDevenvBuildType}">
+                      <f:entry field="dotNetDevenvProjects" title="Solution or project file" help="/plugin/fortify/help-dotNetDevenvProjects.html">
+                        <f:textbox/>
+                      </f:entry>
+                      <f:entry field="dotNetDevenvAddOptions" title="devenv options" help="/plugin/fortify/help-dotNetDevenvAddOptions.html">
+                        <f:textbox/>
+                      </f:entry>
+                    </f:dropdownListBlock>
+                    <f:dropdownListBlock title="MSBuild" value="basicDotNetMSBuildBuildType" staplerClass="com.fortify.plugin.jenkins.FortifyPlugin$BasicDotNetMSBuildBuildTypeBlock" selected="${instance.isBasicDotNetMSBuildBuildType}">
+                      <f:entry field="dotNetMSBuildProjects" title="Solution or project file" help="/plugin/fortify/help-dotNetMSBuildProjects.html">
+                        <f:textbox/>
+                      </f:entry>
+                      <f:entry field="dotNetMSBuildAddOptions" title="MSBuild options" help="/plugin/fortify/help-dotNetMSBuildAddOptions.html">
+                        <f:textbox/>
+                      </f:entry>
+                    </f:dropdownListBlock>
+                  </f:dropdownList>
+                </f:dropdownListBlock>
+                <f:dropdownListBlock title="Source Code Scan" value="basicDotNetSourceCodeScanType" staplerClass="com.fortify.plugin.jenkins.FortifyPlugin$BasicDotNetSourceCodeScanTypeBlock" selected="${instance.isBasicDotNetSourceCodeScanType}">
+                  <f:entry field="dotNetSourceCodeFrameworkVersion" title=".NET framework version" help="/plugin/fortify/help-dotNetFrameworkVersion.html">
+                    <f:textbox/>
+                  </f:entry>
+                  <f:entry field="dotNetSourceCodeLibdirs" title="Libdirs" help="/plugin/fortify/help-dotNetSourceCodeLibDirs.html">
+                    <f:textbox/>
+                  </f:entry>
+                  <f:entry field="dotNetSourceCodeAddOptions" title="Fortify SCA translation options" help="/plugin/fortify/help-dotNetSourceCodeAddOptions.html">
+                    <f:textbox/>
+                  </f:entry>
+                  <f:entry field="dotNetSourceCodeSrcFiles" title="Source files" help="/plugin/fortify/help-dotNetSourceCodeSrcFiles.html">
+                    <f:textbox/>
+                  </f:entry>
+                </f:dropdownListBlock>
+              </f:dropdownList>
+            </f:dropdownListBlock>
+            <f:dropdownListBlock title="Maven 3" value="basicMaven3TranslationAppType" staplerClass="com.fortify.plugin.jenkins.FortifyPlugin$BasicMaven3TranslationAppTypeBlock" selected="${instance.isBasicMaven3TranslationType}">
+              <f:entry field="maven3Options" title="Maven options" help="/plugin/fortify/help-maven3Options.html">
+                <f:textbox/>
+              </f:entry>
+            </f:dropdownListBlock>
+            <f:dropdownListBlock title="Gradle" value="basicGradleTranslationAppType" staplerClass="com.fortify.plugin.jenkins.FortifyPlugin$BasicGradleTranslationAppTypeBlock" selected="${instance.isBasicGradleTranslationType}">
+              <f:block>
+                <f:checkbox field="gradleUseWrapper" title="Use Gradle Wrapper" value="true"/>
+              </f:block>
+              <f:entry field="gradleTasks" title="Gradle tasks" help="/plugin/fortify/help-gradleTasks.html">
+                <f:textbox/>
+              </f:entry>
+              <f:entry field="gradleOptions" title="Gradle options" help="/plugin/fortify/help-gradleOptions.html">
+                <f:textbox/>
+              </f:entry>
+            </f:dropdownListBlock>
+            <f:dropdownListBlock title="Other" value="basicOtherTranslationAppType" staplerClass="com.fortify.plugin.jenkins.FortifyPlugin$BasicOtherTranslationAppTypeBlock" selected="${instance.isBasicOtherTranslationType}">
+              <f:entry field="otherOptions" title="Fortify SCA translation options" help="/plugin/fortify/help-otherAddOptions.html">
+                <f:textbox/>
+              </f:entry>
+              <f:entry field="otherIncludesList" title="Includes list" help="/plugin/fortify/help-otherIncludesList.html">
+                <f:textbox/>
+              </f:entry>
+            </f:dropdownListBlock>
+          </f:dropdownList>
+          <f:entry field="translationExcludeList" title="Exclude list" help="/plugin/fortify/help-translationExcludeList.html">
+            <f:textbox/>
+          </f:entry>
+        </f:dropdownListBlock>
+        <f:dropdownListBlock title="Advanced" value="translationAdvanced" staplerClass="com.fortify.plugin.jenkins.FortifyPlugin$AdvancedTranslationBlock" selected="${instance.isAdvancedTranslationType}">
+          <f:block>
+            Fortify SCA translation options<br/>
+            <f:textarea field="translationOptions" help="/plugin/fortify/help-advancedTranslationOptions.html"/>
+          </f:block>
+        </f:dropdownListBlock>
+      </f:dropdownList>
+      <f:block>
+        <f:checkbox field="translationDebug" title="Debug" value="true" help="/plugin/fortify/help-debug.html"/>
+      </f:block>
+      <f:block>
+        <f:checkbox field="translationVerbose" title="Verbose" value="true" help="/plugin/fortify/help-verbose.html"/>
+      </f:block>
+      <f:entry field="translationLogFile" title="Log file location" help="/plugin/fortify/help-logFileLocation.html">
+        <f:textbox/>
+      </f:entry>
+    </f:nested>
+  </f:optionalBlock>
+
+  <f:optionalBlock field="runScan" title="Run Fortify SCA scan">
+    <f:entry field="scanCustomRulepacks" title="Custom Rulepacks" help="/plugin/fortify/help-scanCustomRulepacks.html">
+      <f:textbox/>
+    </f:entry>
+    <f:entry field="scanAddOptions" title="Fortify SCA scan options" help="/plugin/fortify/help-scanAddOptions.html">
+      <f:textbox/>
+    </f:entry>
+      <f:block>
+        <f:checkbox field="scanDebug" title="Debug" value="true" help="/plugin/fortify/help-debug.html"/>
+      </f:block>
+      <f:block>
+        <f:checkbox field="scanVerbose" title="Verbose" value="true" help="/plugin/fortify/help-verbose.html"/>
+      </f:block>
+      <f:entry field="scanLogFile" title="Log file location" help="/plugin/fortify/help-logFileLocation.html">
+        <f:textbox/>
+      </f:entry>
+  </f:optionalBlock>
+
+  <f:optionalBlock field="uploadSSC" title="Upload Fortify SCA scan results to Fortify Software Security Center">
+    <f:entry title="Application name" help="/plugin/fortify/help-sscProjName.html">
+      <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
+      <div style="float:left;width:80%;">
+        <f:editableComboBox id="projectName" name="projectName" field="projectName" clazz="setting-input" items="${descriptor.projectNameItems}" />
+      </div>
+      <div style="float:left">
+        <input value="▼" type="button" id="refreshPrjButton" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects')" />
+      </div>
+      <div style="display:none;" id="refreshSpinner" >
+        <img src="${imagesURL}/spinner.gif" /> ${progress}
+      </div>
+    </f:entry>
+    <f:entry title="Application version" help="/plugin/fortify/help-sscProjVersion.html">
+      <div style="float:left;width:50%;">
+        <f:editableComboBox id="projectVersion" name="projectVersion" field="projectVersion" clazz="setting-input" items="${descriptor.projectVersionItems(projectName)}" />
+      </div>
+      <div style="float:left">
+        <input value="▼" type="button" id="refreshPrjVerButton" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions')" />
+      </div>
+    </f:entry>
+    <f:entry field="filterSet" title="Filter set" help="/plugin/fortify/help-filterSet.html">
+      <f:textbox field="filterSet" />
+    </f:entry>
+    <f:entry field="searchCondition" title="Build failure criteria" help="/plugin/fortify/help-search.html">
+      <f:textbox field="searchCondition" />
+    </f:entry>
+    <f:advanced title="Advanced settings">
+      <f:entry field="pollingInterval" title="Polling interval" help="/plugin/fortify/help-pollingInterval.html">
+        <f:textbox field="pollingInterval" />
+      </f:entry>
+    </f:advanced>
+  </f:optionalBlock>
+
+</j:jelly>

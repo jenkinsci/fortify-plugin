@@ -1,0 +1,181 @@
+<!--
+    (c) Copyright 2019 Micro Focus or one of its affiliates. 
+
+    Licensed under the MIT License (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    https://opensource.org/licenses/MIT
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>3.4</version>
+        <relativePath />
+    </parent>
+
+    <artifactId>fortify</artifactId>
+    <version>19.1.0-SNAPSHOT</version>
+    <packaging>hpi</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jenkins.version>2.107.3</jenkins.version>
+        <java.level>8</java.level>
+        <jenkins-test-harness.version>2.39</jenkins-test-harness.version>
+        <disabledTestInjection>true</disabledTestInjection>
+    </properties>
+
+    <name>Fortify</name>
+    <description>Adds the ability to perform security analysis with Fortify Static Code Analyzer, upload results to Software Security Center, show analysis results summary, and set build failure criteria based on analysis results.</description>
+    <url>https://software.microfocus.com/software/sca</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@github.com:jenkinsci/fortify-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:jenkinsci/fortify-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/fortify-plugin</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>akaryakina</id>
+            <name>Anna Karyakina</name>
+            <email>akarjakina@gmail.com</email>
+        </developer>
+    </developers>
+
+    <organization>
+        <name>Fortify</name>
+        <url>https://software.microfocus.com/software/enterprise-security</url>
+    </organization>
+
+    <repositories>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/public/</url>
+        </repository>
+        <repository>
+            <id>fortify</id>
+            <name>fortify</name>
+            <url>https://dl.bintray.com/fortify/maven-public</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+
+        <!-- for Jenkins Pipelines -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <version>2.16</version>
+        </dependency>
+
+        <!-- Fortify REST API client published on bintray -->
+        <dependency>
+            <groupId>com.fortify</groupId>
+            <artifactId>ssc-restapi-client</artifactId>
+            <version>2.0</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- these are swagger generated REST API dependencies -->
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.5.15</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>2.7.5</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp</groupId>
+            <artifactId>logging-interceptor</artifactId>
+            <version>2.7.5</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.1</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.gsonfire</groupId>
+            <artifactId>gson-fire</artifactId>
+            <version>1.8.0</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.threeten</groupId>
+            <artifactId>threetenbp</artifactId>
+            <version>1.3.5</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.9.3</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>display-info</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <failOnError>false</failOnError>
+                        <additionalparam>-Xdoclint:none</additionalparam>
+                    </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

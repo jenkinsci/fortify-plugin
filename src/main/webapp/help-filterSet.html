@@ -1,0 +1,24 @@
+<!--
+    (c) Copyright 2019 Micro Focus or one of its affiliates.
+   
+    Licensed under the MIT License (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    https://opensource.org/licenses/MIT
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<div>
+  A filter set determines which issues are displayed. This field requires a filter set id.
+  <p>
+    Fortify Security Center provides filter sets based on the issue template configured for the project. By default, every template has "Quick View" (input 32142c2d-3f7f-4863-a1bf-9b1e2f34d2ed) and "Security Auditor View" (input a243b195-0a59-3f8b-1403-d55b7a7d78e6). Your organization might have additional filter sets. If no filter set is specified, the plugin uses the one configured on the server as default.
+  </p>
+  <p>
+    The build failure criteria, the NVS calculation and the Fortify Assessment page depend on the issues filtered by the filter set. For example, if a Quick View filter set is applied and no issues are found, then the build failure criteria determines that there is no reason to set this build to unstable and the NVS is set to zero. The graph summary also shows zero.
+  </p> 
+</div>

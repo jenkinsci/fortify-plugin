@@ -1,0 +1,50 @@
+<?jelly escape-by-default='true'?>
+<!--
+    (c) Copyright 2019 Micro Focus or one of its affiliates.
+   
+    Licensed under the MIT License (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    https://opensource.org/licenses/MIT
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt" xmlns:local="local">
+  <div>
+    <div>
+      <img id="nvsGraph" src="${action.urlName}/graph" />
+    </div>
+    <script defer="true">
+        var stamp = new Date().getTime();
+        function checkGraphUpdate() {
+            var parameters = {};
+            new Ajax.Request("${action.urlName}/checkUpdates?stamp="+stamp,{
+                parameters: parameters,
+                onComplete: function(rsp) {
+                    var update = rsp.getResponseHeader("go");
+                    if(update == "go") {
+                        stamp = new Date().getTime();
+                        var image = document.getElementById('nvsGraph');
+                        if(image.complete) {
+                            var new_image = new Image();
+                            new_image.id = "nvsGraph";
+                            new_image.src = image.src + "?v=" + stamp;
+                            // insert new image and remove old
+                            image.parentNode.insertBefore(new_image,image);
+                            image.parentNode.removeChild(image);
+                        }
+                    }
+                    // next update in 10 sec
+                    window.setTimeout(checkGraphUpdate, 10000);
+                }
+            });
+        }
+        window.setTimeout(checkGraphUpdate, 15000);
+    </script>
+  </div>
+</j:jelly>

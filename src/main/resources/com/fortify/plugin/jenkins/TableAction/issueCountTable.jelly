@@ -1,0 +1,57 @@
+<?jelly escape-by-default='true'?>
+<!--
+    (c) Copyright 2019 Micro Focus or one of its affiliates.
+   
+    Licensed under the MIT License (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    https://opensource.org/licenses/MIT
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+  <l:ajax>
+    <div id="issueStatistics">
+    <j:set var="stats" value="${it.buildStats}" />
+    <table class="pane">
+        <tr>
+          <td class="pane-header">Build</td>
+          <td class="pane-header">Total</td>
+          <j:forEach var="folder" items="${stats.folders}">
+              <td class="pane-header">${folder.name}</td>
+          </j:forEach>
+        </tr>
+        <tr>
+          <td class="pane">
+              ${stats.name}<j:if test="${not empty stats.prevBuildName}"><st:nbsp />(${stats.prevBuildName})</j:if>
+          </td>
+          <td class="pane">
+              ${stats.total}<j:if test="${stats.hasPrev}"><st:nbsp />(${stats.prevTotal})</j:if>
+              <j:if test="${stats.less}">
+                  <st:nbsp /><img src="${rootURL}/plugin/fortify/icons/blue_down_16.gif"/>
+              </j:if>
+              <j:if test="${stats.more}">
+                  <st:nbsp /><img src="${rootURL}/plugin/fortify/icons/red_up_16.gif"/>
+              </j:if>
+          </td>
+          <j:forEach var="folder" items="${stats.folders}">
+              <td class="pane">
+                  ${folder.issueCount}<j:if test="${folder.hasPrev}"><st:nbsp />(${folder.prevIssueCount})</j:if>
+                  <j:if test="${folder.less}">
+                      <st:nbsp /><img src="${rootURL}/plugin/fortify/icons/blue_down_16.gif"/>
+                  </j:if>
+                  <j:if test="${folder.more}">
+                      <st:nbsp /><img src="${rootURL}/plugin/fortify/icons/red_up_16.gif"/>
+                  </j:if>
+              </td>
+          </j:forEach>
+        </tr>
+    </table>
+    </div>
+  </l:ajax>
+</j:jelly>

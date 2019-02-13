@@ -1,0 +1,56 @@
+<?jelly escape-by-default='true'?>
+<!--
+    (c) Copyright 2019 Micro Focus or one of its affiliates.
+   
+    Licensed under the MIT License (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    https://opensource.org/licenses/MIT
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:entry title="${%Application name}"
+      help="/plugin/fortify/help-sscProjName.html">      
+      <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>      
+      <div style="float:left;width:80%;">
+        <f:editableComboBox id="projectName" name="appName" field="appName" clazz="setting-input" items="${descriptor.applicationNameItems}" />
+      </div>
+      <div style="float:left">
+        <input value="▼" type="button" id="refreshPrjButton" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshApplications')" />
+      </div>
+      <div style="display:none;" id="refreshSpinner" >
+        <img src="${imagesURL}/spinner.gif" /> ${progress}
+      </div>      
+    </f:entry>
+  
+    <f:entry title="${%Application version}"
+      help="/plugin/fortify/help-sscProjVersion.html">      
+      <div style="float:left;width:50%;">
+        <f:editableComboBox id="projectVersion" name="appVersion" field="appVersion" clazz="setting-input" items="${descriptor.applicationVersionItems(appName)}" />
+      </div>
+      <div style="float:left">
+        <input value="▼" type="button" id="refreshPrjVerButton" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions')" />
+      </div>
+    </f:entry>
+  <f:entry title="${%Results file}" field="resultsFile" help="/plugin/fortify/help-fpr.html">
+    <f:textbox/>
+  </f:entry>
+    <f:entry title="${%Filter set}" field="filterSet" help="/plugin/fortify/help-filterSet.html">
+      <f:textbox field="filterSet" />
+    </f:entry>
+
+    <f:entry title="${%Build failure criteria}" field="failureCriteria" help="/plugin/fortify/help-search.html">
+      <f:textbox field="failureCriteria" />
+    </f:entry>
+
+        <f:entry title="Polling interval" field="pollingInterval" help="/plugin/fortify/help-pollingInterval.html">
+      <f:textbox field="pollingInterval" />
+    </f:entry>
+    
+</j:jelly>

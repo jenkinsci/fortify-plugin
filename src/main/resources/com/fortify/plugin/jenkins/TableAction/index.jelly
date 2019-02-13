@@ -1,0 +1,57 @@
+<?jelly escape-by-default='true'?>
+<!--
+    (c) Copyright 2019 Micro Focus or one of its affiliates.
+   
+    Licensed under the MIT License (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    https://opensource.org/licenses/MIT
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+    <st:header name="Content-Type" value="text/html;charset=UTF-8" />
+    <l:layout norefresh="true" >
+        <l:header>
+            <link rel="stylesheet" type="text/css" href="${rootURL}/plugin/fortify/issueStyles.css"/>
+            <script src="${rootURL}/plugin/fortify/refresh-issues.js"></script>
+            <script type="text/javascript" defer="true">
+                var stamp = new Date().getTime();
+                var contextUrl = '${h.getActionUrl(it.project.url,it)}';
+            </script>
+        </l:header>
+
+        <st:include page="sidepanel.jelly" it="${it.project}"/>
+        <l:side-panel/>
+        <l:main-panel>
+            <h1>List of Fortify SSC issues</h1>
+            <j:choose>
+                <j:when test="${not empty it.lastBuildStats}">
+                <div id="allTables">
+                    <h2>Summary</h2>
+                    <div id="scanStatistics">
+                        <st:include page="issueCountTable.jelly"/>
+                    </div>
+
+                    <br /><br />
+                    <div id="issueTable">
+                        <h2>Issues breakdown by Priority Order</h2><st:nbsp /><span id="firstTimeSpinF" />
+                        <!-- issuesByFriorityTable.jelly content is loaded with loadIssueTable(...) Ajax call -->
+                    </div>
+                </div>
+                </j:when>
+                <j:otherwise>
+                    You have to build your project in order to access Fortify Assessment results
+                </j:otherwise>
+	            <script type="text/javascript" defer="true">
+	                loadIssueTable('${imagesURL}/spinner.gif');
+	            </script>
+            </j:choose>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>

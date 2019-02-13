@@ -1,0 +1,47 @@
+<?jelly escape-by-default='true'?>
+<!--
+    (c) Copyright 2019 Micro Focus or one of its affiliates.
+   
+    Licensed under the MIT License (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    https://opensource.org/licenses/MIT
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ -->
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  	<f:entry title="${%Build ID}" field="buildID" help="/plugin/fortify/help-buildId.html">
+    	<f:textbox/>
+  	</f:entry>
+  	<f:entry title="${%Results file}" field="resultsFile" help="/plugin/fortify/help-fpr.html">
+    	<f:textbox/>
+  	</f:entry>
+    <f:entry title="${%Custom Rulepacks}" field="customRulepacks" help="/plugin/fortify/help-scanCustomRulepacks.html">
+      	<f:textbox/>
+    </f:entry>
+    <f:entry title="${%Additional options}" field="addOptions" help="/plugin/fortify/help-scanAddOptions.html">
+      	<f:textbox/>
+    </f:entry>
+    <f:advanced align="left">
+  		<f:entry title="${%Maximum heap memory} (MB)" field="maxHeap" help="/plugin/fortify/help-maxHeap.html">
+	  		<f:textbox/>
+		</f:entry>
+		<f:entry title="${%Additional JVM options}" field="addJVMOptions" help="/plugin/fortify/help-addJVMOptions.html">
+	  		<f:textbox/>
+		</f:entry>
+  		<f:block>
+        	<f:checkbox title="${%Debug}" field="debug" value="true" help="/plugin/fortify/help-debug.html"/>
+      	</f:block>
+      	<f:block>
+        	<f:checkbox title="${%Verbose}" field="verbose" value="true" help="/plugin/fortify/help-verbose.html"/>
+      	</f:block>
+      	<f:entry title="${%Log file location}" field="logFile" help="/plugin/fortify/help-logFileLocation.html">
+        	<f:textbox/>
+      	</f:entry>
+    </f:advanced>
+</j:jelly>

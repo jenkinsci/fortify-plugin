@@ -1,0 +1,20 @@
+a.fnewValue {
+    text-decoration: underline;
+    color: inherit;
+    display: inline;
+}
+a.fcurrentValue {
+    text-decoration: none;
+    color: black;
+    display: inline;
+}
+a.fsortheader {
+    text-decoration: none;
+    color: black;
+    display: block;
+}
+span.fsortarrow {
+    text-decoration: none;
+    color: black;
+    display: inline;
+}

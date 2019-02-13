@@ -10,14 +10,26 @@ For more information about Fortify SCA please visit https://www.microfocus.com/p
 
 For more information about Fortify SSC please visit https://www.microfocus.com/products/software-security-assurance-sdlc
 
+## Building and debugging
+
+To build the plugin and connect your IDE for a remote debug session, you can use the following script:
+```
+SET HOME=%~dp0
+SET MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+call mvn clean
+call mvn package -Dssc.url=http://127.0.0.1:8180/ssc/
+call mvn -Djetty.port=8181 -DskipTests=true hpi:run
+```
+
 ## Usage notes
 
-* SSC authentication token. 
-  Token creation command:
+You are required to obtain Fortify SSC authentication token to use the server related functionality of the plugin (which includes build failure conditions and getting all vulnerability results in Jenkins).
+
+* SSC authentication token. Token creation command:
   ```
   $ fortifyclient token -gettoken JenkinsToken -daysToLive 365 -url http://localhost:8180/ssc -user admin
   ```
-* Upon building process junit tests from the plug-in use connection to SSC. 
+* Tests. Upon building process junit tests from the plug-in use connection to SSC. 
   To override default SSC location (localhost:8080) you can specify optional SSC URL parameter 'ssc.url'.
   For example:
   ```

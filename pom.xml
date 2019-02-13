@@ -37,7 +37,7 @@
 
     <name>Fortify Plugin</name>
     <description>Adds the ability to perform security analysis with Fortify Static Code Analyzer, upload results to Software Security Center, show analysis results summary, and set build failure criteria based on analysis results.</description>
-    <url>https://software.microfocus.com/software/sca</url>
+    <url>https://wiki.jenkins.io/display/JENKINS/Fortify+Plugin</url>
 
     <licenses>
         <license>

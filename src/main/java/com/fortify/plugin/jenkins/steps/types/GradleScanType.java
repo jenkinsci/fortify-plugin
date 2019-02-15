@@ -62,8 +62,7 @@ public class GradleScanType extends ProjectScanType {
 		this.gradleOptions = gradleOptions;
 	}
 
-	@Symbol("Gradle")
-	@Extension
+	@Extension @Symbol("fortifyGradle")
 	public static final class DescriptorImpl extends ProjectScanTypeDescriptor {
 		public DescriptorImpl() {
 			super(GradleScanType.class);

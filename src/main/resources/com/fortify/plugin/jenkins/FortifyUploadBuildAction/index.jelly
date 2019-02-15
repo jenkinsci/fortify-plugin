@@ -14,8 +14,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
  -->
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
-         xmlns:l="/lib/layout">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout">
 	<l:layout title="Build #${it.build.number}">
 		<l:side-panel>
 			<st:include it="${it.build}" page="sidepanel.jelly"/>

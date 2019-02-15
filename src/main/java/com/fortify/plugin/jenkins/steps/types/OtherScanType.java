@@ -52,8 +52,7 @@ public class OtherScanType extends ProjectScanType {
 		this.otherIncludesList = otherIncludesList;
 	}
 
-	@Symbol("Other")
-	@Extension
+	@Extension @Symbol("fortifyOther")
 	public static final class DescriptorImpl extends ProjectScanTypeDescriptor {
 		public DescriptorImpl() {
 			super(OtherScanType.class);

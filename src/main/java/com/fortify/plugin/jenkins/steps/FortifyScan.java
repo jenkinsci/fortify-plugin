@@ -32,6 +32,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import com.fortify.plugin.jenkins.Messages;
+import com.fortify.plugin.jenkins.PathUtils;
 import com.google.common.collect.ImmutableSet;
 
 import hudson.AbortException;
@@ -63,10 +64,7 @@ public class FortifyScan extends FortifySCAStep implements SimpleBuildStep {
 
 	public String getResolvedResultsFile(TaskListener listener) {
 		String s = resolve(getResultsFile(), listener);
-		if (StringUtils.isNotEmpty(s) && !s.toLowerCase().endsWith(".fpr")) {
-			s += ".fpr";
-		}
-		return s;
+		return PathUtils.appendExtentionIfNotEmpty(s, ".fpr");
 	}
 
 	public String getResolvedCustomRulepacks(TaskListener listener) {

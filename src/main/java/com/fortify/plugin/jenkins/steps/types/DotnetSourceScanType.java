@@ -72,8 +72,7 @@ public class DotnetSourceScanType extends ProjectScanType {
 		this.dotnetAddOptions = dotnetAddOptions;
 	}
 
-	@Symbol("DotnetSrc")
-	@Extension
+	@Extension @Symbol("fortifyDotnetSrc")
 	public static final class DescriptorImpl extends ProjectScanTypeDescriptor {
 		public DescriptorImpl() {
 			super(DotnetSourceScanType.class);

@@ -52,8 +52,7 @@ public class MsbuildScanType extends ProjectScanType {
 		this.dotnetAddOptions = dotnetAddOptions;
 	}
 
-	@Symbol("MSBuild")
-	@Extension
+	@Extension @Symbol("fortifyMSBuild")
 	public static final class DescriptorImpl extends ProjectScanTypeDescriptor {
 		public DescriptorImpl() {
 			super(MsbuildScanType.class);

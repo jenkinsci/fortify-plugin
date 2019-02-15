@@ -39,8 +39,7 @@ public class MavenScanType extends ProjectScanType {
 		this.mavenOptions = mavenOptions;
 	}
 
-	@Symbol("Maven3")
-	@Extension
+	@Extension @Symbol("fortifyMaven3")
 	public static final class DescriptorImpl extends ProjectScanTypeDescriptor {
 		public DescriptorImpl() {
 			super(MavenScanType.class);

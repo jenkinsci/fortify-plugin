@@ -43,6 +43,7 @@ import com.fortify.plugin.jenkins.FPRSummary;
 import com.fortify.plugin.jenkins.FortifyPlugin;
 import com.fortify.plugin.jenkins.FortifyUploadBuildAction;
 import com.fortify.plugin.jenkins.Messages;
+import com.fortify.plugin.jenkins.PathUtils;
 import com.fortify.plugin.jenkins.RemoteService;
 import com.fortify.plugin.jenkins.TableAction;
 import com.fortify.plugin.jenkins.bean.GroupingValueBean;
@@ -147,10 +148,7 @@ public class FortifyUpload extends FortifyStep implements SimpleBuildStep, Exten
 
 	public String getResolvedFpr(TaskListener listener) {
 		String s = resolve(getResultsFile(), listener);
-		if (StringUtils.isNotEmpty(s) && !s.toLowerCase().endsWith(".fpr")) {
-			s += ".fpr";
-		}
-		return s;
+		return PathUtils.appendExtentionIfNotEmpty(s, ".fpr");
 	}
 
 	public String getResolvedAppName(TaskListener listener) {

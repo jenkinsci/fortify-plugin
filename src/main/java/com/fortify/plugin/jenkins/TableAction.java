@@ -37,10 +37,12 @@ import com.fortify.plugin.jenkins.bean.IssueFolderBean;
 import com.fortify.plugin.jenkins.model.ui.GroupingProfile;
 import com.fortify.plugin.jenkins.steps.FortifyUpload;
 
+import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.StreamBuildListener;
+import jenkins.model.Jenkins;
 
 /**
  * Issue tables
@@ -86,7 +88,7 @@ public class TableAction implements Action {
 
 	private long lastUpdated;
 
-	private Job<?, ?> project;
+	private String projectName;
 	private FortifyUpload manager;
 	private String appName;
 	private String appVersion;
@@ -94,14 +96,14 @@ public class TableAction implements Action {
 	private List<GroupingBean> groupingProfiles;
 
 	public TableAction(Job<?, ?> project, FortifyUpload upload, String appName, String appVersion) {
-		this.project = project;
+		this.projectName = project.getName();
 		this.manager = upload;
 		this.appName = appName;
 		this.appVersion = appVersion;
 	}
 
-	public Job<?, ?> getProject() {
-		return project;
+	public String getProjectName() {
+		return projectName;
 	}
 
 	public String getAppName() {
@@ -120,7 +122,7 @@ public class TableAction implements Action {
 	public String getDisplayName() {
 		String name = "Fortify Assessment";
 		if (appName != null || appVersion != null) {
-			name += "(";
+			name += " (";
 			if (appName != null) {
 				name += appName;
 				if (appVersion != null) {
@@ -153,14 +155,22 @@ public class TableAction implements Action {
 		return url;
 	}
 
-	private Run<?, ?> getLastBuild(Job<?, ?> project) {
-		Run<?, ?> lastBuild = project.getLastBuild();
-		if (lastBuild != null) {
-			if (lastBuild.isBuilding()) {
-				lastBuild = lastBuild.getPreviousBuild();
+	private Run<?, ?> getLastBuild(String projectName) {
+		if (projectName != null) {
+			List<AbstractProject> allProjects = Jenkins.get().getAllItems(AbstractProject.class);
+			for (AbstractProject next : allProjects) {
+				if (next != null && projectName.equals(next.getName())) {
+					Run<?, ?> lastBuild = next.getLastBuild();
+					if (lastBuild != null) {
+						if (lastBuild.isBuilding()) {
+							lastBuild = lastBuild.getPreviousBuild();
+						}
+					}
+					return lastBuild;
+				}
 			}
 		}
-		return lastBuild;
+		return null;
 	}
 
 	public MergedBuildStatistics getBuildStats() {
@@ -172,12 +182,12 @@ public class TableAction implements Action {
 	}
 
 	public BuildStatistics getLastBuildStats() {
-		Run<?, ?> lastBuild = getLastBuild(getProject());
+		Run<?, ?> lastBuild = getLastBuild(getProjectName());
 		return lastBuild == null ? null : getBuildStatsFor(lastBuild);
 	}
 
 	public BuildStatistics getPreviousBuildStats() {
-		Run<?, ?> lastBuild = getLastBuild(getProject());
+		Run<?, ?> lastBuild = getLastBuild(getProjectName());
 		Run<?, ?> previousBuild = null;
 		if (lastBuild != null) {
 			previousBuild = lastBuild.getPreviousBuild();

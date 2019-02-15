@@ -83,17 +83,6 @@
 					<st:nbsp /> | <st:nbsp />
 					<a href="javascript:updatePageSize('pageAll','-1','${fspinnerUrl}')" class="${pSize == '-1' ? 'fcurrentValue' : 'fnewValue'}">All</a><span id="pageAll" />
 					<st:nbsp />
-					<!-- This will not currently work
-					<j:if test="${folder == 'All'}">
-					  <span style="float: right;">
-						<a href="javascript:updateListWithSort('sortByPriority','${folder}','${page}','priority','${fspinnerUrl}')">
-							Sort by Priority
-						</a>
-						<st:nbsp /><st:nbsp /><span class="fsortarrow">${sortOrder == 'priority' ? sortDirection : '&#160;'}</span>
-						<st:nbsp /><span id="sortByPriority" />
-					  </span>
-					</j:if>
-					-->
 				</div>
 			</j:if>
     	</j:when>

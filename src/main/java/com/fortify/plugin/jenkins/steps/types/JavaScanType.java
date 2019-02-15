@@ -73,8 +73,7 @@ public class JavaScanType extends ProjectScanType {
 		this.javaAddOptions = javaAddOptions;
 	}
 
-	@Symbol("Java")
-	@Extension
+	@Extension @Symbol("fortifyJava")
 	public static final class DescriptorImpl extends ProjectScanTypeDescriptor {
 		public DescriptorImpl() {
 			super(JavaScanType.class);

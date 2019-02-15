@@ -52,8 +52,7 @@ public class DevenvScanType extends ProjectScanType {
 		this.dotnetAddOptions = dotnetAddOptions;
 	}
 
-	@Symbol("devenv")
-	@Extension
+	@Extension @Symbol("fortifyDevenv")
 	public static final class DescriptorImpl extends ProjectScanTypeDescriptor {
 		public DescriptorImpl() {
 			super(DevenvScanType.class);

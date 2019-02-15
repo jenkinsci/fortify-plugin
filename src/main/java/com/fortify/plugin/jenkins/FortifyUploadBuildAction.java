@@ -27,7 +27,7 @@ import jenkins.tasks.SimpleBuildStep;
 
 public class FortifyUploadBuildAction implements Action, SimpleBuildStep.LastBuildAction {
 
-	private List<Action> projectActions = new ArrayList<Action>();
+	private List<Action> projectActions = null;
 
 	public FortifyUploadBuildAction() {
 		super();
@@ -36,7 +36,8 @@ public class FortifyUploadBuildAction implements Action, SimpleBuildStep.LastBui
 	public void addAppVersion(Job<?, ?> project, FortifyUpload upload, String appName, String appVersion) {
 		boolean chartExists = false;
 		boolean tableExists = false;
-		for (Action existingAction : projectActions) {
+		Collection<Action> actions = getProjectActions();
+		for (Action existingAction : actions) {
 			if (existingAction instanceof ChartAction && appName.equals(((ChartAction) existingAction).getAppName())
 					&& appVersion.equals(((ChartAction) existingAction).getAppVersion())) {
 				chartExists = true;
@@ -47,10 +48,10 @@ public class FortifyUploadBuildAction implements Action, SimpleBuildStep.LastBui
 			}
 		}
 		if (!chartExists) {
-			projectActions.add(new ChartAction(project, upload.isPipeline(), appName, appVersion));
+			actions.add(new ChartAction(project, upload.isPipeline(), appName, appVersion));
 		}
 		if (!tableExists) {
-			projectActions.add(new TableAction(project, upload, appName, appVersion));
+			actions.add(new TableAction(project, upload, appName, appVersion));
 		}
 	}
 
@@ -70,7 +71,10 @@ public class FortifyUploadBuildAction implements Action, SimpleBuildStep.LastBui
 	}
 
 	@Override
-	public Collection<? extends Action> getProjectActions() {
+	public Collection<Action> getProjectActions() {
+		if (projectActions == null) {
+			projectActions = new ArrayList<Action>();
+		}
 		return projectActions;
 	}
 }

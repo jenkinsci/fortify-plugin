@@ -32,6 +32,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.verb.POST;
 
 import com.fortify.plugin.jenkins.bean.ProjectTemplateBean;
 import com.fortify.plugin.jenkins.fortifyclient.FortifyClient;
@@ -68,6 +69,7 @@ import hudson.tasks.Recorder;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -557,11 +559,11 @@ public class FortifyPlugin extends Recorder {
 		/** SSC proxy **/
 		private boolean useProxy;
 		private String proxyUrl; // host:port
-		private String proxyUsername;
-		private String proxyPassword;
+		private Secret proxyUsername;
+		private Secret proxyPassword;
 
 		/** SSC Authentication Token */
-		private String token;
+		private Secret token;
 
 		/** SSC issue template name (used during creation of new application version) */
 		private String projectTemplate;
@@ -603,15 +605,15 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		public String getProxyUsername() {
-			return proxyUsername;
+			return proxyUsername == null ? "" : proxyUsername.getPlainText();
 		}
 
 		public String getProxyPassword() {
-			return proxyPassword;
+			return proxyPassword == null ? "" : proxyPassword.getPlainText();
 		}
 
 		public String getToken() {
-			return token;
+			return token == null ? "" : token.getPlainText();
 		}
 
 		public boolean canUploadToSsc() {
@@ -661,6 +663,7 @@ public class FortifyPlugin extends Recorder {
 			return FormValidation.ok();
 		}
 
+		@POST
 		public FormValidation doCheckProxyUsername(@QueryParameter String value) {
 			try {
 				checkProxyUsernameValue(value.trim());
@@ -670,6 +673,7 @@ public class FortifyPlugin extends Recorder {
 			return FormValidation.ok();
 		}
 
+		@POST
 		public FormValidation doCheckProxyPassword(@QueryParameter String value) {
 			try {
 				checkProxyPasswordValue(value);
@@ -679,6 +683,7 @@ public class FortifyPlugin extends Recorder {
 			return FormValidation.ok();
 		}
 
+		@POST
 		public FormValidation doCheckToken(@QueryParameter String value) {
 			if (StringUtils.isBlank(value)) {
 				return FormValidation.warning("SSC Authentication Token can't be empty");
@@ -730,8 +735,8 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		private FormValidation doTestConnection(String url, String token, String jarsPath) {
-			return doTestConnection(url, token, jarsPath, this.useProxy, this.proxyUrl, this.proxyUsername,
-					this.proxyPassword);
+			return doTestConnection(url, token, jarsPath, this.useProxy, this.proxyUrl, this.getProxyUsername(),
+					this.getProxyPassword());
 		}
 
 		public FormValidation doTestConnection(@QueryParameter String url, @QueryParameter String token,
@@ -752,17 +757,17 @@ public class FortifyPlugin extends Recorder {
 
 			// backup original values
 			String orig_url = this.url;
-			String orig_token = this.token;
+			Secret orig_token = this.token;
 			boolean orig_useProxy = this.useProxy;
 			String orig_proxyUrl = this.proxyUrl;
-			String orig_proxyUsername = this.proxyUsername;
-			String orig_proxyPassword = this.proxyPassword;
+			Secret orig_proxyUsername = this.proxyUsername;
+			Secret orig_proxyPassword = this.proxyPassword;
 			this.url = sscUrl;
-			this.token = userToken;
+			this.token = userToken.isEmpty() ? null : Secret.fromString(userToken);
 			this.useProxy = useProxy;
 			this.proxyUrl = proxyUrl;
-			this.proxyUsername = proxyUsername;
-			this.proxyPassword = proxyPassword;
+			this.proxyUsername = proxyUsername == null ? null : Secret.fromString(proxyUsername);
+			this.proxyPassword = proxyPassword == null ? null : Secret.fromString(proxyPassword);
 			try {
 				runWithFortifyClient(userToken, new FortifyClient.Command<FortifyClient.NoReturn>() {
 					@Override
@@ -913,9 +918,9 @@ public class FortifyPlugin extends Recorder {
 			String orig_url = this.url;
 			boolean orig_useProxy = this.useProxy;
 			String orig_proxyUrl = this.proxyUrl;
-			String orig_proxyUsername = this.proxyUsername;
-			String orig_proxyPassword = this.proxyPassword;
-			String orig_token = this.token;
+			Secret orig_proxyUsername = this.proxyUsername;
+			Secret orig_proxyPassword = this.proxyPassword;
+			Secret orig_token = this.token;
 
 			String url = req.getParameter("url");
 			boolean useProxy = "true".equals(req.getParameter("useProxy"));
@@ -927,16 +932,16 @@ public class FortifyPlugin extends Recorder {
 			this.useProxy = useProxy;
 			if (useProxy) {
 				this.proxyUrl = proxyUrl != null ? proxyUrl.trim() : "";
-				this.proxyUsername = proxyUsername != null ? proxyUsername.trim() : "";
-				this.proxyPassword = proxyPassword != null ? proxyPassword : "";
+				this.proxyUsername = proxyUsername != null ? Secret.fromString(proxyUsername.trim()) : null;
+				this.proxyPassword = proxyPassword != null ? Secret.fromString(proxyPassword) : null;
 			} else {
 				this.proxyUrl = "";
-				this.proxyUsername = "";
-				this.proxyPassword = "";
+				this.proxyUsername = null;
+				this.proxyPassword = null;
 			}
-			this.token = token != null ? token.trim() : "";
+			this.token = token != null ? Secret.fromString(token.trim()) : null;
 
-			if (!doTestConnection(this.url, this.token, null).kind.equals(FormValidation.Kind.OK)) {
+			if (!doTestConnection(this.url, this.getToken(), null).kind.equals(FormValidation.Kind.OK)) {
 				return; // don't get templates if server is unavailable
 			}
 
@@ -972,8 +977,7 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public void doCreateNewProject(final StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
-				throws Exception {
+		public void doCreateNewProject(final StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
 			try {
 				runWithFortifyClient(getToken(), new FortifyClient.Command<FortifyClient.NoReturn>() {
 					@Override
@@ -1028,8 +1032,9 @@ public class FortifyPlugin extends Recorder {
 					proxyUrl = null;
 				}
 				try {
-					proxyUsername = useProxy.getString("proxyUsername").trim();
-					checkProxyUsernameValue(proxyUsername);
+					String usernameParam = useProxy.getString("proxyUsername").trim();
+					checkProxyUsernameValue(usernameParam);
+					proxyUsername = usernameParam.isEmpty() ? null : Secret.fromString(usernameParam);
 				} catch (JSONException e) {
 					System.out.println("Can't restore 'proxyUsername' property.  Will use default (empty) values.");
 					proxyUsername = null;
@@ -1038,8 +1043,9 @@ public class FortifyPlugin extends Recorder {
 					proxyUsername = null;
 				}
 				try {
-					proxyPassword = useProxy.getString("proxyPassword").trim();
-					checkProxyPasswordValue(proxyPassword);
+					String pwdParam = useProxy.getString("proxyPassword").trim();
+					checkProxyPasswordValue(pwdParam);
+					proxyPassword = pwdParam.isEmpty() ? null : Secret.fromString(pwdParam);
 				} catch (JSONException e) {
 					System.out.println("Can't restore 'proxyPassword' property.  Will use default (empty) values.");
 					proxyPassword = null;
@@ -1049,7 +1055,8 @@ public class FortifyPlugin extends Recorder {
 				}
 			}
 			try {
-				token = o.getString("token").trim();
+				String tokenParam = o.getString("token").trim();
+				token = tokenParam.isEmpty() ? null : Secret.fromString(tokenParam);
 			} catch (JSONException e) {
 				System.out.println("Can't restore 'Authentication Token' property. Will use default (empty) values.");
 				token = null;
@@ -1070,8 +1077,7 @@ public class FortifyPlugin extends Recorder {
 					breakdownPageSize = DEFAULT_PAGE_SIZE;
 				}
 			} catch (NumberFormatException | JSONException e) {
-				System.out.println(
-						"Can't restore 'Issue breakdown page size' property. Will use default (empty) values.");
+				System.out.println("Can't restore 'Issue breakdown page size' property. Will use default (" + DEFAULT_PAGE_SIZE + ") value.");
 				breakdownPageSize = DEFAULT_PAGE_SIZE;
 			}
 

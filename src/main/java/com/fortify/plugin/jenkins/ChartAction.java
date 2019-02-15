@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.file.NoSuchFileException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import javax.servlet.ServletException;
 
@@ -37,6 +40,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import hudson.Extension;
+import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -46,17 +50,18 @@ import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.ColorPalette;
 import hudson.util.DataSetBuilder;
+import jenkins.model.Jenkins;
 
 public class ChartAction implements Action {
 	private static long lastChanged;
 
-	private Job<?, ?> project;
+	private String projectName;
 	private String appName;
 	private String appVersion;
 	private boolean isPipeline;
 
 	public ChartAction(Job<?, ?> project, boolean isPipeline, String appName, String appVersion) {
-		this.project = project;
+		this.projectName = project.getName();
 		this.appName = appName;
 		this.appVersion = appVersion;
 		this.isPipeline = isPipeline;
@@ -110,7 +115,7 @@ public class ChartAction implements Action {
 	public void doGraph(StaplerRequest req, StaplerResponse rsp) throws IOException {
 		DataSetBuilder<String, NumberOnlyBuildLabel> dsb = new DataSetBuilder<String, NumberOnlyBuildLabel>();
 
-		for (Run<?, ?> b : project.getBuilds()) {
+		for (Run<?, ?> b : getBuilds()) {
 			if (b.isBuilding())
 				continue;
 			FPRSummary fprData = new FPRSummary();
@@ -127,6 +132,18 @@ public class ChartAction implements Action {
 		}
 
 		ChartUtil.generateGraph(req, rsp, createChart(dsb.build(), appName, appVersion), 400, 200);
+	}
+
+	private Collection<Run<?, ?>> getBuilds() {
+		if (projectName != null) { // can be null since it's transient
+			List<AbstractProject> allProjects = Jenkins.get().getAllItems(AbstractProject.class);
+			for (AbstractProject next : allProjects) {
+				if (next != null && projectName.equals(next.getName())) {
+					return next.getBuilds();
+				}
+			}
+		}
+		return Collections.emptyList();
 	}
 
 	// NVS is to be removed in the following releases

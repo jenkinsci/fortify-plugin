@@ -42,8 +42,7 @@ public class AdvancedScanType extends ProjectScanType {
 		this.advOptions = advOptions;
 	}
 
-	@Symbol("Advanced")
-	@Extension
+	@Extension @Symbol("fortifyAdvanced")
 	public static final class DescriptorImpl extends ProjectScanTypeDescriptor {
 		public DescriptorImpl() {
 			super(AdvancedScanType.class);

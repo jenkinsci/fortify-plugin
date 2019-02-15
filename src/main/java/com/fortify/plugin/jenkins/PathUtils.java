@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 
 public class PathUtils {
 	private static final Pattern FwdSlashSeq = Pattern.compile("//+");
@@ -118,4 +119,12 @@ public class PathUtils {
 		}
 		return norm;
 	}
+
+	public static String appendExtentionIfNotEmpty(String s, String extention) {
+		if (StringUtils.isNotEmpty(s) && !s.toLowerCase().endsWith(extention)) {
+			s += extention;
+		}
+		return s;
+	}
+
 }

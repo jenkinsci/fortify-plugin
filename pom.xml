@@ -34,7 +34,7 @@
         <disabledTestInjection>true</disabledTestInjection>
     </properties>
 
-    <name>Fortify Plugin</name>
+    <name>Fortify</name>
     <description>Adds the ability to perform security analysis with Fortify Static Code Analyzer, upload results to Software Security Center, show analysis results summary, and set build failure criteria based on analysis results.</description>
     <url>https://wiki.jenkins.io/display/JENKINS/Fortify+Plugin</url>
 

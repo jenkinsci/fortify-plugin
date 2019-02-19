@@ -55,13 +55,13 @@ import jenkins.model.Jenkins;
 public class ChartAction implements Action {
 	private static long lastChanged;
 
-	private String projectName;
+	private String projectFullName;
 	private String appName;
 	private String appVersion;
 	private boolean isPipeline;
 
 	public ChartAction(Job<?, ?> project, boolean isPipeline, String appName, String appVersion) {
-		this.projectName = project.getName();
+		this.projectFullName = project.getFullName();
 		this.appName = appName;
 		this.appVersion = appVersion;
 		this.isPipeline = isPipeline;
@@ -135,10 +135,10 @@ public class ChartAction implements Action {
 	}
 
 	private Collection<Run<?, ?>> getBuilds() {
-		if (projectName != null) { // can be null since it's transient
+		if (projectFullName != null) {
 			List<AbstractProject> allProjects = Jenkins.get().getAllItems(AbstractProject.class);
 			for (AbstractProject next : allProjects) {
-				if (next != null && projectName.equals(next.getName())) {
+				if (next != null && projectFullName.equals(next.getFullName())) {
 					return next.getBuilds();
 				}
 			}

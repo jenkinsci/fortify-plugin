@@ -88,7 +88,7 @@ public class TableAction implements Action {
 
 	private long lastUpdated;
 
-	private String projectName;
+	private String projectFullName;
 	private FortifyUpload manager;
 	private String appName;
 	private String appVersion;
@@ -96,14 +96,10 @@ public class TableAction implements Action {
 	private List<GroupingBean> groupingProfiles;
 
 	public TableAction(Job<?, ?> project, FortifyUpload upload, String appName, String appVersion) {
-		this.projectName = project.getName();
+		this.projectFullName = project.getFullName();
 		this.manager = upload;
 		this.appName = appName;
 		this.appVersion = appVersion;
-	}
-
-	public String getProjectName() {
-		return projectName;
 	}
 
 	public String getAppName() {
@@ -155,18 +151,26 @@ public class TableAction implements Action {
 		return url;
 	}
 
-	private Run<?, ?> getLastBuild(String projectName) {
-		if (projectName != null) {
+	private Run<?, ?> getLastBuild() {
+		Job<?, ?> project = getProject();
+		if (project != null) {
+			Run<?, ?> lastBuild = project.getLastBuild();
+			if (lastBuild != null) {
+				if (lastBuild.isBuilding()) {
+					lastBuild = lastBuild.getPreviousBuild();
+				}
+			}
+			return lastBuild;
+		}
+		return null;
+	}
+
+	public Job<?, ?> getProject() {
+		if (projectFullName != null) {
 			List<AbstractProject> allProjects = Jenkins.get().getAllItems(AbstractProject.class);
 			for (AbstractProject next : allProjects) {
-				if (next != null && projectName.equals(next.getName())) {
-					Run<?, ?> lastBuild = next.getLastBuild();
-					if (lastBuild != null) {
-						if (lastBuild.isBuilding()) {
-							lastBuild = lastBuild.getPreviousBuild();
-						}
-					}
-					return lastBuild;
+				if (next != null && projectFullName.equals(next.getFullName())) {
+					return next;
 				}
 			}
 		}
@@ -182,12 +186,12 @@ public class TableAction implements Action {
 	}
 
 	public BuildStatistics getLastBuildStats() {
-		Run<?, ?> lastBuild = getLastBuild(getProjectName());
+		Run<?, ?> lastBuild = getLastBuild();
 		return lastBuild == null ? null : getBuildStatsFor(lastBuild);
 	}
 
 	public BuildStatistics getPreviousBuildStats() {
-		Run<?, ?> lastBuild = getLastBuild(getProjectName());
+		Run<?, ?> lastBuild = getLastBuild();
 		Run<?, ?> previousBuild = null;
 		if (lastBuild != null) {
 			previousBuild = lastBuild.getPreviousBuild();

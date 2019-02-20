@@ -36,7 +36,7 @@ public class FortifyUploadBuildAction implements Action, SimpleBuildStep.LastBui
 	public void addAppVersion(Job<?, ?> project, FortifyUpload upload, String appName, String appVersion) {
 		boolean chartExists = false;
 		boolean tableExists = false;
-		Collection<Action> actions = getProjectActions();
+		Collection<Action> actions = (Collection<Action>) getProjectActions();
 		for (Action existingAction : actions) {
 			if (existingAction instanceof ChartAction && appName.equals(((ChartAction) existingAction).getAppName())
 					&& appVersion.equals(((ChartAction) existingAction).getAppVersion())) {
@@ -71,7 +71,7 @@ public class FortifyUploadBuildAction implements Action, SimpleBuildStep.LastBui
 	}
 
 	@Override
-	public Collection<Action> getProjectActions() {
+	public Collection<? extends Action> getProjectActions() {
 		if (projectActions == null) {
 			projectActions = new ArrayList<Action>();
 		}

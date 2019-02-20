@@ -167,8 +167,8 @@ public class TableAction implements Action {
 
 	public Job<?, ?> getProject() {
 		if (projectFullName != null) {
-			List<AbstractProject> allProjects = Jenkins.get().getAllItems(AbstractProject.class);
-			for (AbstractProject next : allProjects) {
+			List<Job> allProjects = Jenkins.get().getAllItems(Job.class);
+			for (Job next : allProjects) {
 				if (next != null && projectFullName.equals(next.getFullName())) {
 					return next;
 				}

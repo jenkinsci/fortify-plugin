@@ -136,8 +136,8 @@ public class ChartAction implements Action {
 
 	private Collection<Run<?, ?>> getBuilds() {
 		if (projectFullName != null) {
-			List<AbstractProject> allProjects = Jenkins.get().getAllItems(AbstractProject.class);
-			for (AbstractProject next : allProjects) {
+			List<Job> allProjects = Jenkins.get().getAllItems(Job.class);
+			for (Job next : allProjects) {
 				if (next != null && projectFullName.equals(next.getFullName())) {
 					return next.getBuilds();
 				}

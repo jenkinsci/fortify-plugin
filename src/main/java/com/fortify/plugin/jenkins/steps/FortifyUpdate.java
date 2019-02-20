@@ -20,7 +20,6 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,16 +41,11 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Launcher.ProcStarter;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.tasks.SimpleBuildStep;
 
-public class FortifyUpdate extends FortifyStep implements SimpleBuildStep {
+public class FortifyUpdate extends FortifyStep {
 	private String updateServerURL;
 	private String proxyURL;
 	private String proxyUsername;
@@ -135,30 +129,7 @@ public class FortifyUpdate extends FortifyStep implements SimpleBuildStep {
 	}
 
 	@Override
-	public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
-		return false;
-	}
-
-	@Override
-	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-			throws InterruptedException, IOException {
-		perform(build, build.getWorkspace(), launcher, listener);
-		return true;
-	}
-
-	@Override
-	public Action getProjectAction(AbstractProject<?, ?> project) {
-		return null;
-	}
-
-	@Override
-	public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
-		return null;
-	}
-
-	@Override
-	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
-			throws InterruptedException, IOException {
+	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
 		PrintStream log = listener.getLogger();
 		log.println("Fortify Jenkins plugin v " + VERSION);
 		log.println("Launching fortifyupdate command");

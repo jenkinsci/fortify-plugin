@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -53,17 +52,12 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Launcher.ProcStarter;
 import hudson.Util;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
-import jenkins.tasks.SimpleBuildStep;
 
-public class FortifyTranslate extends FortifySCAStep implements SimpleBuildStep {
+public class FortifyTranslate extends FortifySCAStep {
 	private ProjectScanType projectScanType;
 	private String excludeList;
 
@@ -231,35 +225,12 @@ public class FortifyTranslate extends FortifySCAStep implements SimpleBuildStep 
 	}
 
 	@Override
-	public Action getProjectAction(AbstractProject<?, ?> arg0) {
-		return null;
-	}
-
-	@Override
-	public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> arg0) {
-		return null;
-	}
-
-	@Override
-	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-			throws InterruptedException, IOException {
-		perform(build, build.getWorkspace(), launcher, listener);
-		return true;
-	}
-
-	@Override
-	public boolean prebuild(AbstractBuild<?, ?> arg0, BuildListener arg1) {
-		return false;
-	}
-
-	@Override
 	public StepExecution start(StepContext context) throws Exception {
 		return new Execution(this, context);
 	}
 
 	@Override
-	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
-			throws InterruptedException, IOException {
+	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
 		setLastBuild(build);
 		PrintStream log = listener.getLogger();
 		log.println("Fortify Jenkins plugin v " + VERSION);

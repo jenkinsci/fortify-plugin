@@ -21,7 +21,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -57,12 +56,9 @@ import com.google.common.collect.ImmutableSet;
 
 import hudson.AbortException;
 import hudson.Extension;
-import hudson.ExtensionPoint;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -70,9 +66,8 @@ import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
-import jenkins.tasks.SimpleBuildStep;
 
-public class FortifyUpload extends FortifyStep implements SimpleBuildStep, ExtensionPoint {
+public class FortifyUpload extends FortifyStep {
 
 	private boolean accessToProject = true;
 	private int pageSize = 0;
@@ -189,25 +184,7 @@ public class FortifyUpload extends FortifyStep implements SimpleBuildStep, Exten
 	}
 
 	@Override
-	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-			throws InterruptedException, IOException {
-		perform(build, build.getWorkspace(), launcher, listener);
-		return true;
-	}
-
-	@Override
-	public Action getProjectAction(AbstractProject<?, ?> project) {
-		return null;
-	}
-
-	@Override
-	public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
-		return null;
-	}
-
-	@Override
-	public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener)
-			throws InterruptedException, IOException {
+	public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
 		PrintStream log = listener.getLogger();
 		setLastBuild(run);
 		RemoteService service = new RemoteService(getResolvedFpr(listener));

@@ -1216,7 +1216,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	public class UploadSSCBlock {
+	public static class UploadSSCBlock {
 		private String projectName;
 		private String projectVersion;
 		private String filterSet;
@@ -1253,7 +1253,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	public class RunTranslationBlock {
+	public static class RunTranslationBlock {
 		private TranslationTypeBlock translationType;
 		private boolean debug;
 		private boolean verbose;
@@ -1463,7 +1463,7 @@ public class FortifyPlugin extends Recorder {
 	public interface TranslationTypeBlock {
 	}
 
-	public class BasicTranslationBlock implements TranslationTypeBlock {
+	public static class BasicTranslationBlock implements TranslationTypeBlock {
 		private BasicTranslationAppTypeBlock appTypeBlock;
 		private String excludeList;
 
@@ -1482,7 +1482,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	public class AdvancedTranslationBlock implements TranslationTypeBlock {
+	public static class AdvancedTranslationBlock implements TranslationTypeBlock {
 		private String translationOptions;
 
 		@DataBoundConstructor
@@ -1498,7 +1498,7 @@ public class FortifyPlugin extends Recorder {
 	public interface BasicTranslationAppTypeBlock {
 	}
 
-	public class BasicJavaTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
+	public static class BasicJavaTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private String javaVersion;
 		private String classpath;
 		private String sourceFiles;
@@ -1530,7 +1530,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	public class BasicDotNetTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
+	public static class BasicDotNetTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private BasicDotNetScanTypeBlock scanType;
 
 		@DataBoundConstructor
@@ -1604,7 +1604,7 @@ public class FortifyPlugin extends Recorder {
 	public interface BasicDotNetScanTypeBlock {
 	}
 
-	public class BasicDotNetProjectSolutionScanTypeBlock implements BasicDotNetScanTypeBlock {
+	public static class BasicDotNetProjectSolutionScanTypeBlock implements BasicDotNetScanTypeBlock {
 		private BasicDotNetBuildTypeBlock buildType;
 
 		@DataBoundConstructor
@@ -1637,7 +1637,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	public class BasicDotNetSourceCodeScanTypeBlock implements BasicDotNetScanTypeBlock {
+	public static class BasicDotNetSourceCodeScanTypeBlock implements BasicDotNetScanTypeBlock {
 		private String dotNetVersion;
 		private String libdirs;
 		private String addOptions;
@@ -1672,7 +1672,7 @@ public class FortifyPlugin extends Recorder {
 	public interface BasicDotNetBuildTypeBlock {
 	}
 
-	public class BasicDotNetDevenvBuildTypeBlock implements BasicDotNetBuildTypeBlock {
+	public static class BasicDotNetDevenvBuildTypeBlock implements BasicDotNetBuildTypeBlock {
 		private String projects;
 		private String addOptions;
 
@@ -1691,7 +1691,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	public class BasicDotNetMSBuildBuildTypeBlock implements BasicDotNetBuildTypeBlock {
+	public static class BasicDotNetMSBuildBuildTypeBlock implements BasicDotNetBuildTypeBlock {
 		private String projects;
 		private String addOptions;
 
@@ -1710,7 +1710,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	public class BasicMaven3TranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
+	public static class BasicMaven3TranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private String options;
 
 		@DataBoundConstructor
@@ -1723,7 +1723,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	public class BasicGradleTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
+	public static class BasicGradleTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private boolean useWrapper;
 		private String tasks;
 		private String options;
@@ -1748,7 +1748,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	public class BasicOtherTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
+	public static class BasicOtherTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private String options;
 		private String includesList;
 
@@ -1767,7 +1767,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	public class RunScanBlock {
+	public static class RunScanBlock {
 		private String customRulepacks;
 		private String additionalOptions;
 		private boolean debug;
@@ -1805,7 +1805,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	public class UpdateContentBlock {
+	public static class UpdateContentBlock {
 		private String updateServerUrl;
 		private UseProxyBlock useProxy;
 
@@ -1838,7 +1838,7 @@ public class FortifyPlugin extends Recorder {
 
 	// possibly re-use for global SSC proxy setting with new constructor? Or just
 	// re-use field names?
-	public class UseProxyBlock {
+	public static class UseProxyBlock {
 		private String proxyUrl;
 		private String proxyUsername;
 		private String proxyPassword;

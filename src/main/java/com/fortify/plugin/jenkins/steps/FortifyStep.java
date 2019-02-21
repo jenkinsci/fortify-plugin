@@ -118,7 +118,9 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-		perform(build, build == null ? null : build.getWorkspace(), launcher, listener);
+		if (build != null && launcher != null && listener != null && build.getWorkspace() != null) {
+			perform(build, build.getWorkspace(), launcher, listener);
+		}
 		return true;
 	}
 

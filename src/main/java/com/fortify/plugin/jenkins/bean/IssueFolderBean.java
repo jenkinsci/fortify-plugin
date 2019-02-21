@@ -19,8 +19,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.fortify.plugin.jenkins.FortifyPlugin;
 
 public class IssueFolderBean implements Comparable {
@@ -61,15 +59,13 @@ public class IssueFolderBean implements Comparable {
 			// ignore
 		}
 
-		if (StringUtils.isBlank(this.url)) {
-			try {
-				this.url = FortifyPlugin.DESCRIPTOR.getUrl() + "/html/ssc/html/index.jsp" + "?projectName="
-						+ URLEncoder.encode(projectName, "UTF-8") + "&projectVersionName="
-						+ URLEncoder.encode(projectVersion, "UTF-8") + "&folder=" + id;
-			} catch (UnsupportedEncodingException e) {
-				// leave empty
-				this.url = FortifyPlugin.DESCRIPTOR.getUrl() + "/html/ssc/html/index.jsp";
-			}
+		try {
+			this.url = FortifyPlugin.DESCRIPTOR.getUrl() + "/html/ssc/html/index.jsp" + "?projectName="
+					+ URLEncoder.encode(projectName, "UTF-8") + "&projectVersionName="
+				+ URLEncoder.encode(projectVersion, "UTF-8") + "&folder=" + id;
+		} catch (UnsupportedEncodingException e) {
+			// leave empty
+			this.url = FortifyPlugin.DESCRIPTOR.getUrl() + "/html/ssc/html/index.jsp";
 		}
 	}
 

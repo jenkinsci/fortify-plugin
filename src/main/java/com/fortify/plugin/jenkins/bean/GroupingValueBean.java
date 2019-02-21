@@ -41,9 +41,9 @@ public class GroupingValueBean implements Comparable {
 		this.id = id.trim();
 		this.folderId = folderId;
 		this.name = attributes.get(0).trim();
-		this.totalCount = Integer.valueOf(attributes.get(1));
-		this.visibleCount = Integer.valueOf(attributes.get(1));
-		this.auditedCount = Integer.valueOf(attributes.get(1));
+		this.totalCount = Integer.parseInt(attributes.get(1));
+		this.visibleCount = Integer.parseInt(attributes.get(1));
+		this.auditedCount = Integer.parseInt(attributes.get(1));
 	}
 
 	public String getId() {

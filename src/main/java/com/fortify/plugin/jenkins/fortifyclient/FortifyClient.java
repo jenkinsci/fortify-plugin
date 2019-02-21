@@ -86,11 +86,11 @@ public class FortifyClient {
 		Map<String, Long> projectList = new LinkedHashMap<String, Long>();
 
 		Map<String, Map<String, Long>> allProjects = getProjectListEx();
-		for (String prjName : allProjects.keySet()) {
-			Map<String, Long> prjVersions = allProjects.get(prjName);
+		for (Map.Entry<String, Map<String, Long>> prjEntry : allProjects.entrySet()) {
+			Map<String, Long> prjVersions = prjEntry.getValue();
 			for (Map.Entry<String, Long> prjVersion : prjVersions.entrySet()) {
 				Long versionId = prjVersion.getValue();
-				projectList.put(prjName + " (" + prjVersion.getKey() + ")", versionId);
+				projectList.put(prjEntry.getKey() + " (" + prjVersion.getKey() + ")", versionId);
 			}
 		}
 		return projectList;

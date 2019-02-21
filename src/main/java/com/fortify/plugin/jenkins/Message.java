@@ -36,37 +36,27 @@ public class Message {
 	private Level level;
 	private Throwable throwable;
 	private String message;
-	private Object[] parameters;
 	private int severity;
 	private final int errorCode;
 
-	public Message(int errorCode, Level level, int severity, Throwable throwable, String message, Object[] parameters) {
+	public Message(int errorCode, Level level, int severity, Throwable throwable, String message) {
 		this.level = level;
 		this.throwable = throwable;
 		this.message = message;
-		this.parameters = parameters;
 		this.severity = severity;
 		this.errorCode = errorCode;
 	}
 
 	public Message(int severity, String message) {
-		this(DEFAULT_ERROR_CODE, Level.OFF, severity, null, message, null);
+		this(DEFAULT_ERROR_CODE, Level.OFF, severity, null, message);
 	}
 
 	public Message(int severity, int errorCode, Object... parameters) {
-		this(errorCode, Level.OFF, severity, null, null, parameters);
-	}
-
-	public Message(int severity, String message, Object... parameters) {
-		this(DEFAULT_ERROR_CODE, Level.OFF, severity, null, message, parameters);
+		this(errorCode, Level.OFF, severity, null, null);
 	}
 
 	public String getMessage() {
 		return message;
-	}
-
-	public Object[] getParameters() {
-		return parameters;
 	}
 
 	public Level getLogLevel() {
@@ -130,10 +120,6 @@ public class Message {
 	}
 
 	public static Message mk(int ec) {
-		return new Message(NONE, ec, (Object[]) null);
-	}
-
-	public static Message mk(int ec, Object... params) {
-		return new Message(NONE, ec, params);
+		return new Message(NONE, ec);
 	}
 }

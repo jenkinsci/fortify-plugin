@@ -16,8 +16,10 @@
 package com.fortify.plugin.jenkins;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -534,13 +536,11 @@ public class FortifyPlugin extends Recorder {
 								DESCRIPTOR.getProxyPassword());
 					}
 				}
-				if (client != null) {
-					return cmd.runWith(client);
-				}
+				return cmd.runWith(client);
 			} finally {
 				if (contextClassLoader != null) {
 					Thread.currentThread().setContextClassLoader(contextClassLoader);
-				}
+			}
 			}
 		}
 		return null;
@@ -889,14 +889,14 @@ public class FortifyPlugin extends Recorder {
 				allProjects = getAllProjects();
 				// and then convert it to JSON
 				StringBuilder buf = new StringBuilder();
-				for (String prjName : allProjects.keySet()) {
-					List<String> versions = new ArrayList<String>(allProjects.get(prjName).keySet());
+				for (Map.Entry<String, Map<String, Long>> prj : allProjects.entrySet()) {
+					List<String> versions = new ArrayList<String>(prj.getValue().keySet());
 					Collections.sort(versions, String.CASE_INSENSITIVE_ORDER);
 					for (String prjVersion : versions) {
 						if (buf.length() > 0) {
 							buf.append(",");
 						}
-						buf.append("{ \"name\": \"" + prjVersion + "\", \"prj\": \"" + prjName + "\" }\n");
+						buf.append("{ \"name\": \"" + prjVersion + "\", \"prj\": \"" + prj + "\" }\n");
 					}
 				}
 				buf.insert(0, "{ \"list\" : [\n");
@@ -980,9 +980,10 @@ public class FortifyPlugin extends Recorder {
 				runWithFortifyClient(getToken(), new FortifyClient.Command<FortifyClient.NoReturn>() {
 					@Override
 					public NoReturn runWith(FortifyClient client) throws Exception {
+						Writer w = new OutputStreamWriter(System.out, "UTF-8");
 						client.createProject(req.getParameter("newprojName"), req.getParameter("newprojVersion"),
 								req.getParameter("newprojTemplate"), Collections.<String, String>emptyMap(),
-								new PrintWriter(System.out));
+								new PrintWriter(w));
 						return FortifyClient.NoReturn.INSTANCE;
 					}
 				});
@@ -1182,8 +1183,8 @@ public class FortifyPlugin extends Recorder {
 								}
 							});
 					List<ProjectTemplateBean> list = new ArrayList<ProjectTemplateBean>(map.size());
-					for (String name : map.keySet()) {
-						ProjectTemplateBean proj = new ProjectTemplateBean(name, map.get(name));
+					for (Map.Entry<String, String> entry : map.entrySet()) {
+						ProjectTemplateBean proj = new ProjectTemplateBean(entry.getKey(), entry.getValue());
 						list.add(proj);
 					}
 					Collections.sort(list);

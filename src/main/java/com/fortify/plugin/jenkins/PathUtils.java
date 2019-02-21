@@ -28,10 +28,10 @@ public class PathUtils {
 
 	private static String getEnvironmentPath() {
 		Map<String, String> env = System.getenv();
-		for (String key : env.keySet()) {
+		for (Map.Entry<String, String> entry : env.entrySet()) {
 			// the key may be case sensitive on Unix
-			if ("PATH".equalsIgnoreCase(key)) {
-				return env.get(key);
+			if ("PATH".equalsIgnoreCase(entry.getKey())) {
+				return entry.getValue();
 			}
 		}
 		return null;

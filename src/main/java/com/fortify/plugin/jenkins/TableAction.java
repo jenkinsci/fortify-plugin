@@ -31,13 +31,10 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
-import com.fortify.plugin.jenkins.bean.GroupingBean;
 import com.fortify.plugin.jenkins.bean.IssueBean;
 import com.fortify.plugin.jenkins.bean.IssueFolderBean;
-import com.fortify.plugin.jenkins.model.ui.GroupingProfile;
 import com.fortify.plugin.jenkins.steps.FortifyUpload;
 
-import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Job;
 import hudson.model.Run;
@@ -93,7 +90,6 @@ public class TableAction implements Action {
 	private String appName;
 	private String appVersion;
 	private List<IssueFolderBean> folders;
-	private List<GroupingBean> groupingProfiles;
 
 	public TableAction(Job<?, ?> project, FortifyUpload upload, String appName, String appVersion) {
 		this.projectFullName = project.getFullName();
@@ -370,23 +366,6 @@ public class TableAction implements Action {
 			folders = manager.getFolders(new StreamBuildListener(System.out, Charset.defaultCharset()));
 		}
 		return folders;
-	}
-
-	public synchronized List<GroupingBean> getGroupingProfiles() {
-		if (groupingProfiles == null)
-			groupingProfiles = new ArrayList<GroupingBean>();
-
-		groupingProfiles.clear();
-
-		for (GroupingProfile profile : manager
-				.getGroupingProfiles(new StreamBuildListener(System.out, Charset.defaultCharset()))) {
-			GroupingBean newGrouping = new GroupingBean();
-			newGrouping.setGroupingName(profile.getName());
-			newGrouping.setGroupingID(profile.getGroupingTypeString());
-			groupingProfiles.add(newGrouping);
-		}
-
-		return groupingProfiles;
 	}
 
 	public void doSetPageSize(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {

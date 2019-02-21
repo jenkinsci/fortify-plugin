@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.fortify.plugin.jenkins.fortifycommon;
+package com.fortify.plugin.jenkins;
 
 public class FortifyException extends RuntimeException {
 	protected Throwable cause;

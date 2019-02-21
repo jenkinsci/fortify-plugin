@@ -13,18 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.fortify.plugin.jenkins.model.ui;
+package com.fortify.plugin.jenkins.bean;
 
-public enum SystemUsageType {
+public class MetaDataValue {
 
-	HP_DEFINED_DELETABLE, HP_DEFINED_NON_DELETABLE, USER_DEFINED_DELETABLE, USER_DEFINED_NON_DELETABLE;
+	protected String shortName;
+	protected String description;
+	protected String id;
+	protected Boolean _default;
 
-	public String value() {
-		return name();
+	public String getShortName() {
+		return shortName;
 	}
 
-	public static SystemUsageType fromValue(String v) {
-		return valueOf(v);
+	public void setShortName(String value) {
+		this.shortName = value;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String value) {
+		this.description = value;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String value) {
+		this.id = value;
+	}
+
+	public Boolean isDefault() {
+		return _default;
+	}
+
+	public void setDefault(Boolean value) {
+		this._default = value;
 	}
 
 }

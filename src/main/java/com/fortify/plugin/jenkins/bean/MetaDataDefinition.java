@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.fortify.plugin.jenkins.model.ui;
+package com.fortify.plugin.jenkins.bean;
 
 import java.util.ArrayList;
 import java.util.List;

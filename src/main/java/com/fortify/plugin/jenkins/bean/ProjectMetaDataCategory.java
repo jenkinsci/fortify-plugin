@@ -13,45 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package com.fortify.plugin.jenkins.model.ui;
+package com.fortify.plugin.jenkins.bean;
 
-public class MetaDataValue {
+public enum ProjectMetaDataCategory {
 
-	protected String shortName;
-	protected String description;
-	protected String id;
-	protected Boolean _default;
+	TECHNICAL, BUSINESS, DYNAMIC_SCAN_REQUEST, ORGANIZATION;
 
-	public String getShortName() {
-		return shortName;
+	public String value() {
+		return name();
 	}
 
-	public void setShortName(String value) {
-		this.shortName = value;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String value) {
-		this.description = value;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String value) {
-		this.id = value;
-	}
-
-	public Boolean isDefault() {
-		return _default;
-	}
-
-	public void setDefault(Boolean value) {
-		this._default = value;
+	public static ProjectMetaDataCategory fromValue(String v) {
+		return valueOf(v);
 	}
 
 }

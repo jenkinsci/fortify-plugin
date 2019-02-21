@@ -37,8 +37,6 @@ import org.kohsuke.stapler.verb.POST;
 import com.fortify.plugin.jenkins.bean.ProjectTemplateBean;
 import com.fortify.plugin.jenkins.fortifyclient.FortifyClient;
 import com.fortify.plugin.jenkins.fortifyclient.FortifyClient.NoReturn;
-import com.fortify.plugin.jenkins.fortifycommon.FortifyException;
-import com.fortify.plugin.jenkins.fortifycommon.Message;
 import com.fortify.plugin.jenkins.steps.FortifyClean;
 import com.fortify.plugin.jenkins.steps.FortifyScan;
 import com.fortify.plugin.jenkins.steps.FortifyTranslate;

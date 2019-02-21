@@ -34,11 +34,12 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.commons.lang.StringUtils;
 
 import com.fortify.plugin.jenkins.fortifyclient.ApiClientWrapper.AppTypeEnum;
-import com.fortify.plugin.jenkins.model.ui.MetaDataDefinition;
-import com.fortify.plugin.jenkins.model.ui.MetaDataSelectedValue;
-import com.fortify.plugin.jenkins.model.ui.MetaDataValue;
-import com.fortify.plugin.jenkins.model.ui.ProjectMetaDataCategory;
-import com.fortify.plugin.jenkins.model.ui.SystemUsageType;
+import com.fortify.plugin.jenkins.bean.MetaDataDefinition;
+import com.fortify.plugin.jenkins.bean.MetaDataSelectedValue;
+import com.fortify.plugin.jenkins.bean.MetaDataValue;
+import com.fortify.plugin.jenkins.bean.ProjectDataEntry;
+import com.fortify.plugin.jenkins.bean.ProjectMetaDataCategory;
+import com.fortify.plugin.jenkins.bean.SystemUsageType;
 import com.fortify.ssc.restclient.ApiException;
 import com.fortify.ssc.restclient.model.AttributeDefinition;
 import com.fortify.ssc.restclient.model.AttributeDefinition.TypeEnum;

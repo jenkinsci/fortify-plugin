@@ -15,30 +15,16 @@
  *******************************************************************************/
 package com.fortify.plugin.jenkins.bean;
 
-public class GroupingBean implements Comparable {
+public enum SystemUsageType {
 
-	private String groupingName;
-	private String groupingID;
+	HP_DEFINED_DELETABLE, HP_DEFINED_NON_DELETABLE, USER_DEFINED_DELETABLE, USER_DEFINED_NON_DELETABLE;
 
-	public String getGroupingName() {
-		return groupingName;
+	public String value() {
+		return name();
 	}
 
-	public void setGroupingName(String groupingName) {
-		this.groupingName = groupingName;
+	public static SystemUsageType fromValue(String v) {
+		return valueOf(v);
 	}
 
-	public String getGroupingID() {
-		return groupingID;
-	}
-
-	public void setGroupingID(String groupingID) {
-		this.groupingID = groupingID;
-	}
-
-	@Override
-	public int compareTo(Object otherBean) {
-		GroupingBean otherBean2 = (GroupingBean) otherBean;
-		return this.getGroupingName().compareTo(otherBean2.getGroupingName());
-	}
 }

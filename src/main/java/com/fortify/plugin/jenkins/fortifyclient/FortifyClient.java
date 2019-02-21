@@ -26,7 +26,8 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
 import com.fortify.plugin.jenkins.bean.IssueBean;
-import com.fortify.plugin.jenkins.model.ui.GroupingProfile;
+import com.fortify.plugin.jenkins.bean.ProjectDataEntry;
+import com.fortify.plugin.jenkins.bean.GroupingProfile;
 import com.fortify.ssc.restclient.ApiException;
 import com.fortify.ssc.restclient.model.Artifact;
 import com.fortify.ssc.restclient.model.FilterSet;

@@ -115,7 +115,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-		perform(build, build.getWorkspace(), launcher, listener);
+		// we don't need to provide implementation here because hudson.tasks.BuildStepCompatibilityLayer will always call the other perform method of SimpleBuildStep implementations
 		return true;
 	}
 

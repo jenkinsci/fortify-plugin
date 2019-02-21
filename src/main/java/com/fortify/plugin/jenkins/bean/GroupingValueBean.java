@@ -76,4 +76,16 @@ public class GroupingValueBean implements Comparable {
 		return otherBean.getId().compareTo(getId());
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof GroupingValueBean) {
+			return ((GroupingValueBean)obj).getId().equals(this.getId());
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return getId().hashCode();
+	}
 }

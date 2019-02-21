@@ -48,4 +48,17 @@ public class ProjectTemplateBean implements Comparable {
 		ProjectTemplateBean otherBean2 = (ProjectTemplateBean) otherBean;
 		return this.getName().compareTo(otherBean2.getName());
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof ProjectTemplateBean) {
+			return ((ProjectTemplateBean)obj).getId().equals(this.getId());
+		}
+		return super.equals(obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return getId().hashCode();
+	}
 }

@@ -17,6 +17,7 @@ package com.fortify.plugin.jenkins.fortifyclient;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -47,8 +48,6 @@ import com.fortify.ssc.restclient.model.AttributeOption;
 import com.fortify.ssc.restclient.model.IssueTemplate;
 
 public class ProjectCreationService {
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
-
 	private static DatatypeFactory datatypeFactory;
 	static {
 		try {
@@ -67,6 +66,8 @@ public class ProjectCreationService {
 		calendar.setTimeInMillis(date.getTime());
 		return datatypeFactory.newXMLGregorianCalendar(calendar);
 	}
+
+	private static String DATEFORMAT = "MM/dd/yyyy";
 
 	private final PrintWriter logWriter;
 
@@ -118,7 +119,7 @@ public class ProjectCreationService {
 
 		// these are the application attribute values we'll be setting for the
 		// application version
-		List<MetaDataSelectedValue> selectedProjectAttributes = new ArrayList<MetaDataSelectedValue>();
+		//List<MetaDataSelectedValue> selectedProjectAttributes = new ArrayList<MetaDataSelectedValue>();
 
 		Set<MetaDataDefinition> definitionsNotSet = new LinkedHashSet<MetaDataDefinition>();
 		definitionsNotSet.addAll(serverProjectAttributeDefinitions);
@@ -139,7 +140,8 @@ public class ProjectCreationService {
 					} else if (Boolean.TRUE.equals(definition.isBooleanValue())) {
 						setBooleanValue(String.valueOf(false), definition, newValue);
 					} else if (Boolean.TRUE.equals(definition.isDateValue())) {
-						setDateValue(DATE_FORMAT.format(new Date()), definition, newValue);
+						final DateFormat mmddyyyy = new SimpleDateFormat(DATEFORMAT);
+						setDateValue(mmddyyyy.format(new Date()), definition, newValue);
 					} else {
 						List<MetaDataValue> values = definition.getValue();
 						if (!values.isEmpty()) {
@@ -147,7 +149,7 @@ public class ProjectCreationService {
 						}
 					}
 				}
-				selectedProjectAttributes.add(newValue);
+				//selectedProjectAttributes.add(newValue);
 			}
 		}
 
@@ -189,7 +191,7 @@ public class ProjectCreationService {
 			}
 		}
 
-		String masterAttrGuid = issueTemplate != null ? issueTemplate.getMasterAttrGuid() : null;
+		String masterAttrGuid = issueTemplate.getMasterAttrGuid();
 		applicationVersionId = getAppVersionIdOrCreate(projectName, projectVersionName, issueTemplate.getId(),
 				masterAttrGuid);
 
@@ -299,7 +301,8 @@ public class ProjectCreationService {
 	private void setDateValue(final String projectAttributeValue, final MetaDataDefinition projectAttributeDefinition,
 			final MetaDataSelectedValue value) {
 		try {
-			Date date = DATE_FORMAT.parse(projectAttributeValue);
+			final DateFormat mmddyyyy = new SimpleDateFormat(DATEFORMAT);
+			Date date = mmddyyyy.parse(projectAttributeValue);
 			value.setDateValue(convertDateToXMLGregorianCalender(date));
 		} catch (ParseException e) {
 			Date now = new Date();

@@ -645,6 +645,20 @@ public class TableAction implements Action {
 			return otherView.getFolder().compareTo(getFolder());
 		}
 
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof View) {
+				View otherView = (View) obj;
+				return otherView.getFolder().equals(this.getFolder()) && (otherView.getPage() == this.getPage());
+			}
+			return super.equals(obj);
+		}
+
+		@Override
+		public int hashCode() {
+			return getFolder().hashCode() + 31 * getPage();
+		}
+
 		@JavaScriptMethod
 		public void setSortOrder(SortOrder order) {
 			sortOrder = order;

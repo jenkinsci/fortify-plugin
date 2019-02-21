@@ -118,4 +118,17 @@ public class IssueFolderBean implements Comparable {
 		IssueFolderBean otherBean = (IssueFolderBean) o;
 		return otherBean.getId().compareTo(getId());
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof IssueFolderBean) {
+			return ((IssueFolderBean)obj).getId().equals(this.getId());
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return getId().hashCode();
+	}
 }

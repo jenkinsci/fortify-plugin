@@ -18,6 +18,8 @@ package com.fortify.plugin.jenkins.steps;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -66,13 +68,14 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		EnvVars env = build.getEnvironment(listener);
 		String fortifyHome = null;
 		String path = null;
-		for (String key : env.keySet()) {
+		for (Map.Entry<String, String> entry : env.entrySet()) {
+			String key = entry.getKey();
 			if ("FORTIFY_HOME".equals(key)) {
 				if (checkFortifyHome) {
-					fortifyHome = env.get(key);
+					fortifyHome = entry.getValue();
 				}
 			} else if ("PATH".equalsIgnoreCase(key)) {
-				path = env.get(key);
+				path = entry.getValue();
 			}
 		}
 		String s = workspace.act(new FindExecutableRemoteService(filename, fortifyHome, path, workspace));
@@ -115,7 +118,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-		perform(build, build.getWorkspace(), launcher, listener);
+		perform(build, build == null ? null : build.getWorkspace(), launcher, listener);
 		return true;
 	}
 
@@ -126,7 +129,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 
 	@Override
 	public Collection<? extends Action> getProjectActions(AbstractProject<?, ?> project) {
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override

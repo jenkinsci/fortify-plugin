@@ -25,9 +25,9 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.fortify.plugin.jenkins.bean.GroupingProfile;
 import com.fortify.plugin.jenkins.bean.IssueBean;
 import com.fortify.plugin.jenkins.bean.ProjectDataEntry;
-import com.fortify.plugin.jenkins.bean.GroupingProfile;
 import com.fortify.ssc.restclient.ApiException;
 import com.fortify.ssc.restclient.model.Artifact;
 import com.fortify.ssc.restclient.model.FilterSet;
@@ -35,7 +35,6 @@ import com.fortify.ssc.restclient.model.Folder;
 import com.fortify.ssc.restclient.model.FolderDto;
 import com.fortify.ssc.restclient.model.IssueSelector;
 import com.fortify.ssc.restclient.model.IssueTemplate;
-import com.fortify.ssc.restclient.model.Project;
 import com.fortify.ssc.restclient.model.ProjectVersion;
 import com.fortify.ssc.restclient.model.ProjectVersionIssue;
 import com.fortify.ssc.restclient.model.ProjectVersionIssueGroup;
@@ -89,9 +88,9 @@ public class FortifyClient {
 		Map<String, Map<String, Long>> allProjects = getProjectListEx();
 		for (String prjName : allProjects.keySet()) {
 			Map<String, Long> prjVersions = allProjects.get(prjName);
-			for (String prjVersion : prjVersions.keySet()) {
-				Long versionId = prjVersions.get(prjVersion);
-				projectList.put(prjName + " (" + prjVersion + ")", versionId);
+			for (Map.Entry<String, Long> prjVersion : prjVersions.entrySet()) {
+				Long versionId = prjVersion.getValue();
+				projectList.put(prjName + " (" + prjVersion.getKey() + ")", versionId);
 			}
 		}
 		return projectList;
@@ -104,13 +103,6 @@ public class FortifyClient {
 	 * @throws ApiException
 	 */
 	public Map<String, Map<String, Long>> getProjectListEx() throws ApiException {
-
-		Map<Long, String> pmap = new LinkedHashMap<Long, String>();
-		List<Project> projects = apiClientWrapper.getApplications();
-		for (Project project : projects) {
-			pmap.put(project.getId(), project.getName());
-		}
-
 		List<ProjectVersion> pversions = apiClientWrapper.getApplicationVersions();
 		Map<String, Map<String, Long>> projectList = new LinkedHashMap<String, Map<String, Long>>();
 		for (ProjectVersion version : pversions) {

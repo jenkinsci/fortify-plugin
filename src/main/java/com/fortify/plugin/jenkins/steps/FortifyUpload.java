@@ -17,8 +17,10 @@ package com.fortify.plugin.jenkins.steps;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -482,22 +484,22 @@ public class FortifyUpload extends FortifyStep {
 				: new StreamBuildListener(System.out, Charset.defaultCharset());
 		if (FortifyPlugin.DESCRIPTOR.canUploadToSsc()) {
 			try {
-				final PrintStream log = System.out;
+				final Writer log = new OutputStreamWriter(listener.getLogger(), "UTF-8");
 				Map<String, List<String>> map = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<Map<String, List<String>>>() {
 							@Override
 							public Map<String, List<String>> runWith(FortifyClient client) throws Exception {
-								return client.getGroupingValues(versionId == null ? Long.MIN_VALUE : versionId,
+								return client.getGroupingValues(versionId == null ? Long.valueOf(Long.MIN_VALUE) : versionId,
 										folderId, getResolvedFilterSet(listener),
 										searchCondition == null ? "" : searchCondition, groupingName,
 										new PrintWriter(log, true));
 							}
 						});
 				List<GroupingValueBean> list = new ArrayList<GroupingValueBean>(map.size());
-				for (String id : map.keySet()) {
-					List<String> attributes = map.get(id);
+				for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+					List<String> attributes = entry.getValue();
 					if (attributes.size() == 5) {
-						GroupingValueBean next = new GroupingValueBean(id, folderId, attributes);
+						GroupingValueBean next = new GroupingValueBean(entry.getKey(), folderId, attributes);
 						list.add(next);
 					}
 				}
@@ -517,27 +519,26 @@ public class FortifyUpload extends FortifyStep {
 	public List<IssueFolderBean> getFolders(final TaskListener taskListener) {
 		final TaskListener listener = taskListener != null ? taskListener
 				: new StreamBuildListener(System.out, Charset.defaultCharset());
-		final PrintStream log = listener.getLogger();
 		accessToProject = true;
 		getResolvedAppVersion(listener);
 		if (FortifyPlugin.DESCRIPTOR.canUploadToSsc()) {
 			try {
+				final Writer log = new OutputStreamWriter(listener.getLogger(), "UTF-8");
 				final Long versionId = createNewOrGetProject(listener);
 				Map<String, List<String>> map = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<Map<String, List<String>>>() {
 							@Override
 							public Map<String, List<String>> runWith(FortifyClient client) throws Exception {
 								return client.getFolderIdToAttributesList(
-										versionId == null ? Long.MIN_VALUE : versionId, getResolvedFilterSet(listener),
+										versionId == null ? Long.valueOf(Long.MIN_VALUE) : versionId, getResolvedFilterSet(listener),
 										new PrintWriter(log, true));
 							}
 						});
 				List<IssueFolderBean> list = new ArrayList<IssueFolderBean>(map.size());
-				for (String id : map.keySet()) {
-					List<String> attributes = map.get(id);
+				for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+					List<String> attributes = entry.getValue();
 					if (attributes.size() == 5) {
-						list.add(new IssueFolderBean(id, getResolvedAppName(listener), getResolvedAppVersion(listener),
-								attributes));
+						list.add(new IssueFolderBean(entry.getKey(), getResolvedAppName(listener), getResolvedAppVersion(listener), attributes));
 					}
 				}
 
@@ -563,13 +564,14 @@ public class FortifyUpload extends FortifyStep {
 		accessToProject = true;
 		if (FortifyPlugin.DESCRIPTOR.canUploadToSsc()) {
 			try {
+				final Writer log = new OutputStreamWriter(listener.getLogger(), "UTF-8");
 				final Long versionId = createNewOrGetProject(listener);
 				List<GroupingProfile> groupingProfiles = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<List<GroupingProfile>>() {
 							@Override
 							public List<GroupingProfile> runWith(FortifyClient client) throws Exception {
-								return client.getGroupingProfiles(versionId == null ? Long.MIN_VALUE : versionId,
-										getResolvedFilterSet(listener), new PrintWriter(listener.getLogger(), true));
+								return client.getGroupingProfiles(versionId == null ? Long.valueOf(Long.MIN_VALUE) : versionId,
+										getResolvedFilterSet(listener), new PrintWriter(log, true));
 							}
 						});
 				// System.out.printf("Obtained %d folders for '%s (%s)'%n", list.size(),
@@ -615,14 +617,14 @@ public class FortifyUpload extends FortifyStep {
 			try {
 				final TaskListener listener = taskListener != null ? taskListener
 						: new StreamBuildListener(System.out, Charset.defaultCharset());
-				final PrintStream log = listener.getLogger();
+				final Writer log = new OutputStreamWriter(listener.getLogger(), "UTF-8");
 				final Long versionId = createNewOrGetProject(listener);
 
 				Map<String, IssueBean> map = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<Map<String, IssueBean>>() {
 							@Override
 							public Map<String, IssueBean> runWith(FortifyClient client) throws Exception {
-								return client.getIssuesByFolderId(versionId == null ? Long.MIN_VALUE : versionId,
+								return client.getIssuesByFolderId(versionId == null ? Long.valueOf(Long.MIN_VALUE) : versionId,
 										folderId, startPage, pageSize, getResolvedFilterSet(listener), selectedGrouping,
 										sortOrder.getModelSorting() == null ? "" : sortOrder.getModelSorting(),
 										Boolean.valueOf(downNotUp), Boolean.valueOf(showingAllNotNew),
@@ -631,8 +633,8 @@ public class FortifyUpload extends FortifyStep {
 						});
 				List<IssueBean> list = new ArrayList<IssueBean>(map.size());
 
-				for (String issueInstanceId : map.keySet()) {
-					IssueBean issueBean = map.get(issueInstanceId);
+				for (Map.Entry<String, IssueBean> issueInstanceEntry : map.entrySet()) {
+					IssueBean issueBean = issueInstanceEntry.getValue();
 					issueBean.setProjectName(getResolvedAppName(listener));
 					issueBean.setProjectVersionName(getResolvedAppVersion(listener));
 					list.add(issueBean);
@@ -651,7 +653,7 @@ public class FortifyUpload extends FortifyStep {
 		final TaskListener listener = taskListener == null
 				? new StreamBuildListener(System.out, Charset.defaultCharset())
 				: taskListener;
-		final PrintStream log = listener.getLogger();
+		final Writer log = new OutputStreamWriter(listener.getLogger(), "UTF-8");
 		Long versionId = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(), new FortifyClient.Command<Long>() {
 			@Override
 			public Long runWith(FortifyClient client) throws Exception {
@@ -773,9 +775,7 @@ public class FortifyUpload extends FortifyStep {
 								FortifyPlugin.DESCRIPTOR.getProxyPassword());
 					}
 				}
-				if (client != null) {
-					return cmd.runWith(client);
-				}
+				return cmd.runWith(client);
 			} finally {
 				if (contextClassLoader != null) {
 					Thread.currentThread().setContextClassLoader(contextClassLoader);

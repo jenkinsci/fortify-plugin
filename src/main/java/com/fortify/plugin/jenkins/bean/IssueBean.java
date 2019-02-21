@@ -267,4 +267,17 @@ public class IssueBean implements Comparable {
 		IssueBean otherBean = (IssueBean) o;
 		return otherBean.getIssueInstanceId().compareTo(getIssueInstanceId());
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof IssueBean) {
+			return ((IssueBean)obj).getIssueInstanceId().equals(this.getIssueInstanceId());
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return getIssueInstanceId().hashCode();
+	}
 }

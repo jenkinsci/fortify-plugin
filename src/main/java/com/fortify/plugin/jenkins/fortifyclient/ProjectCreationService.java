@@ -171,7 +171,7 @@ public class ProjectCreationService {
 
 		if (selectedIssueTemplateName == null) {
 			issueTemplate = defaultIssueTemplate;
-			logWriter.printf("No Issue Template selected. Using default template '%s'.\n", issueTemplate.getName());
+			logWriter.printf("No Issue Template selected. Using default template '%s'.%n", issueTemplate.getName());
 		} else {
 			for (IssueTemplate pt : projectTemplates) {
 				if (pt.getName().equals(selectedIssueTemplateName)) {
@@ -181,10 +181,10 @@ public class ProjectCreationService {
 			}
 
 			if (issueTemplate != null) {
-				logWriter.printf("Selected Issue Template is '%s'\n", issueTemplate.getName()); // Issue template found
+				logWriter.printf("Selected Issue Template is '%s'%n", issueTemplate.getName()); // Issue template found
 			} else {
 				issueTemplate = defaultIssueTemplate; // selected issue template is not valid so use default template
-				logWriter.printf("Specified Issue Template ='%s' doesn't exist, template '%s' is used instead!\n",
+				logWriter.printf("Specified Issue Template ='%s' doesn't exist, template '%s' is used instead!%n",
 						selectedIssueTemplateName, issueTemplate.getName());
 			}
 		}
@@ -280,7 +280,7 @@ public class ProjectCreationService {
 			value.setIntegerValue(Long.valueOf(projectAttributeValue));
 		} catch (NumberFormatException e) {
 			logWriter.printf("[WARN] Failed to set an integer value of '" + projectAttributeValue + "' for '"
-					+ projectAttributeDefinition.getName() + "'; continuing with 0\n");
+					+ projectAttributeDefinition.getName() + "'; continuing with 0%n");
 			value.setIntegerValue(0L);
 		}
 	}
@@ -291,7 +291,7 @@ public class ProjectCreationService {
 			value.setBooleanValue(Boolean.valueOf(projectAttributeValue));
 		} catch (Exception e) {
 			logWriter.printf("[WARN] Failed to set a boolean value of '" + projectAttributeValue + "' for '"
-					+ projectAttributeDefinition.getName() + "'; continuing with false\n");
+					+ projectAttributeDefinition.getName() + "'; continuing with false%n");
 			value.setBooleanValue(Boolean.FALSE);
 		}
 	}
@@ -304,7 +304,7 @@ public class ProjectCreationService {
 		} catch (ParseException e) {
 			Date now = new Date();
 			logWriter.printf("[WARN] Failed to set date value of '" + projectAttributeValue + "' for '"
-					+ projectAttributeDefinition.getName() + "'; continuing with '" + now + "'\n");
+					+ projectAttributeDefinition.getName() + "'; continuing with '" + now + "'%n");
 			value.setDateValue(convertDateToXMLGregorianCalender(now));
 		}
 	}

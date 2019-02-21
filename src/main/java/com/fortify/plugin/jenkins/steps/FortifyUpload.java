@@ -195,7 +195,7 @@ public class FortifyUpload extends FortifyStep {
 		log.println("Retrieving build statistics from SSC");
 		calculateFprStatistics(summary, listener);
 
-		log.printf("Calculated NVS=%f, failedCount=%d\n", summary.getNvs(), summary.getFailedCount());
+		log.printf("Calculated NVS=%f, failedCount=%d%n", summary.getNvs(), summary.getFailedCount());
 
 		// save data under the builds directory, this is always in Jenkins master node
 		log.println("Saving build summary");
@@ -208,7 +208,7 @@ public class FortifyUpload extends FortifyStep {
 		// now check if the fail count
 		if (summary.getFailedCount() > 0) {
 			log.printf(
-					"FortifyJenkins plugin: this build is considered unstable because Fail Condition met %d vulnerabilities\n",
+					"FortifyJenkins plugin: this build is considered unstable because Fail Condition met %d vulnerabilities%n",
 					summary.getFailedCount());
 			run.setResult(Result.UNSTABLE);
 		}
@@ -248,9 +248,9 @@ public class FortifyUpload extends FortifyStep {
 		} else {
 			localFPR = new File(summary.getFprFile().toURI());
 		}
-		log.printf("Using FPR: %s\n", summary.getFprFile().toURI());
+		log.printf("Using FPR: %s%n", summary.getFprFile().toURI());
 		// if ( summary.getFprFile().isRemote() )
-		log.printf("Local FPR: %s\n", localFPR.getCanonicalFile());
+		log.printf("Local FPR: %s%n", localFPR.getCanonicalFile());
 
 		// if the application ID is not null, then we need to upload the FPR to SSC
 		Long artifactId = null;
@@ -258,7 +258,7 @@ public class FortifyUpload extends FortifyStep {
 		if (!StringUtils.isBlank(getResolvedAppName(listener)) && !StringUtils.isBlank(getResolvedAppVersion(listener))
 				&& FortifyPlugin.DESCRIPTOR.canUploadToSsc()) {
 			// the FPR may be in remote slave, we need to call launcher to do this for me
-			log.printf("Uploading FPR to SSC at %s\n", FortifyPlugin.DESCRIPTOR.getUrl());
+			log.printf("Uploading FPR to SSC at %s%n", FortifyPlugin.DESCRIPTOR.getUrl());
 			try {
 				final Long projectId = createNewOrGetProject(listener);
 				final File fpr = localFPR;
@@ -269,7 +269,7 @@ public class FortifyUpload extends FortifyStep {
 								return client.uploadFPR(fpr, projectId);
 							}
 						});
-				log.printf("FPR uploaded successfully.  artifact id = %d\n", artifactId);
+				log.printf("FPR uploaded successfully.  artifact id = %d%n", artifactId);
 				return artifactId;
 			} catch (Throwable t) {
 				log.println("Error uploading to SSC: " + FortifyPlugin.DESCRIPTOR.getUrl());
@@ -283,7 +283,7 @@ public class FortifyUpload extends FortifyStep {
 						try {
 							boolean deleted = localFPR.delete();
 							if (!deleted)
-								log.printf("Can't delete local FPR file: %s\n", localFPR.getCanonicalFile());
+								log.printf("Can't delete local FPR file: %s%n", localFPR.getCanonicalFile());
 						} catch (Exception e) {
 							e.printStackTrace(log);
 						}
@@ -292,7 +292,7 @@ public class FortifyUpload extends FortifyStep {
 			}
 		} else {
 			log.printf(
-					"FPR uploading was skipped. Some of the required settings are not specified: Application Name='%s', Application Version='%s', serverUrl='%s', authenticationToken='%s'\n",
+					"FPR uploading was skipped. Some of the required settings are not specified: Application Name='%s', Application Version='%s', serverUrl='%s', authenticationToken='%s'%n",
 					getResolvedAppName(listener), getResolvedAppVersion(listener), FortifyPlugin.DESCRIPTOR.getUrl(),
 					FortifyPlugin.DESCRIPTOR.getToken());
 			throw new AbortException("FPR uploading was skipped. Some of the required settings are not specified.");
@@ -304,7 +304,7 @@ public class FortifyUpload extends FortifyStep {
 		boolean isProcessingComplete = false;
 		while (!isProcessingComplete) {
 			int sleep = (getResolvedPollingInterval(listener) != null) ? getResolvedPollingInterval(listener) : 1;
-			log.printf("Sleep for %d minute(s)\n", sleep);
+			log.printf("Sleep for %d minute(s)%n", sleep);
 			sleep = sleep * 60 * 1000; // wait time is in minute(s)
 			long sleepUntil = System.currentTimeMillis() + sleep;
 			while (true) {
@@ -383,13 +383,13 @@ public class FortifyUpload extends FortifyStep {
 		}
 
 		for (IssueFolderBean folder : folders) {
-			log.printf("Processing folder = %s ...\n", folder.getName());
+			log.printf("Processing folder = %s ...%n", folder.getName());
 
 			if (IssueFolderBean.NAME_CRITICAL.equals(folder.getName())
 					|| IssueFolderBean.NAME_HOT.equals(folder.getName())) {
 				List<GroupingValueBean> groupingValues = getGroupingValues(versionId, folder.getId(), null,
 						GroupingValueBean.GROUPING_TYPE_ANALYSIS, listener);
-				log.printf("Got %d grouping values for folder = %s\n", groupingValues.size(), folder.getName());
+				log.printf("Got %d grouping values for folder = %s%n", groupingValues.size(), folder.getName());
 
 				for (GroupingValueBean group : groupingValues) {
 					if (GroupingValueBean.ID_NOT_AN_ISSUE.equals(group.getName())) {
@@ -401,7 +401,7 @@ public class FortifyUpload extends FortifyStep {
 					|| IssueFolderBean.NAME_WARNING.equals(folder.getName())) {
 				List<GroupingValueBean> groupingValues = getGroupingValues(versionId, folder.getId(), null,
 						GroupingValueBean.GROUPING_TYPE_ANALYSIS, listener);
-				log.printf("Got %d grouping values for folder = %s\n", groupingValues.size(), folder.getName());
+				log.printf("Got %d grouping values for folder = %s%n", groupingValues.size(), folder.getName());
 
 				for (GroupingValueBean group : groupingValues) {
 					if (GroupingValueBean.ID_NOT_AN_ISSUE.equals(group.getName())) {
@@ -412,7 +412,7 @@ public class FortifyUpload extends FortifyStep {
 			} else if (IssueFolderBean.NAME_MEDIUM.equals(folder.getName())) {
 				List<GroupingValueBean> groupingValues = getGroupingValues(versionId, folder.getId(), null,
 						GroupingValueBean.GROUPING_TYPE_ANALYSIS, listener);
-				log.printf("Got %d grouping values for folder = %s\n", groupingValues.size(), folder.getName());
+				log.printf("Got %d grouping values for folder = %s%n", groupingValues.size(), folder.getName());
 
 				for (GroupingValueBean group : groupingValues) {
 					if (GroupingValueBean.ID_NOT_AN_ISSUE.equals(group.getName())) {
@@ -424,7 +424,7 @@ public class FortifyUpload extends FortifyStep {
 					|| IssueFolderBean.NAME_INFO.equals(folder.getName())) {
 				List<GroupingValueBean> groupingValues = getGroupingValues(versionId, folder.getId(), null,
 						GroupingValueBean.GROUPING_TYPE_ANALYSIS, listener);
-				log.printf("Got %d grouping values for folder = %s\n", groupingValues.size(), folder.getName());
+				log.printf("Got %d grouping values for folder = %s%n", groupingValues.size(), folder.getName());
 
 				for (GroupingValueBean group : groupingValues) {
 					if (GroupingValueBean.ID_NOT_AN_ISSUE.equals(group.getName())) {
@@ -435,7 +435,7 @@ public class FortifyUpload extends FortifyStep {
 			} else if (IssueFolderBean.ATTRIBUTE_VALUE_ALL.equals(folder.getName())) {
 				List<GroupingValueBean> groupingValues = getGroupingValues(versionId, folder.getId(), null,
 						GroupingValueBean.GROUPING_TYPE_ANALYSIS, listener);
-				log.printf("Got %d grouping values for folder = %s\n", groupingValues.size(), folder.getName());
+				log.printf("Got %d grouping values for folder = %s%n", groupingValues.size(), folder.getName());
 
 				totalIssues = folder.getIssueCount();
 
@@ -454,7 +454,7 @@ public class FortifyUpload extends FortifyStep {
 				if (!StringUtils.isBlank(getResolvedFailureCriteria(listener))) {
 					List<GroupingValueBean> groupingValuesByCondition = getGroupingValues(versionId, folder.getId(),
 							getFailureCriteria(), GroupingValueBean.GROUPING_TYPE_ANALYSIS, listener);
-					log.printf("Got %d grouping values for folder = %s, condition = '%s'\n", groupingValues.size(),
+					log.printf("Got %d grouping values for folder = %s, condition = '%s'%n", groupingValues.size(),
 							folder.getName(), getFailureCriteria());
 
 					for (GroupingValueBean group : groupingValuesByCondition) {
@@ -503,7 +503,7 @@ public class FortifyUpload extends FortifyStep {
 				}
 
 				// log.printf("Obtained %d grouping values for folder = %s, search = %s for '%s
-				// (%s)'\n", list.size(), folderId, searchCondition,
+				// (%s)'%n", list.size(), folderId, searchCondition,
 				// getResolvedAppName(listener), getResolvedAppVersion(listener));
 
 				return list;
@@ -541,7 +541,7 @@ public class FortifyUpload extends FortifyStep {
 					}
 				}
 
-				// System.out.printf("Obtained %d folders for '%s (%s)'\n", list.size(),
+				// System.out.printf("Obtained %d folders for '%s (%s)'%n", list.size(),
 				// getResolvedAppName(listener), getResolvedAppVersion(listener));
 
 				return list;
@@ -572,7 +572,7 @@ public class FortifyUpload extends FortifyStep {
 										getResolvedFilterSet(listener), new PrintWriter(listener.getLogger(), true));
 							}
 						});
-				// System.out.printf("Obtained %d folders for '%s (%s)'\n", list.size(),
+				// System.out.printf("Obtained %d folders for '%s (%s)'%n", list.size(),
 				// getProjectName(), getProjectVersion());
 
 				return groupingProfiles;

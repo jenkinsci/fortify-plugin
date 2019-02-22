@@ -1,3 +1,6 @@
+[![Jenkins Plugins](https://img.shields.io/jenkins/plugin/v/fortify.svg)](https://wiki.jenkins.io/display/JENKINS/Fortify+Plugin)
+[![Build Status](https://ci.jenkins.io/buildStatus/icon?job=plugins/fortify-plugin/master)](https://ci.jenkins.io/job/plugins/job/fortify-plugin/job/master)
+
 # Fortify Jenkins plugin
 
 This is the official Jenkins plugin for the Fortify Static Code Analyzer (SCA) and Fortify Software Security Center (SSC).

@@ -1,7 +1,7 @@
 <?jelly escape-by-default='true'?>
 <!--
     (c) Copyright 2019 Micro Focus or one of its affiliates.
-   
+
     Licensed under the MIT License (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -17,54 +17,70 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
   <style type="text/css">
-        .comboBoxList {
-            display:block;
-            background-color: #fff;
-            color: #000;
-        }
+    .comboBoxList {
+    display:block;
+    background-color: #fff;
+    color: #000;
+    }
   </style>
 
   <f:section title="Fortify Assessment">
 
-    <f:entry title="SSC URL" help="/plugin/fortify/help-sscUrl.html">
-      <f:textbox name="url" field="url" id="url"/>
-    </f:entry>
-
-    <f:optionalBlock name="useProxy" title="Use proxy for SSC" checked="${instance.useProxy}">
-      <f:entry title="Proxy server host:port">
-        <f:textbox name="proxyUrl" field="proxyUrl" id="proxyUrl"/>
+    <f:section title="SSC configuration">
+      <f:entry title="SSC URL" help="/plugin/fortify/help-sscUrl.html">
+        <f:textbox name="url" field="url" id="url"/>
       </f:entry>
-      <f:entry title="Proxy server username">
-        <f:textbox name="proxyUsername" field="proxyUsername" id="proxyUsername" checkMethod="post"/>
-      </f:entry>
-      <f:entry title="Proxy server password">
-        <f:password name="proxyPassword" field="proxyPassword" id="proxyPassword" checkMethod="post"/>
-      </f:entry>
-    </f:optionalBlock>
 
-    <f:entry title="Authentication token" help="/plugin/fortify/help-sscAuthToken.html">
-      <f:textbox name="token" field="token" id="token" checkMethod="post"/>
-    </f:entry>
+      <!--<f:optionalBlock name="useProxy" title="Use proxy" checked="${instance.useProxy}">
+        <f:entry title="Proxy server host:port">
+          <f:textbox name="proxyUrl" field="proxyUrl" id="proxyUrl"/>
+        </f:entry>
+        <f:entry title="Proxy server username">
+          <f:textbox name="proxyUsername" field="proxyUsername" id="proxyUsername" checkMethod="post"/>
+        </f:entry>
+        <f:entry title="Proxy server password">
+          <f:password name="proxyPassword" field="proxyPassword" id="proxyPassword" checkMethod="post"/>
+        </f:entry>
+      </f:optionalBlock>-->
 
-    <f:entry title="Issue template" help="/plugin/fortify/help-sscProjTemplate.html">
-      <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
-      <div style="float:left;width:80%;">
-        <f:editableComboBox id="projectTemplate" name="projectTemplate" field="projectTemplate" clazz="setting-input" items="${descriptor.projectTemplateItems}" />
-      </div>
-      <div style="float:left">
-        <input value="▼" type="button" id="refreshButton" onclick="refreshTemplateList('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjectTemplates','url,token,useProxy,proxyUrl,proxyUsername,proxyPassword')" />
-      </div>
-      <div style="display:none;" id="refreshSpinner" >
-        <img src="${imagesURL}/spinner.gif" /> ${progress}
-      </div>
-    </f:entry>
-
-    <f:advanced title="Advanced settings">
-      <f:validateButton title="Test connection" progress="Testing..." method="testConnection" with="url,token,useProxy,proxyUrl,proxyUsername,proxyPassword" />
-      <f:entry title="Issue breakdown page size" help="/plugin/fortify/help-breakdownPageSize.html">
-        <f:textbox field="breakdownPageSize" id="breakdownPageSize" />
+      <f:entry title="Authentication token" help="/plugin/fortify/help-sscAuthToken.html">
+        <f:textbox name="token" field="token" id="token" checkMethod="post"/>
       </f:entry>
-    </f:advanced>
+
+      <f:entry title="Issue template" help="/plugin/fortify/help-sscProjTemplate.html">
+        <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
+        <div style="float:left;width:80%;">
+          <f:editableComboBox id="projectTemplate" name="projectTemplate" field="projectTemplate" clazz="setting-input" items="${descriptor.projectTemplateItems}" />
+        </div>
+        <div style="float:left">
+          <input value="▼" type="button" id="refreshButton" onclick="refreshTemplateList('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjectTemplates','url,token,useProxy,proxyUrl,proxyUsername,proxyPassword')" />
+        </div>
+        <div style="display:none;" id="refreshSpinner" >
+          <img src="${imagesURL}/spinner.gif" /> ${progress}
+        </div>
+      </f:entry>
+
+      <f:advanced title="Advanced settings">
+        <f:validateButton title="Test SSC connection" progress="Testing..." method="testConnection" with="url,token,useProxy,proxyUrl,proxyUsername,proxyPassword" />
+        <f:entry title="Issue breakdown page size" help="/plugin/fortify/help-breakdownPageSize.html">
+          <f:textbox field="breakdownPageSize" id="breakdownPageSize" />
+        </f:entry>
+      </f:advanced>
+    </f:section>
+
+    <f:section title="Controller configuration">
+      <f:entry title="Controller URL" help="">
+        <f:textbox name="ctrlUrl" field="ctrlUrl" id="ctrlUrl"/>
+      </f:entry>
+
+      <f:entry title="Controller token" help="">
+        <f:textbox name="ctrlToken" field="ctrlToken" id="ctrlToken" checkMethod="post"/>
+      </f:entry>
+
+      <f:entry>
+        <f:validateButton title="Test Controller connection" progress="Testing..." method="testConnection" with="ctrlUrl,ctrlToken,useProxy,proxyUrl,proxyUsername,proxyPassword" />
+      </f:entry>
+    </f:section>
 
   </f:section>
 

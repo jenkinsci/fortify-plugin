@@ -28,3 +28,6 @@ fortify.iml
 
 # build files
 target/
+
+# Jenkins work dir
+work/

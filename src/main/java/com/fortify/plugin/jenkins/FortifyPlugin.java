@@ -28,22 +28,20 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fortify.plugin.jenkins.bean.SensorPoolBean;
+import com.fortify.plugin.jenkins.steps.*;
+import com.fortify.plugin.jenkins.steps.remote.Gradle;
+import com.fortify.plugin.jenkins.steps.remote.Maven;
+import com.fortify.plugin.jenkins.steps.remote.RemoteAnalysisProjectType;
+import hudson.model.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.verb.POST;
 
 import com.fortify.plugin.jenkins.bean.ProjectTemplateBean;
 import com.fortify.plugin.jenkins.fortifyclient.FortifyClient;
 import com.fortify.plugin.jenkins.fortifyclient.FortifyClient.NoReturn;
-import com.fortify.plugin.jenkins.steps.FortifyClean;
-import com.fortify.plugin.jenkins.steps.FortifyScan;
-import com.fortify.plugin.jenkins.steps.FortifyTranslate;
-import com.fortify.plugin.jenkins.steps.FortifyUpdate;
-import com.fortify.plugin.jenkins.steps.FortifyUpload;
 import com.fortify.plugin.jenkins.steps.types.AdvancedScanType;
 import com.fortify.plugin.jenkins.steps.types.DevenvScanType;
 import com.fortify.plugin.jenkins.steps.types.DotnetSourceScanType;
@@ -58,10 +56,6 @@ import com.fortify.ssc.restclient.ApiException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.Plugin;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -111,17 +105,26 @@ public class FortifyPlugin extends Recorder {
 
 	public static final int DEFAULT_PAGE_SIZE = 50;
 
-	private UploadSSCBlock uploadSSC;
-	private RunTranslationBlock runTranslation;
-	private RunScanBlock runScan;
-	private UpdateContentBlock updateContent;
-	private boolean runSCAClean;
-	private String buildId;
-	private String scanFile;
-	private String maxHeap;
-	private String addJVMOptions;
+	private transient UploadSSCBlock uploadSSC;
+	private transient RunTranslationBlock runTranslation;
+	private transient RunScanBlock runScan;
+	private transient UpdateContentBlock updateContent;
+	private transient boolean runSCAClean;
+	private transient String buildId;
+	private transient String scanFile;
+	private transient String maxHeap;
+	private transient String addJVMOptions;
+
+	private AnalysisRunType analysisRunType;
+	private RemoteAnalysisProjectType remoteAnalysisProjectType;
+	private ProjectScanType projectScanType;
 
 	@DataBoundConstructor
+	public FortifyPlugin(AnalysisRunType analysisRunType) {
+		this.analysisRunType = analysisRunType;
+	}
+
+	@Deprecated
 	public FortifyPlugin(String buildId, String scanFile, String maxHeap, String addJVMOptions,
 			UpdateContentBlock updateContent, boolean runSCAClean, RunTranslationBlock runTranslation,
 			RunScanBlock runScan, UploadSSCBlock uploadSSC) {
@@ -136,243 +139,459 @@ public class FortifyPlugin extends Recorder {
 		this.uploadSSC = uploadSSC;
 	}
 
+	/* for backwards compatibility */
+	protected Object readResolve() {
+		if (runTranslation != null) {
+			analysisRunType = new AnalysisRunType("local");
+			analysisRunType.setRunSCAClean(runSCAClean);
+		}
+		if (runScan != null) {
+			analysisRunType.setRunScan(runScan);
+		}
+		return this;
+	}
+
+	public boolean getAnalysisRunType() { return analysisRunType != null; }
+
+	// populate the dropdown lists
+	public RemoteAnalysisProjectType getRemoteAnalysisProjectType() { return getAnalysisRunType() ? analysisRunType.getRemoteAnalysisProjectType() : null; }
+	public ProjectScanType getProjectScanType() { return getAnalysisRunType() ? analysisRunType.getProjectScanType() : null; }
+
+	public boolean isRemote() {
+		return getAnalysisRunType() && analysisRunType.value.equals("remote");
+	}
+
+	public boolean isMixed() {
+		return getAnalysisRunType() && analysisRunType.value.equals("mixed");
+	}
+
+	public boolean isLocal() {
+		return getAnalysisRunType() && analysisRunType.value.equals("local");
+	}
+
+	public boolean isTranslationDebug() { return getAnalysisRunType() && analysisRunType.isTranslationDebug(); }
+	public boolean isTranslationVerbose() { return getAnalysisRunType() && analysisRunType.isTranslationVerbose(); }
+
 	public String getBuildId() {
-		return buildId;
+		return getAnalysisRunType() ? analysisRunType.getBuildId() : "";
 	}
 
 	public String getScanFile() {
-		return scanFile;
+		return getAnalysisRunType() ? analysisRunType.getScanFile() : "";
 	}
 
 	public String getMaxHeap() {
-		return maxHeap;
+		return getAnalysisRunType() ? analysisRunType.getMaxHeap() : "";
 	}
 
 	public String getAddJVMOptions() {
-		return addJVMOptions;
+		return getAnalysisRunType() ? analysisRunType.getAddJVMOptions() : "";
 	}
 
 	public boolean getUpdateContent() {
-		return updateContent != null;
+		return getAnalysisRunType() && analysisRunType.getUpdateContent() != null;
 	}
 
+	@Deprecated
 	public boolean getRunTranslation() {
 		return runTranslation != null;
 	}
 
 	public boolean getRunScan() {
-		return runScan != null;
+		return getAnalysisRunType() && analysisRunType.getRunScan() != null;
+	}
+
+	public boolean getRunRemoteScan() {
+		return getAnalysisRunType() && analysisRunType.getRunRemoteScan() != null;
+	}
+
+	public boolean getMbsType() {
+		return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getMbsType() != null;
+	}
+
+	public boolean isCreate() {
+		return getMbsType() && analysisRunType.getRunRemoteScan().getMbsType().getValue().equals("create");
+	}
+
+	public boolean isUseExisting() {
+		return getMbsType() && analysisRunType.getRunRemoteScan().getMbsType().getValue().equals("useExisting");
+	}
+
+	public String getFileName() {
+		return isUseExisting() ? analysisRunType.getRunRemoteScan().getMbsType().getFileName() : "";
 	}
 
 	public boolean getUploadSSC() {
-		return uploadSSC != null;
+		return getAnalysisRunType() && analysisRunType.getUploadSSC() != null;
 	}
 
 	public String getUpdateServerUrl() {
-		return getUpdateContent() ? updateContent.getUpdateServerUrl() : "";
+		return getUpdateContent() ? analysisRunType.getUpdateContent().getUpdateServerUrl() : "";
 	}
 
+	@Deprecated
 	public boolean getUpdateUseProxy() {
 		return getUpdateContent() && updateContent.getUpdateUseProxy();
 	}
 
+	@Deprecated
 	public String getUpdateProxyUrl() {
 		return getUpdateUseProxy() ? updateContent.getUpdateProxyUrl() : "";
 	}
 
+	@Deprecated
 	public String getUpdateProxyUsername() {
 		return getUpdateUseProxy() ? updateContent.getUpdateProxyUsername() : "";
 	}
 
+	@Deprecated
 	public String getUpdateProxyPassword() {
 		return getUpdateUseProxy() ? updateContent.getUpdateProxyPassword() : "";
 	}
 
 	public boolean getRunSCAClean() {
-		return runSCAClean;
+		return getAnalysisRunType() && analysisRunType.isRunSCAClean();
 	}
 
+	@Deprecated
 	public String getTranslationType() {
 		return getRunTranslation() ? runTranslation.getTranslationType() : "";
 	}
 
+	@Deprecated
 	public boolean getIsBasicTranslationType() {
 		return getRunTranslation() && runTranslation.isBasicTranslationType();
 	}
 
+	@Deprecated
 	public boolean getIsAdvancedTranslationType() {
 		return getRunTranslation() && runTranslation.isAdvancedTranslationType();
 	}
 
+	@Deprecated
 	public boolean getIsBasicJavaTranslationType() {
 		return getRunTranslation() && runTranslation.isBasicJavaTranslationType();
 	}
 
+	@Deprecated
 	public boolean getIsBasicDotNetTranslationType() {
 		return getRunTranslation() && runTranslation.isBasicDotNetTranslationType();
 	}
 
+	@Deprecated
 	public boolean getIsBasicMaven3TranslationType() {
 		return getRunTranslation() && runTranslation.isBasicMaven3TranslationType();
 	}
 
+	@Deprecated
 	public boolean getIsBasicGradleTranslationType() {
 		return getRunTranslation() && runTranslation.isBasicGradleTranslationType();
 	}
 
+	@Deprecated
 	public boolean getIsBasicOtherTranslationType() {
 		return getRunTranslation() && runTranslation.isBasicOtherTranslationType();
 	}
 
+	@Deprecated
 	public String getTranslationJavaVersion() {
 		return getRunTranslation() ? runTranslation.getTranslationJavaVersion() : "";
 	}
 
+	@Deprecated
 	public String getTranslationJavaClasspath() {
 		return getRunTranslation() ? runTranslation.getTranslationClasspath() : "";
 	}
 
+	@Deprecated
 	public String getTranslationJavaSourceFiles() {
 		return getRunTranslation() ? runTranslation.getTranslationSourceFiles() : "";
 	}
 
+	@Deprecated
 	public String getTranslationJavaAddOptions() {
 		return getRunTranslation() ? runTranslation.getTranslationAddOptions() : "";
 	}
 
 	public String getTranslationExcludeList() {
-		return getRunTranslation() ? runTranslation.getTranslationExcludeList() : "";
+		return getAnalysisRunType() ? analysisRunType.getTranslationExcludeList() : "";
 	}
 
+	@Deprecated
 	public String getTranslationOptions() {
 		return getRunTranslation() ? runTranslation.getTranslationOptions() : "";
 	}
 
+	@Deprecated
 	public boolean getTranslationDebug() {
 		return getRunTranslation() && runTranslation.getTranslationDebug();
 	}
 
+	@Deprecated
 	public boolean getTranslationVerbose() {
 		return getRunTranslation() && runTranslation.getTranslationVerbose();
 	}
 
 	public String getTranslationLogFile() {
-		return getRunTranslation() ? runTranslation.getTranslationLogFile() : "";
+		return getAnalysisRunType() ? analysisRunType.getTranslationLogFile() : "";
 	}
 
+	@Deprecated
 	public boolean getIsBasicDotNetProjectSolutionScanType() {
 		return getRunTranslation() && runTranslation.isBasicDotNetProjectSolutionScanType();
 	}
 
+	@Deprecated
 	public boolean getIsBasicDotNetSourceCodeScanType() {
 		return getRunTranslation() && runTranslation.isBasicDotNetSourceCodeScanType();
 	}
 
+	@Deprecated
 	public boolean getIsBasicDotNetDevenvBuildType() {
 		return getRunTranslation() && runTranslation.isBasicDotNetDevenvBuildType();
 	}
 
+	@Deprecated
 	public boolean getIsBasicDotNetMSBuildBuildType() {
 		return getRunTranslation() && runTranslation.isBasicDotNetMSBuildBuildType();
 	}
 
+	@Deprecated
 	public String getDotNetDevenvProjects() {
 		return getRunTranslation() ? runTranslation.getDotNetDevenvProjects() : "";
 	}
 
+	@Deprecated
 	public String getDotNetDevenvAddOptions() {
 		return getRunTranslation() ? runTranslation.getDotNetDevenvAddOptions() : "";
 	}
 
+	@Deprecated
 	public String getDotNetMSBuildProjects() {
 		return getRunTranslation() ? runTranslation.getDotNetMSBuildProjects() : "";
 	}
 
+	@Deprecated
 	public String getDotNetMSBuildAddOptions() {
 		return getRunTranslation() ? runTranslation.getDotNetMSBuildAddOptions() : "";
 	}
 
+	@Deprecated
 	public String getDotNetSourceCodeFrameworkVersion() {
 		return getRunTranslation() ? runTranslation.getDotNetSourceCodeFrameworkVersion() : "";
 	}
 
+	@Deprecated
 	public String getDotNetSourceCodeLibdirs() {
 		return getRunTranslation() ? runTranslation.getDotNetSourceCodeLibdirs() : "";
 	}
 
+	@Deprecated
 	public String getDotNetSourceCodeAddOptions() {
 		return getRunTranslation() ? runTranslation.getDotNetSourceCodeAddOptions() : "";
 	}
 
+	@Deprecated
 	public String getDotNetSourceCodeSrcFiles() {
 		return getRunTranslation() ? runTranslation.getDotNetSourceCodeSrcFiles() : "";
 	}
 
+	@Deprecated
 	public String getMaven3Options() {
 		return getRunTranslation() ? runTranslation.getMaven3Options() : "";
 	}
 
+	@Deprecated
 	public boolean getGradleUseWrapper() {
 		return getRunTranslation() && runTranslation.getGradleUseWrapper();
 	}
 
+	@Deprecated
 	public String getGradleTasks() {
 		return getRunTranslation() ? runTranslation.getGradleTasks() : "";
 	}
 
+	@Deprecated
 	public String getGradleOptions() {
 		return getRunTranslation() ? runTranslation.getGradleOptions() : "";
 	}
 
+	@Deprecated
 	public String getOtherOptions() {
 		return getRunTranslation() ? runTranslation.getOtherOptions() : "";
 	}
 
+	@Deprecated
 	public String getOtherIncludesList() {
 		return getRunTranslation() ? runTranslation.getOtherIncludesList() : "";
 	}
 
 	public String getScanCustomRulepacks() {
-		return getRunScan() ? runScan.getScanCustomRulepacks() : "";
+		return getRunScan() ? analysisRunType.getRunScan().getScanCustomRulepacks() : "";
 	}
 
 	public String getScanAddOptions() {
-		return getRunScan() ? runScan.getScanAddOptions() : "";
+		return getRunScan() ? analysisRunType.getRunScan().getScanAddOptions() : "";
 	}
 
 	public boolean getScanDebug() {
-		return getRunScan() && runScan.getScanDebug();
+		return getRunScan() && analysisRunType.getRunScan().getScanDebug();
 	}
 
 	public boolean getScanVerbose() {
-		return getRunScan() && runScan.getScanVerbose();
+		return getRunScan() && analysisRunType.getRunScan().getScanVerbose();
 	}
 
 	public String getScanLogFile() {
-		return getRunScan() ? runScan.getScanLogFile() : "";
+		return getRunScan() ? analysisRunType.getRunScan().getScanLogFile() : "";
 	}
 
 	// these are the original fields for uploading to ssc - don't feel like renaming
 	// them...
 	public String getFilterSet() {
-		return uploadSSC == null ? "" : uploadSSC.getFilterSet();
+		return getUploadSSC() ? analysisRunType.getUploadSSC().getFilterSet() : "";
 	}
 
 	public String getSearchCondition() {
-		return uploadSSC == null ? "" : uploadSSC.getSearchCondition();
+		return getUploadSSC() ? analysisRunType.getUploadSSC().getSearchCondition() : "";
 	}
 
 	public String getProjectName() {
-		return uploadSSC == null ? "" : uploadSSC.getProjectName();
+		return getUploadSSC() ? analysisRunType.getUploadSSC().getProjectName() : "";
 	}
 
 	public String getProjectVersion() {
-		return uploadSSC == null ? "" : uploadSSC.getProjectVersion();
+		return getUploadSSC() ? analysisRunType.getUploadSSC().getProjectVersion() : "";
 	}
 
 	public String getUploadWaitTime() {
-		return uploadSSC == null ? null : uploadSSC.getPollingInterval();
+		return getUploadSSC() ? analysisRunType.getUploadSSC().getPollingInterval() : "";
 	}
+
+	public boolean getRemoteOptionalConfig() {
+		if (isRemote()) {
+			return analysisRunType.getRemoteOptionalConfig() != null;
+		} else if (isMixed()) {
+			return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null;
+		} else {
+			return false;
+		}
+		//return getAnalysisRunType() && analysisRunType.getRemoteOptionalConfig() != null;
+	}
+
+	public String getSensorPoolName() {
+		if (isRemote()) {
+			return analysisRunType.getRemoteOptionalConfig().getSensorPoolName();
+		} else if (isMixed()) {
+			return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getSensorPoolName() : "";
+		} else {
+			return "";
+		}
+		//return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getSensorPoolName() : "";
+	}
+
+	public String getEmailAddr() {
+		if (isRemote()) {
+			return analysisRunType.getRemoteOptionalConfig().getEmailAddr();
+		} else if (isMixed()) {
+			return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getEmailAddr() : "";
+		} else {
+			return "";
+		}
+		//return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getEmailAddr() : "";
+	}
+
+	public String getScaScanOptions() {
+		if (isRemote()) {
+			return analysisRunType.getRemoteOptionalConfig().getScaScanOptions();
+		} else if (isMixed()) {
+			return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getScaScanOptions() : "";
+		} else {
+			return "";
+		}
+		//return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getScaScanOptions() : "";
+	}
+
+	public String getRulepacks() {
+		if (isRemote()) {
+			return analysisRunType.getRemoteOptionalConfig().getRulepacks();
+		} else if (isMixed()) {
+			return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getRulepacks() : "";
+		} else {
+			return "";
+		}
+		//return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getRulepacks() : "";
+	}
+
+	public String getFilterFile() {
+		if (isRemote()) {
+			return analysisRunType.getRemoteOptionalConfig().getFilterFile();
+		} else if (isMixed()) {
+			return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getFilterFile() : "";
+		} else {
+			return "";
+		}
+		//return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getFilterFile() : "";
+	}
+
+	/*public boolean getRemoteRemoteOptionalConfig() { return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null; }
+
+	public String getRemoteSensorPoolName() { return getRemoteRemoteOptionalConfig() ? analysisRunType.getRunRemoteScan().getRemoteRemoteOptionalConfig().getRemoteSensorPoolName() : ""; }
+
+	public String getRemoteEmailAddr() { return getRemoteRemoteOptionalConfig() ? analysisRunType.getRunRemoteScan().getRemoteRemoteOptionalConfig().getRemoteEmailAddr() : ""; }
+
+	public String getRemoteScaScanOptions() { return getRemoteRemoteOptionalConfig() ? analysisRunType.getRunRemoteScan().getRemoteRemoteOptionalConfig().getRemoteScaScanOptions() : ""; }
+
+	public String getRemoteRulepacks() { return getRemoteRemoteOptionalConfig() ? analysisRunType.getRunRemoteScan().getRemoteRemoteOptionalConfig().getRemoteRulepacks() : ""; }
+
+	public String getRemoteFilterFile() { return getRemoteRemoteOptionalConfig() ? analysisRunType.getRunRemoteScan().getRemoteRemoteOptionalConfig().getRemoteFilterFile() : ""; }*/
+
+	public String getBuildTool() {
+		if (!getAnalysisRunType()) {
+			return "";
+		}
+		if (getRemoteAnalysisProjectType() instanceof Gradle) {
+			return "gradle";
+		} else if (getRemoteAnalysisProjectType() instanceof Maven) {
+			return "mvn";
+		} else {
+			return "none";
+		}
+	}
+
+	public String getBuildFile() {
+		if (!getAnalysisRunType()) {
+			return "";
+		}
+		if (getRemoteAnalysisProjectType() instanceof Gradle) {
+			return ((Gradle) getRemoteAnalysisProjectType()).getBuildFile();
+		} else if (getRemoteAnalysisProjectType() instanceof Maven) {
+			return ((Maven) getRemoteAnalysisProjectType()).getBuildFile();
+		} else {
+			return "";
+		}
+	}
+
+	public boolean getIncludeTests() {
+		if (getAnalysisRunType()) {
+			if (getRemoteAnalysisProjectType() instanceof Gradle) {
+				return ((Gradle) getRemoteAnalysisProjectType()).getIncludeTests();
+			} else if (getRemoteAnalysisProjectType() instanceof Maven) {
+				return ((Maven) getRemoteAnalysisProjectType()).getIncludeTests();
+			}
+		}
+		return false;
+	}
+
+	public String getTransArgs() {
+		return getRemoteAnalysisProjectType() == null ? "" : analysisRunType.getTransArgs();
+	}
+
+	public String getMbsFile() {
+		return getRunRemoteScan() ? getFileName() : "";
+	}
+	public String getScanArgs() { return getRemoteOptionalConfig() ? getScaScanOptions() : ""; }
+	/*public String getRemoteScanArgs() { return getRemoteRemoteOptionalConfig() ? getRemoteScaScanOptions() : ""; }*/
 
 	@Override
 	public BuildStepMonitor getRequiredMonitorService() {
@@ -399,61 +618,82 @@ public class FortifyPlugin extends Recorder {
 		PrintStream log = listener.getLogger();
 		log.println("Fortify Jenkins plugin v " + getPluginVersion());
 
-		if (updateContent != null) {
-			FortifyUpdate fu = new FortifyUpdate.Builder().updateServerURL(getUpdateServerUrl())
-					.useProxy(getUpdateUseProxy()).proxyURL(getUpdateProxyUrl()).proxyUsername(getUpdateProxyUsername())
-					.proxyPassword(getUpdateProxyPassword()).build();
-			fu.perform(build, launcher, listener);
+		if (isRemote()) {
+			runRemote(build, launcher, listener);
+		} else if (isMixed()) {
+			runMixed(build, launcher, listener);
+		} else if (isLocal()) { // Local Translation
+			runLocal(build, launcher, listener);
 		}
 
-		if (runSCAClean) {
-			FortifyClean fc = new FortifyClean(getBuildId());
-			fc.perform(build, launcher, listener);
+		return true;
+	}
+
+	private void runRemote(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+		PrintStream log = listener.getLogger();
+		log.println("Running remote translation and scan.");
+
+		final RemoteAnalysisProjectType remoteAnalysisProjectType = getRemoteAnalysisProjectType();
+		CloudScanStart csStart = new CloudScanStart(remoteAnalysisProjectType);
+		CloudScanArguments csArguments = new CloudScanArguments();
+
+		if (getRemoteOptionalConfig()) {
+			csStart.setRemoteOptionalConfig(analysisRunType.getRemoteOptionalConfig());
+
+			csArguments.setScanArgs(getScanArgs());
 		}
 
-		if (runTranslation != null) {
-			final ProjectScanType projectScanType = calculateProjectScanType();
-			FortifyTranslate ft = new FortifyTranslate(getBuildId(), projectScanType);
-			ft.setMaxHeap(getMaxHeap());
-			ft.setAddJVMOptions(getAddJVMOptions());
-			ft.setDebug(getTranslationDebug());
-			ft.setVerbose(getTranslationVerbose());
-			ft.setLogFile(getTranslationLogFile());
-			ft.setExcludeList(getTranslationExcludeList());
+		csArguments.setTransArgs(getTransArgs());
 
-			if (projectScanType instanceof JavaScanType) {
-				ft.setJavaVersion(getTranslationJavaVersion());
-				ft.setJavaClasspath(getTranslationJavaClasspath());
-				ft.setJavaSrcFiles(getTranslationJavaSourceFiles());
-				ft.setJavaAddOptions(getTranslationJavaAddOptions());
-			} else if (projectScanType instanceof DevenvScanType) {
-				ft.setDotnetProject(getDotNetDevenvProjects());
-				ft.setDotnetAddOptions(getDotNetDevenvAddOptions());
-			} else if (projectScanType instanceof MsbuildScanType) {
-				ft.setDotnetProject(getDotNetMSBuildProjects());
-				ft.setDotnetAddOptions(getDotNetMSBuildAddOptions());
-			} else if (projectScanType instanceof DotnetSourceScanType) {
-				ft.setDotnetFrameworkVersion(getDotNetSourceCodeFrameworkVersion());
-				ft.setDotnetLibdirs(getDotNetSourceCodeLibdirs());
-				ft.setDotnetAddOptions(getDotNetSourceCodeAddOptions());
-				ft.setDotnetSrcFiles(getDotNetSourceCodeSrcFiles());
-			} else if (projectScanType instanceof MavenScanType) {
-				ft.setMavenOptions(getMaven3Options());
-			} else if (projectScanType instanceof GradleScanType) {
-				ft.setUseWrapper(getGradleUseWrapper());
-				ft.setGradleTasks(getGradleTasks());
-				ft.setGradleOptions(getGradleOptions());
-			} else if (projectScanType instanceof OtherScanType) {
-				ft.setOtherIncludesList(getOtherIncludesList());
-				ft.setOtherOptions(getOtherOptions());
-			} else if (projectScanType instanceof AdvancedScanType) {
-				ft.setAdvOptions(getTranslationOptions());
-			}
-
-			ft.perform(build, launcher, listener);
+		if (StringUtils.isNotEmpty(csArguments.getTransArgs()) || StringUtils.isNotEmpty(csArguments.getScanArgs())) {
+			csArguments.perform(build, launcher, listener);
 		}
 
-		if (runScan != null) {
+		if (getUploadSSC()) {
+			csStart.setUploadSSC(analysisRunType.getUploadSSC());
+		}
+
+		// run CloudScan start command
+		csStart.perform(build, launcher, listener);
+	}
+
+	private void runMixed(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+		PrintStream log = listener.getLogger();
+		log.println("Running local translation and remote scan.");
+
+		performLocalTranslation(build, launcher, listener);
+
+		final RemoteAnalysisProjectType remoteAnalysisProjectType = getRemoteAnalysisProjectType();
+		CloudScanStart csStart = new CloudScanStart(remoteAnalysisProjectType);
+
+		if (getRemoteOptionalConfig()) {
+			csStart.setRemoteOptionalConfig(analysisRunType.getRunRemoteScan().getRemoteOptionalConfig());
+		}
+		if (isCreate()) {
+			csStart.setCreateMbs(true);
+			csStart.setBuildID(getBuildId());
+		} else if (isUseExisting()) {
+			csStart.setCreateMbs(false);
+			csStart.setMbsFile(getMbsFile());
+		}
+
+		csStart.setScanArgs(getScanArgs());
+
+		if (getUploadSSC()) {
+			csStart.setUploadSSC(analysisRunType.getUploadSSC());
+		}
+
+		// run CloudScan start command if either remote or mixed analysis type
+		csStart.perform(build, launcher, listener);
+	}
+
+	private void runLocal(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+		PrintStream log = listener.getLogger();
+		log.println("Running local translation and scan.");
+
+		performLocalTranslation(build, launcher, listener);
+
+		if (getRunScan()) {
 			FortifyScan fs = new FortifyScan(getBuildId());
 			fs.setAddJVMOptions(getAddJVMOptions());
 			fs.setMaxHeap(getMaxHeap());
@@ -463,20 +703,75 @@ public class FortifyPlugin extends Recorder {
 			fs.setResultsFile(getScanFile());
 			fs.setCustomRulepacks(getScanCustomRulepacks());
 			fs.setAddOptions(getScanAddOptions());
+
 			fs.perform(build, launcher, listener);
 		}
 
-		if (uploadSSC != null) {
+		if (getUploadSSC()) {
 			FortifyUpload upload = new FortifyUpload(false, getProjectName(), getProjectVersion());
 			upload.setFailureCriteria(getSearchCondition());
 			upload.setFilterSet(getFilterSet());
 			upload.setResultsFile(getScanFile());
 			upload.setPollingInterval(getUploadWaitTime());
-			upload.perform(build, launcher, listener);
 
+			upload.perform(build, launcher, listener);
 		}
 
-		return true;
+	}
+
+	private void performLocalTranslation(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+		// Update security content
+		if (getUpdateContent()) {
+			FortifyUpdate fu = new FortifyUpdate.Builder().updateServerURL(getUpdateServerUrl()).build();
+			fu.perform(build, launcher, listener);
+		}
+		// run Fortify SCA clean
+		if (getRunSCAClean()) {
+			FortifyClean fc = new FortifyClean(getBuildId());
+			fc.perform(build, launcher, listener);
+		}
+
+		final ProjectScanType projectScanType = getProjectScanType();
+		if (projectScanType != null) {
+			FortifyTranslate ft = new FortifyTranslate(getBuildId(), projectScanType);
+			ft.setMaxHeap(getMaxHeap());
+			ft.setAddJVMOptions(getAddJVMOptions());
+			ft.setDebug(isTranslationDebug());
+			ft.setVerbose(isTranslationVerbose());
+			ft.setLogFile(getTranslationLogFile());
+			ft.setExcludeList(getTranslationExcludeList());
+
+			if (projectScanType instanceof JavaScanType) {
+				ft.setJavaVersion(((JavaScanType) projectScanType).getJavaVersion());
+				ft.setJavaClasspath(((JavaScanType) projectScanType).getJavaClasspath());
+				ft.setJavaSrcFiles(((JavaScanType) projectScanType).getJavaSrcFiles());
+				ft.setJavaAddOptions(((JavaScanType) projectScanType).getJavaAddOptions());
+			} else if (projectScanType instanceof DevenvScanType) {
+				ft.setDotnetProject(((DevenvScanType) projectScanType).getDotnetProject());
+				ft.setDotnetAddOptions(((DevenvScanType) projectScanType).getDotnetAddOptions());
+			} else if (projectScanType instanceof MsbuildScanType) {
+				ft.setDotnetProject(((MsbuildScanType) projectScanType).getDotnetProject());
+				ft.setDotnetAddOptions(((MsbuildScanType) projectScanType).getDotnetAddOptions());
+			} else if (projectScanType instanceof DotnetSourceScanType) {
+				ft.setDotnetFrameworkVersion(((DotnetSourceScanType) projectScanType).getDotnetFrameworkVersion());
+				ft.setDotnetLibdirs(((DotnetSourceScanType) projectScanType).getDotnetLibdirs());
+				ft.setDotnetAddOptions(((DotnetSourceScanType) projectScanType).getDotnetAddOptions());
+				ft.setDotnetSrcFiles(((DotnetSourceScanType) projectScanType).getDotnetSrcFiles());
+			} else if (projectScanType instanceof MavenScanType) {
+				ft.setMavenOptions(((MavenScanType) projectScanType).getMavenOptions());
+			} else if (projectScanType instanceof GradleScanType) {
+				ft.setUseWrapper(((GradleScanType) projectScanType).getUseWrapper());
+				ft.setGradleTasks(((GradleScanType) projectScanType).getGradleTasks());
+				ft.setGradleOptions(((GradleScanType) projectScanType).getGradleOptions());
+			} else if (projectScanType instanceof OtherScanType) {
+				ft.setOtherIncludesList(((OtherScanType) projectScanType).getOtherIncludesList());
+				ft.setOtherOptions(((OtherScanType) projectScanType).getOtherOptions());
+			} else if (projectScanType instanceof AdvancedScanType) {
+				ft.setAdvOptions(((AdvancedScanType) projectScanType).getAdvOptions());
+			}
+
+			ft.perform(build, launcher, listener);
+		}
 	}
 
 	/**
@@ -575,6 +870,15 @@ public class FortifyPlugin extends Recorder {
 		/** List of all Projects (including versions info) obtained from SSC */
 		private Map<String, Map<String, Long>> allProjects = Collections.emptyMap();
 
+		/** List of all CloudScan Sensor pools obtained from SSC */
+		private List<SensorPoolBean> sensorPoolList = Collections.emptyList();
+
+		/** CloudScan Controller URL */
+		private String ctrlUrl;
+
+		/** CloudScan Controller Token*/
+		private Secret ctrlToken;
+
 		public DescriptorImpl() {
 			super(FortifyPlugin.class);
 			load();
@@ -625,6 +929,10 @@ public class FortifyPlugin extends Recorder {
 		public Integer getBreakdownPageSize() {
 			return breakdownPageSize;
 		}
+
+		public String getCtrlUrl() { return ctrlUrl; }
+
+		public String getCtrlToken() { return ctrlToken == null ? "" : ctrlToken.getPlainText(); }
 
 		public FormValidation doCheckBreakdownPageSize(@QueryParameter String value) {
 			if (StringUtils.isBlank(value)) {
@@ -730,6 +1038,15 @@ public class FortifyPlugin extends Recorder {
 				}
 				return FormValidation.error("The unit is in minutes, and in the range of 0 to 60");
 			}
+		}
+
+		public FormValidation doCheckCtrlUrl(@QueryParameter String value) {
+			try {
+				checkCtrlUrlValue(value.trim());
+			} catch (FortifyException e) {
+				return FormValidation.warning(e.getMessage());
+			}
+			return FormValidation.ok();
 		}
 
 		private FormValidation doTestConnection(String url, String token, String jarsPath) {
@@ -856,6 +1173,26 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
+		private void checkCtrlUrlValue(String url) throws FortifyException {
+			if (StringUtils.isBlank(url)) {
+				throw new FortifyException(new Message(Message.ERROR, "URL cannot be empty."));
+			} else {
+				if (StringUtils.startsWith(url, "http://") || StringUtils.startsWith(url, "https://")) {
+					if (url.trim().equalsIgnoreCase("http://") || url.trim().equalsIgnoreCase("https://")) {
+						throw new FortifyException(new Message(Message.ERROR, "URL host is required."));
+					}
+					if (!StringUtils.endsWith(url,"/cloud-ctrl")) {
+						throw new FortifyException(new Message(Message.ERROR, "Invalid context."));
+					}
+				} else {
+					throw new FortifyException(new Message(Message.ERROR, "Invalid protocol."));
+				}
+				if (url.indexOf(' ') != -1) {
+					throw new FortifyException(new Message(Message.ERROR, "Please remove spaces from URL."));
+				}
+			}
+		}
+
 		public void doRefreshProjects(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
 				throws Exception {
 			try {
@@ -975,6 +1312,33 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
+		public void doRefreshSensorPools(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
+				throws Exception {
+			try {
+				// always retrieve data from SSC
+				sensorPoolList = getSensorPoolListNoCache();
+				// and then convert it to JSON
+				StringBuilder buf = new StringBuilder();
+				buf.append("{ \"list\" : [\n");
+				for (int i = 0; i < sensorPoolList.size(); i++) {
+					SensorPoolBean b = sensorPoolList.get(i);
+					buf.append("{ \"name\": \"" + b.getName() + "\", \"uuid\": \"" + b.getUuid() + "\" }");
+					if (i != sensorPoolList.size() - 1) {
+						buf.append(",\n");
+					} else {
+						buf.append("\n");
+					}
+				}
+				buf.append("]}");
+				// send HTML data directly
+				rsp.setContentType("text/html;charset=UTF-8");
+				rsp.getWriter().print(buf.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw e;
+			}
+		}
+
 		public void doCreateNewProject(final StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
 			try {
 				runWithFortifyClient(getToken(), new FortifyClient.Command<FortifyClient.NoReturn>() {
@@ -1078,6 +1442,25 @@ public class FortifyPlugin extends Recorder {
 			} catch (NumberFormatException | JSONException e) {
 				System.out.println("Can't restore 'Issue breakdown page size' property. Will use default (" + DEFAULT_PAGE_SIZE + ") value.");
 				breakdownPageSize = DEFAULT_PAGE_SIZE;
+			}
+
+			try {
+				ctrlUrl = o.getString("ctrlUrl").trim();
+				checkCtrlUrlValue(ctrlUrl);
+			} catch (JSONException e) {
+				System.out.println("Can't restore 'CTRLURL' property. Will use default (empty) values.");
+				ctrlUrl = null;
+			} catch (FortifyException e) {
+				System.out.println(e.getMessage());
+				ctrlUrl = null;
+			}
+
+			try {
+				String ctrlTokenParam = o.getString("ctrlToken").trim();
+				ctrlToken = ctrlTokenParam.isEmpty() ? null : Secret.fromString(ctrlTokenParam);
+			} catch (JSONException e) {
+				System.out.println("Can't restore 'Controller token' property. Will use default (empty) values.");
+				ctrlToken = null;
 			}
 
 			save();
@@ -1196,6 +1579,61 @@ public class FortifyPlugin extends Recorder {
 			return Collections.emptyList();
 		}
 
+		/*public ComboBoxModel doFillSensorPoolItems() {
+			if (sensorPoolList.isEmpty()) {
+				sensorPoolList = getSensorPoolListNoCache();
+			}
+
+			List<String> ids = new ArrayList<String>(sensorPoolList.size());
+			for (SensorPoolBean b : sensorPoolList) {
+				ids.add(b.getUuid());
+			}
+			return new ComboBoxModel(ids);
+		}*/
+
+		public ListBoxModel doFillSensorPoolNameItems() {
+			sensorPoolList = getSensorPoolListNoCache();
+
+			List<ListBoxModel.Option> optionList = new ArrayList<>();
+
+			for (SensorPoolBean sensorPoolBean : sensorPoolList) {
+				ListBoxModel.Option option = new ListBoxModel.Option(sensorPoolBean.getName(), sensorPoolBean.getUuid());
+				optionList.add(option);
+			}
+
+			return new ListBoxModel(optionList);
+		}
+
+		public List<SensorPoolBean> getSensorPoolList() {
+			if (sensorPoolList.isEmpty()) {
+				sensorPoolList = getSensorPoolListNoCache();
+			}
+			return sensorPoolList;
+		}
+
+		private List<SensorPoolBean> getSensorPoolListNoCache() {
+			try {
+				Map<String, String> map = runWithFortifyClient(getToken(),
+						new FortifyClient.Command<Map<String, String>>() {
+							@Override
+							public Map<String, String> runWith(FortifyClient client) throws Exception {
+								return client.getCloudScanPoolList();
+							}
+						});
+				List<SensorPoolBean> list = new ArrayList<SensorPoolBean>(map.size());
+				for (Map.Entry<String, String> entry : map.entrySet()) {
+					SensorPoolBean proj = new SensorPoolBean(entry.getKey(), entry.getValue());
+					list.add(proj);
+				}
+				Collections.sort(list);
+				return list;
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+
+			return Collections.emptyList();
+		}
+
 		public ListBoxModel doFillTranslationApplicationTypeItems() {
 			ListBoxModel options = new ListBoxModel(5);
 			options.add("Java", "java");
@@ -1225,6 +1663,12 @@ public class FortifyPlugin extends Recorder {
 		private String pollingInterval;
 
 		@DataBoundConstructor
+		public UploadSSCBlock(String projectName, String projectVersion) {
+			this.projectName = projectName != null ? projectName.trim() : "";
+			this.projectVersion = projectName != null ? projectVersion.trim() : "";
+		}
+
+		@Deprecated
 		public UploadSSCBlock(String projectName, String projectVersion, String filterSet, String searchCondition, String pollingInterval) {
 			this.projectName = projectName != null ? projectName.trim() : "";
 			this.projectVersion = projectName != null ? projectVersion.trim() : "";
@@ -1244,16 +1688,23 @@ public class FortifyPlugin extends Recorder {
 		public String getFilterSet() {
 			return filterSet;
 		}
+		@DataBoundSetter
+		public void setFilterSet(String filterSet) { this.filterSet = filterSet; }
 
 		public String getSearchCondition() {
 			return searchCondition;
 		}
+		@DataBoundSetter
+		public void setSearchCondition(String searchCondition) { this.searchCondition = searchCondition; }
 
 		public String getPollingInterval() {
 			return pollingInterval;
 		}
+		@DataBoundSetter
+		public void setPollingInterval(String pollingInterval) { this.pollingInterval = pollingInterval; }
 	}
 
+	@Deprecated
 	public static class RunTranslationBlock {
 		private TranslationTypeBlock translationType;
 		private boolean debug;
@@ -1461,9 +1912,11 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
+	@Deprecated
 	public interface TranslationTypeBlock {
 	}
 
+	@Deprecated
 	public static class BasicTranslationBlock implements TranslationTypeBlock {
 		private BasicTranslationAppTypeBlock appTypeBlock;
 		private String excludeList;
@@ -1483,6 +1936,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
+	@Deprecated
 	public static class AdvancedTranslationBlock implements TranslationTypeBlock {
 		private String translationOptions;
 
@@ -1496,9 +1950,11 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
+	@Deprecated
 	public interface BasicTranslationAppTypeBlock {
 	}
 
+	@Deprecated
 	public static class BasicJavaTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private String javaVersion;
 		private String classpath;
@@ -1531,6 +1987,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
+	@Deprecated
 	public static class BasicDotNetTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private BasicDotNetScanTypeBlock scanType;
 
@@ -1602,9 +2059,11 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
+	@Deprecated
 	public interface BasicDotNetScanTypeBlock {
 	}
 
+	@Deprecated
 	public static class BasicDotNetProjectSolutionScanTypeBlock implements BasicDotNetScanTypeBlock {
 		private BasicDotNetBuildTypeBlock buildType;
 
@@ -1638,6 +2097,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
+	@Deprecated
 	public static class BasicDotNetSourceCodeScanTypeBlock implements BasicDotNetScanTypeBlock {
 		private String dotNetVersion;
 		private String libdirs;
@@ -1670,9 +2130,11 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
+	@Deprecated
 	public interface BasicDotNetBuildTypeBlock {
 	}
 
+	@Deprecated
 	public static class BasicDotNetDevenvBuildTypeBlock implements BasicDotNetBuildTypeBlock {
 		private String projects;
 		private String addOptions;
@@ -1692,6 +2154,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
+	@Deprecated
 	public static class BasicDotNetMSBuildBuildTypeBlock implements BasicDotNetBuildTypeBlock {
 		private String projects;
 		private String addOptions;
@@ -1711,6 +2174,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
+	@Deprecated
 	public static class BasicMaven3TranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private String options;
 
@@ -1724,6 +2188,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
+	@Deprecated
 	public static class BasicGradleTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private boolean useWrapper;
 		private String tasks;
@@ -1749,6 +2214,7 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
+	@Deprecated
 	public static class BasicOtherTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private String options;
 		private String includesList;
@@ -1776,6 +2242,9 @@ public class FortifyPlugin extends Recorder {
 		private String logFile;
 
 		@DataBoundConstructor
+		public RunScanBlock() {}
+
+		@Deprecated
 		public RunScanBlock(String scanCustomRulepacks, String scanAddOptions, boolean scanDebug, boolean scanVerbose,
 				String scanLogFile) {
 			this.customRulepacks = scanCustomRulepacks != null ? scanCustomRulepacks.trim() : "";
@@ -1788,22 +2257,36 @@ public class FortifyPlugin extends Recorder {
 		public String getScanCustomRulepacks() {
 			return customRulepacks;
 		}
+		@DataBoundSetter
+		public void setScanCustomRulepacks(String scanCustomRulepacks) {
+			this.customRulepacks = scanCustomRulepacks;
+		}
 
 		public String getScanAddOptions() {
 			return additionalOptions;
+		}
+		@DataBoundSetter
+		public void setScanAddOptions(String scanAddOptions) {
+			this.additionalOptions = scanAddOptions;
 		}
 
 		public boolean getScanDebug() {
 			return debug;
 		}
+		@DataBoundSetter
+		public void setScanDebug(boolean scanDebug) { this.debug = scanDebug; }
 
 		public boolean getScanVerbose() {
 			return verbose;
 		}
+		@DataBoundSetter
+		public void setScanVerbose(boolean scanVerbose) { this.verbose = scanVerbose; }
 
 		public String getScanLogFile() {
 			return logFile;
 		}
+		@DataBoundSetter
+		public void setScanLogFile(String scanLogFile) { this.logFile = scanLogFile; }
 	}
 
 	public static class UpdateContentBlock {
@@ -1811,6 +2294,9 @@ public class FortifyPlugin extends Recorder {
 		private UseProxyBlock useProxy;
 
 		@DataBoundConstructor
+		public UpdateContentBlock() {}
+
+		@Deprecated
 		public UpdateContentBlock(String updateServerUrl, UseProxyBlock updateUseProxy) {
 			this.updateServerUrl = updateServerUrl != null ? updateServerUrl.trim() : "";
 			this.useProxy = updateUseProxy;
@@ -1819,26 +2305,31 @@ public class FortifyPlugin extends Recorder {
 		public String getUpdateServerUrl() {
 			return updateServerUrl;
 		}
+		@DataBoundSetter
+		public void setUpdateServerUrl(String updateServerUrl) { this.updateServerUrl = updateServerUrl; }
 
+		@Deprecated
 		public boolean getUpdateUseProxy() {
 			return useProxy != null;
 		}
 
+		@Deprecated
 		public String getUpdateProxyUrl() {
 			return useProxy == null ? "" : useProxy.getProxyUrl();
 		}
 
+		@Deprecated
 		public String getUpdateProxyUsername() {
 			return useProxy == null ? "" : useProxy.getProxyUsername();
 		}
 
+		@Deprecated
 		public String getUpdateProxyPassword() {
 			return useProxy == null ? "" : useProxy.getProxyPassword();
 		}
 	}
 
-	// possibly re-use for global SSC proxy setting with new constructor? Or just
-	// re-use field names?
+	@Deprecated
 	public static class UseProxyBlock {
 		private String proxyUrl;
 		private String proxyUsername;
@@ -1863,4 +2354,206 @@ public class FortifyPlugin extends Recorder {
 			return proxyPassword;
 		}
 	}
+
+	public static class AnalysisRunType {
+		private String value;
+		// remote translation and scan
+		private RemoteAnalysisProjectType remoteAnalysisProjectType;
+		private RemoteOptionalConfigBlock remoteOptionalConfig;
+		private String transArgs;
+
+		// local translation
+		private ProjectScanType projectScanType;
+		private UpdateContentBlock updateContent;
+		private boolean runSCAClean;
+		private String buildId;
+		private String scanFile;
+		private String maxHeap;
+		private String addJVMOptions;
+		private String translationExcludeList;
+		private boolean translationDebug;
+		private boolean translationVerbose;
+		private String translationLogFile;
+
+		// mixed - remote scan
+		private RunRemoteScanBlock runRemoteScan;
+		// local scan
+		private RunScanBlock runScan;
+
+		// upload to ssc
+		private UploadSSCBlock uploadSSC;
+
+		@DataBoundConstructor
+		public AnalysisRunType(String value) {
+			this.value = value;
+		}
+
+		public RemoteAnalysisProjectType getRemoteAnalysisProjectType() { return remoteAnalysisProjectType; }
+		@DataBoundSetter
+		public void setRemoteAnalysisProjectType(RemoteAnalysisProjectType remoteAnalysisProjectType) {
+			this.remoteAnalysisProjectType = remoteAnalysisProjectType;
+		}
+
+		public RemoteOptionalConfigBlock getRemoteOptionalConfig() { return remoteOptionalConfig; }
+		@DataBoundSetter
+		public void setRemoteOptionalConfig(RemoteOptionalConfigBlock remoteOptionalConfig) { this.remoteOptionalConfig = remoteOptionalConfig; }
+
+		public String getTransArgs() { return transArgs; }
+		@DataBoundSetter
+		public void setTransArgs(String transArgs) { this.transArgs = transArgs; }
+
+		public ProjectScanType getProjectScanType() {
+			return projectScanType;
+		}
+		@DataBoundSetter
+		public void setProjectScanType(ProjectScanType projectScanType) { this.projectScanType = projectScanType; }
+
+		public UpdateContentBlock getUpdateContent() { return updateContent; }
+		@DataBoundSetter
+		public void setUpdateContent(UpdateContentBlock updateContent) { this.updateContent = updateContent; }
+
+		public boolean isRunSCAClean() { return runSCAClean; }
+		@DataBoundSetter
+		public void setRunSCAClean(boolean runSCAClean) { this.runSCAClean = runSCAClean; }
+
+		public String getBuildId() { return buildId; }
+		@DataBoundSetter
+		public void setBuildId(String buildId) { this.buildId = buildId; }
+
+		public String getScanFile() { return scanFile; }
+		@DataBoundSetter
+		public void setScanFile(String scanFile) { this.scanFile = scanFile; }
+
+		public String getMaxHeap() { return maxHeap; }
+		@DataBoundSetter
+		public void setMaxHeap(String maxHeap) { this.maxHeap = maxHeap; }
+
+		public String getAddJVMOptions() { return addJVMOptions; }
+		@DataBoundSetter
+		public void setAddJVMOptions(String addJVMOptions) { this.addJVMOptions = addJVMOptions; }
+
+		public String getTranslationExcludeList() { return translationExcludeList; }
+		@DataBoundSetter
+		public void setTranslationExcludeList(String translationExcludeList) { this.translationExcludeList = translationExcludeList; }
+
+		public boolean isTranslationDebug() { return translationDebug; }
+		@DataBoundSetter
+		public void setTranslationDebug(boolean translationDebug) { this.translationDebug = translationDebug; }
+
+		public boolean isTranslationVerbose() {
+			return translationVerbose;
+		}
+		@DataBoundSetter
+		public void setTranslationVerbose(boolean translationVerbose) { this.translationVerbose = translationVerbose; }
+
+		public String getTranslationLogFile() {
+			return translationLogFile;
+		}
+		@DataBoundSetter
+		public void setTranslationLogFile(String translationLogFile) { this.translationLogFile = translationLogFile; }
+
+		public RunScanBlock getRunScan() { return runScan; }
+		@DataBoundSetter
+		public void setRunScan(RunScanBlock runScan) { this.runScan = runScan; }
+
+		public RunRemoteScanBlock getRunRemoteScan() { return runRemoteScan; }
+		@DataBoundSetter
+		public void setRunRemoteScan(RunRemoteScanBlock runRemoteScan) { this.runRemoteScan = runRemoteScan; }
+
+		public UploadSSCBlock getUploadSSC() { return uploadSSC; }
+		@DataBoundSetter
+		public void setUploadSSC(UploadSSCBlock uploadSSC) { this.uploadSSC = uploadSSC; }
+
+	}
+
+	public static class RunRemoteScanBlock {
+		private MbsScanBlock mbsType;
+		private RemoteOptionalConfigBlock remoteOptionalConfig;
+
+		@DataBoundConstructor
+		public RunRemoteScanBlock() {}
+
+		public MbsScanBlock getMbsType() { return mbsType; }
+		@DataBoundSetter
+		public void setMbsType(MbsScanBlock mbsType) { this.mbsType = mbsType; }
+
+		public RemoteOptionalConfigBlock getRemoteOptionalConfig() { return remoteOptionalConfig; }
+		@DataBoundSetter
+		public void setRemoteOptionalConfig(RemoteOptionalConfigBlock remoteOptionalConfig) { this.remoteOptionalConfig = remoteOptionalConfig; }
+
+	}
+
+	public static class MbsScanBlock {
+		private String value;
+		private String fileName;
+
+		@DataBoundConstructor
+		public MbsScanBlock(String value, String fileName) {
+			this.value = value;
+			this.fileName = fileName;
+		}
+
+		public String getValue() {
+			return value;
+		}
+		public String getFileName() {
+			return fileName;
+		}
+
+	}
+
+	public static class RemoteOptionalConfigBlock {
+		private String sensorPoolName;
+		private String emailAddr;
+		private String scaScanOptions;
+		private String rulepacks;
+		private String filterFile;
+
+		@DataBoundConstructor
+		public RemoteOptionalConfigBlock() {}
+
+		public String getSensorPoolName() { return  sensorPoolName; }
+		@DataBoundSetter
+		public void setSensorPoolName(String sensorPoolName) { this.sensorPoolName = sensorPoolName; }
+
+		public String getEmailAddr() { return emailAddr; }
+		@DataBoundSetter
+		public void setEmailAddr(String emailAddr) { this.emailAddr = emailAddr; }
+
+		public String getScaScanOptions() { return scaScanOptions; }
+		@DataBoundSetter
+		public void setScaScanOptions(String scaScanOptions) { this.scaScanOptions = scaScanOptions; }
+
+		public String getRulepacks() { return rulepacks; }
+		@DataBoundSetter
+		public void setRulepacks(String rulepacks) { this.rulepacks = rulepacks;
+		}
+
+		public String getFilterFile() { return filterFile; }
+		@DataBoundSetter
+		public void setFilterFile(String filterFile) { this.filterFile = filterFile; }
+
+		/*public String getRemoteSensorPoolName() { return  sensorPoolName; }
+		@DataBoundSetter
+		public void setRemoteSensorPoolName(String remoteSensorPoolName) { this.sensorPoolName = remoteSensorPoolName; }
+
+		public String getRemoteEmailAddr() { return emailAddr; }
+		@DataBoundSetter
+		public void setRemoteEmailAddr(String remoteEmailAddr) { this.emailAddr = remoteEmailAddr; }
+
+		public String getRemoteScaScanOptions() { return scaScanOptions; }
+		@DataBoundSetter
+		public void setRemoteScaScanOptions(String remoteScaScanOptions) { this.scaScanOptions = remoteScaScanOptions; }
+
+		public String getRemoteRulepacks() { return rulepacks; }
+		@DataBoundSetter
+		public void setRemoteRulepacks(String remoteRulepacks) { this.rulepacks = remoteRulepacks;
+		}
+
+		public String getRemoteFilterFile() { return filterFile; }
+		@DataBoundSetter
+		public void setRemoteFilterFile(String remoteFilterFile) { this.filterFile = remoteFilterFile; }*/
+
+	}
+
 }

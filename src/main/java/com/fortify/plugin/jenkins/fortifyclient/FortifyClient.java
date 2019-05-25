@@ -1,12 +1,12 @@
 /*******************************************************************************
- * (c) Copyright 2019 Micro Focus or one of its affiliates. 
- * 
+ * (c) Copyright 2019 Micro Focus or one of its affiliates.
+ *
  * Licensed under the MIT License (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * https://opensource.org/licenses/MIT
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,21 +23,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fortify.ssc.restclient.model.*;
 import org.apache.commons.lang.StringUtils;
 
 import com.fortify.plugin.jenkins.bean.GroupingProfile;
 import com.fortify.plugin.jenkins.bean.IssueBean;
 import com.fortify.plugin.jenkins.bean.ProjectDataEntry;
 import com.fortify.ssc.restclient.ApiException;
-import com.fortify.ssc.restclient.model.Artifact;
-import com.fortify.ssc.restclient.model.FilterSet;
-import com.fortify.ssc.restclient.model.Folder;
-import com.fortify.ssc.restclient.model.FolderDto;
-import com.fortify.ssc.restclient.model.IssueSelector;
-import com.fortify.ssc.restclient.model.IssueTemplate;
-import com.fortify.ssc.restclient.model.ProjectVersion;
-import com.fortify.ssc.restclient.model.ProjectVersionIssue;
-import com.fortify.ssc.restclient.model.ProjectVersionIssueGroup;
 
 /**
  * FortifyClient is basically a wrapper around SSC's REST client API
@@ -60,7 +52,7 @@ public class FortifyClient {
 
 	/**
 	 * You have to call this init function before performance any operations
-	 * 
+	 *
 	 * @param uri
 	 *            e.g. https://localhost:8180/ssc
 	 * @param token
@@ -71,14 +63,14 @@ public class FortifyClient {
 	}
 
 	public void init(String uri, String token, String proxyHost, int proxyPort, String proxyUsername,
-			String proxyPassword) throws ApiException {
+					 String proxyPassword) throws ApiException {
 		init(uri, token);
 		apiClientWrapper.setProxy(proxyHost, proxyPort, proxyUsername, proxyPassword);
 	}
 
 	/**
 	 * Retrieve the application version list from SSC
-	 * 
+	 *
 	 * @return Map<String, Long>
 	 * @throws ApiException
 	 */
@@ -98,7 +90,7 @@ public class FortifyClient {
 
 	/**
 	 * Retrieve the application version list from SSC
-	 * 
+	 *
 	 * @return Map<String, Map<String, Long>>
 	 * @throws ApiException
 	 */
@@ -120,7 +112,7 @@ public class FortifyClient {
 
 	/**
 	 * Retrieve the issue template list from SSC
-	 * 
+	 *
 	 * @return map container where template name maps to template id
 	 * @throws ApiException
 	 */
@@ -135,8 +127,24 @@ public class FortifyClient {
 	}
 
 	/**
+	 * Retrieve the CloudScan Pool list from SSC
+	 *
+	 * @return map container where pool name maps to pool uuid
+	 * @throws ApiException
+	 */
+	public Map<String, String> getCloudScanPoolList() throws ApiException {
+		List<CloudPool> csPools = apiClientWrapper.getCloudScanPools();
+
+		Map<String, String> csPoolList = new LinkedHashMap<String, String>();
+		for (CloudPool cloudPool : csPools) {
+			csPoolList.put(cloudPool.getName(), cloudPool.getUuid());
+		}
+		return csPoolList;
+	}
+
+	/**
 	 * Upload an FPR to SSC server
-	 * 
+	 *
 	 * @param fpr
 	 *            the FPR file to be uploaded
 	 * @param appVersionId
@@ -153,7 +161,7 @@ public class FortifyClient {
 
 	/**
 	 * Create new or retrieve existing application version on SSC
-	 * 
+	 *
 	 * @param projectName
 	 *            name of the new application
 	 * @param projectVersionName
@@ -169,7 +177,7 @@ public class FortifyClient {
 	 * @throws ApiException
 	 */
 	public Long createProject(String projectName, String projectVersionName, String projectTemplateName,
-			Map<String, String> attributeNamesAndValues, PrintWriter log) throws IOException, ApiException {
+							  Map<String, String> attributeNamesAndValues, PrintWriter log) throws IOException, ApiException {
 
 		ProjectCreationService pcs = new ProjectCreationService(log, apiClientWrapper);
 		ProjectDataEntry projectData = new ProjectDataEntry(projectName, projectVersionName, projectTemplateName,
@@ -180,15 +188,15 @@ public class FortifyClient {
 
 	/**
 	 * Returns all issues in the specified folder with their attributes.
-	 * 
+	 *
 	 * @param projectVersionId
 	 *            id of the application version to audit
 	 * @return Map<String, IssueBean>
 	 * @throws ApiException
 	 */
 	public Map<String, IssueBean> getIssuesByFolderId(Long projectVersionId, String folderId, int startPage,
-			int pageSize, String filterSet, String groupingName, String sortOrder, Boolean ShowOnlyNewIssues,
-			Boolean sortDownNotUp, PrintWriter log) throws ApiException {
+													  int pageSize, String filterSet, String groupingName, String sortOrder, Boolean ShowOnlyNewIssues,
+													  Boolean sortDownNotUp, PrintWriter log) throws ApiException {
 
 		Map<String, IssueBean> result = new LinkedHashMap<String, IssueBean>();
 		String filter = "FOLDER:" + folderId;
@@ -215,7 +223,7 @@ public class FortifyClient {
 			issueBean.setSeverity(String.valueOf(issue.getSeverity()));
 			issueBean.setSubType(null); /* subType */
 			issueBean.setMappedCategory(issue.getIssueName()); // this is what's displayed in the last column of Fortify
-																// Assessment based on Group By selection
+			// Assessment based on Group By selection
 			issueBean.setEngineType(issue.getEngineType());
 			result.put(issue.getIssueInstanceId(), issueBean);
 		}
@@ -224,7 +232,7 @@ public class FortifyClient {
 	}
 
 	public Map<String, List<String>> getGroupingValues(Long projectVersionId, String folderId, String filterSet,
-			String searchCondition, String groupingName, String groupingType, PrintWriter log) throws ApiException {
+													   String searchCondition, String groupingName, String groupingType, PrintWriter log) throws ApiException {
 
 		Map<String, List<String>> result = new LinkedHashMap<String, List<String>>();
 
@@ -240,7 +248,7 @@ public class FortifyClient {
 				attributes.add(String.valueOf(issueGroup.getVisibleCount()));
 				attributes.add(String.valueOf(issueGroup.getAuditedCount()));
 				attributes.add(issueGroup.getCleanName()); // need this when id is a number for Analysis tag value or -1
-															// for "Not Set"
+				// for "Not Set"
 				result.put(issueGroup.getId(), attributes);
 			}
 		}
@@ -250,7 +258,7 @@ public class FortifyClient {
 
 	/**
 	 * Returns all issues matched specified search condition with their attributes.
-	 * 
+	 *
 	 * @param projectVersionId
 	 *            id of the application version to audit
 	 * @return Map<String, List<String>> map of attribute id -> list of attributes:
@@ -259,14 +267,14 @@ public class FortifyClient {
 	 * @throws ApiException
 	 */
 	public Map<String, List<String>> getGroupingValues(Long projectVersionId, String folderId, String filterSet,
-			String searchCondition, String groupingName, PrintWriter log) throws ApiException {
+													   String searchCondition, String groupingName, PrintWriter log) throws ApiException {
 
 		return getGroupingValues(projectVersionId, folderId, filterSet, searchCondition, groupingName, null, log);
 	}
 
 	/**
 	 * Returns all enabled folder ids with their attributes.
-	 * 
+	 *
 	 * @param versionId
 	 *            id of the application version to audit
 	 * @return Map<String, List<String>> map of folder id -> list of attributes:
@@ -283,10 +291,10 @@ public class FortifyClient {
 		}
 
 		List<Folder> folders = apiClientWrapper.getFoldersForAppVersion(versionId); // superset of folders (e.g.
-																					// Critical, High, Medium, Low,
-																					// Likely, Possible,...)
+		// Critical, High, Medium, Low,
+		// Likely, Possible,...)
 		List<FolderDto> folderDtoList = defaultFilterSet.getFolders(); // folders specific for defaultFilterSet (e.g.
-																		// Critical, High, Medium, Low)
+		// Critical, High, Medium, Low)
 
 		List<ProjectVersionIssueGroup> issueGroupFolders = apiClientWrapper.getIssueGroupFolders(versionId,
 				filterSetGuid);

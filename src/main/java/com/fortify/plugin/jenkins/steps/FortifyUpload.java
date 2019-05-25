@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -757,7 +758,7 @@ public class FortifyUpload extends FortifyStep {
 					contextClassLoader = Thread.currentThread().getContextClassLoader();
 					Thread.currentThread().setContextClassLoader(FortifyPlugin.class.getClassLoader());
 					client = new FortifyClient();
-					boolean useProxy = FortifyPlugin.DESCRIPTOR.getUseProxy();
+					/*boolean useProxy = FortifyPlugin.DESCRIPTOR.getUseProxy();
 					String proxyUrl = FortifyPlugin.DESCRIPTOR.getProxyUrl();
 					if (!useProxy || StringUtils.isEmpty(proxyUrl)) {
 						client.init(url, token);
@@ -773,6 +774,16 @@ public class FortifyUpload extends FortifyStep {
 						}
 						client.init(url, token, proxyHost, proxyPort, FortifyPlugin.DESCRIPTOR.getProxyUsername(),
 								FortifyPlugin.DESCRIPTOR.getProxyPassword());
+					}*/
+					boolean useProxy = Jenkins.get().proxy != null;
+					if (!useProxy) {
+						client.init(url, token);
+					} else {
+						String proxyHost = Jenkins.get().proxy.name;
+						int proxyPort = Jenkins.get().proxy.port;
+						String proxyUsername = Jenkins.get().proxy.getUserName();
+						String proxyPassword = Jenkins.get().proxy.getPassword();
+						client.init(url, token, proxyHost, proxyPort, proxyUsername, proxyPassword);
 					}
 				}
 				return cmd.runWith(client);

@@ -18,7 +18,7 @@
   	<f:entry title="${%Update server URL}" field="updateServerURL" help="/plugin/fortify/help-updateServerUrl.html">
       	<f:textbox default="${descriptor.defaultURL}"/>
     </f:entry>
-    <f:optionalBlock title="${%Configure update server proxy}" field="useProxy" inline="true">
+    <!--<f:optionalBlock title="${%Configure update server proxy}" field="useProxy" inline="true">
       	<f:nested>
     		<f:entry title="${%Proxy server host:port}" field="proxyURL">
     			<f:textbox/>
@@ -30,5 +30,5 @@
     			<f:password/>
     		</f:entry>
       	</f:nested>
-    </f:optionalBlock>
+    </f:optionalBlock>-->
 </j:jelly>

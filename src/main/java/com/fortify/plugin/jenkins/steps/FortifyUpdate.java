@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -47,12 +48,17 @@ import hudson.model.TaskListener;
 
 public class FortifyUpdate extends FortifyStep {
 	private String updateServerURL;
-	private String proxyURL;
-	private String proxyUsername;
-	private String proxyPassword;
-	private boolean useProxy;
+	private transient String proxyURL;
+	private transient String proxyUsername;
+	private transient String proxyPassword;
+	private transient boolean useProxy;
 
 	@DataBoundConstructor
+	public FortifyUpdate(String updateServerURL) {
+		this.updateServerURL = updateServerURL;
+	}
+
+	@Deprecated
 	public FortifyUpdate(String updateServerURL, String proxyURL, String proxyUsername, String proxyPassword,
 			boolean useProxy) {
 		this.updateServerURL = updateServerURL;
@@ -66,18 +72,22 @@ public class FortifyUpdate extends FortifyStep {
 		return updateServerURL;
 	}
 
+	@Deprecated
 	public String getProxyURL() {
 		return proxyURL;
 	}
 
+	@Deprecated
 	public String getProxyUsername() {
 		return proxyUsername;
 	}
 
+	@Deprecated
 	public String getProxyPassword() {
 		return proxyPassword;
 	}
 
+	@Deprecated
 	public boolean getUseProxy() {
 		return useProxy;
 	}
@@ -87,22 +97,22 @@ public class FortifyUpdate extends FortifyStep {
 		this.updateServerURL = updateServerURL;
 	}
 
-	@DataBoundSetter
+	@DataBoundSetter @Deprecated
 	public void setProxyURL(String proxyURL) {
 		this.proxyURL = proxyURL;
 	}
 
-	@DataBoundSetter
+	@DataBoundSetter @Deprecated
 	public void setProxyUsername(String proxyUsername) {
 		this.proxyUsername = proxyUsername;
 	}
 
-	@DataBoundSetter
+	@DataBoundSetter @Deprecated
 	public void setProxyPassword(String proxyPassword) {
 		this.proxyPassword = proxyPassword;
 	}
 
-	@DataBoundSetter
+	@DataBoundSetter @Deprecated
 	public void setUseProxy(boolean useProxy) {
 		this.useProxy = useProxy;
 	}
@@ -111,14 +121,17 @@ public class FortifyUpdate extends FortifyStep {
 		return resolve(getUpdateServerURL(), listener);
 	}
 
+	@Deprecated
 	public String getResolvedUpdateProxyURL(TaskListener listener) {
 		return resolve(getProxyURL(), listener);
 	}
 
+	@Deprecated
 	public String getResolvedUpdateProxyUsername(TaskListener listener) {
 		return resolve(getProxyUsername(), listener);
 	}
 
+	@Deprecated
 	public String getResolvedUpdateProxyPassword(TaskListener listener) {
 		return resolve(getProxyPassword(), listener);
 	}
@@ -150,7 +163,7 @@ public class FortifyUpdate extends FortifyStep {
 				log.println(Messages.FortifyUpdate_URL_Invalid(updateServerUrl));
 			}
 		}
-		if (getUseProxy()) {
+		/*if (getUseProxy()) {
 			String proxy = getResolvedUpdateProxyURL(listener);
 			if (!StringUtils.isEmpty(proxy)) {
 				String[] proxySplit = proxy.split(":");
@@ -191,6 +204,29 @@ public class FortifyUpdate extends FortifyStep {
 					} else {
 						log.println(Messages.FortifyUpdate_Proxy_Host_Invalid(proxyHost));
 					}
+				}
+			}
+		}*/
+		if (Jenkins.get().proxy != null) {
+			String proxyHost = Jenkins.get().proxy.name;
+			int proxyPort = Jenkins.get().proxy.port;
+			String proxyUsername = Jenkins.get().proxy.getUserName();
+			String proxyPassword = Jenkins.get().proxy.getPassword();
+
+			if (StringUtils.isNotEmpty(proxyHost)) {
+				args.add("-proxyhost");
+				args.add(proxyHost);
+				if (proxyPort > -1) {
+					args.add("-proxyport");
+					args.add(Integer.toString(proxyPort));
+				}
+				if (StringUtils.isNotEmpty(proxyUsername)) {
+					args.add("-proxyUsername");
+					args.add(proxyUsername);
+				}
+				if (StringUtils.isNotEmpty(proxyPassword)) {
+					args.add("-proxyPassword");
+					args.add(proxyPassword);
 				}
 			}
 		}

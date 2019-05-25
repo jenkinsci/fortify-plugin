@@ -813,7 +813,7 @@ public class FortifyPlugin extends Recorder {
 					contextClassLoader = Thread.currentThread().getContextClassLoader();
 					Thread.currentThread().setContextClassLoader(FortifyPlugin.class.getClassLoader());
 					client = new FortifyClient();
-					boolean useProxy = DESCRIPTOR.getUseProxy();
+					/*boolean useProxy = DESCRIPTOR.getUseProxy();
 					String proxyUrl = DESCRIPTOR.getProxyUrl();
 					if (!useProxy || StringUtils.isEmpty(proxyUrl)) {
 						client.init(url, token);
@@ -829,6 +829,16 @@ public class FortifyPlugin extends Recorder {
 						}
 						client.init(url, token, proxyHost, proxyPort, DESCRIPTOR.getProxyUsername(),
 								DESCRIPTOR.getProxyPassword());
+					}*/
+					boolean useProxy = Jenkins.get().proxy != null;
+					if (!useProxy) {
+						client.init(url, token);
+					} else {
+						String proxyHost = Jenkins.get().proxy.name;
+						int proxyPort = Jenkins.get().proxy.port;
+						String proxyUsername = Jenkins.get().proxy.getUserName();
+						String proxyPassword = Jenkins.get().proxy.getPassword();
+						client.init(url, token, proxyHost, proxyPort, proxyUsername, proxyPassword);
 					}
 				}
 				return cmd.runWith(client);

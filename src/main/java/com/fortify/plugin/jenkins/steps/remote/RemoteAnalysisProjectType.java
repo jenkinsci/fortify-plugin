@@ -9,13 +9,6 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.util.List;
 
 public abstract class RemoteAnalysisProjectType implements ExtensionPoint, Describable<RemoteAnalysisProjectType> {
-    //protected String transArgs;
-
-    /*public String getTransArgs() { return transArgs; }
-
-    @DataBoundSetter
-    public void setTransArgs(String transArgs) { this.transArgs = transArgs; }*/
-
     @Override
     public Descriptor<RemoteAnalysisProjectType> getDescriptor() {
         return Jenkins.get().getDescriptorOrDie(getClass());

@@ -17,24 +17,23 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <f:dropdownDescriptorSelector title="Application type" field="remoteAnalysisProjectType"
-                                  descriptors="${descriptor.remoteAnalysisProjectTypeDescriptors}"
-                                  help=""/>
+                                  descriptors="${descriptor.remoteAnalysisProjectTypeDescriptors}"/>
     <f:block>
         <table style="width:100%;">
-            <f:optionalBlock field="remoteOptionalConfig" title="Optional configuration" help="">
+            <f:optionalBlock field="remoteOptionalConfig" title="Optional configuration" help="/plugin/fortify/help-remoteOptionalConfiguration.html">
                 <f:section class="section-header" title="Controller configuration">
-                    <f:entry field="sensorPoolName" title="Sensor pool" help="">
+                    <f:entry field="sensorPoolName" title="Sensor pool" help="/plugin/fortify/help-remoteSensorPool.html">
                         <f:select/>
                     </f:entry>
-                    <f:entry title="Notification email" help="">
+                    <f:entry title="Notification email" help="/plugin/fortify/help-remoteNotificationEmail.html">
                         <f:textbox field="emailAddr"/>
                     </f:entry>
                 </f:section>
                 <f:section class="section-header" title="Fortify SCA configuration">
-                    <f:entry title="Custom Rulepacks" help="">
+                    <f:entry title="Custom Rulepacks" help="/plugin/fortify/help-scanCustomRulepacks.html">
                         <f:textbox field="rulepacks"/>
                     </f:entry>
-                    <f:entry title="Fortify SCA scan filter file" help="">
+                    <f:entry title="Fortify SCA scan filter file" help="/plugin/fortify/help-remoteScanFilterFile.html">
                         <f:textbox field="filterFile"/>
                     </f:entry>
                 </f:section>

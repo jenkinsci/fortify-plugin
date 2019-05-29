@@ -31,18 +31,6 @@
         <f:textbox name="url" field="url" id="url"/>
       </f:entry>
 
-      <!--<f:optionalBlock name="useProxy" title="Use proxy" checked="${instance.useProxy}">
-        <f:entry title="Proxy server host:port">
-          <f:textbox name="proxyUrl" field="proxyUrl" id="proxyUrl"/>
-        </f:entry>
-        <f:entry title="Proxy server username">
-          <f:textbox name="proxyUsername" field="proxyUsername" id="proxyUsername" checkMethod="post"/>
-        </f:entry>
-        <f:entry title="Proxy server password">
-          <f:password name="proxyPassword" field="proxyPassword" id="proxyPassword" checkMethod="post"/>
-        </f:entry>
-      </f:optionalBlock>-->
-
       <f:entry title="Authentication token" help="/plugin/fortify/help-sscAuthToken.html">
         <f:textbox name="token" field="token" id="token" checkMethod="post"/>
       </f:entry>
@@ -69,16 +57,16 @@
     </f:section>
 
     <f:section title="Controller configuration">
-      <f:entry title="Controller URL" help="">
+      <f:entry title="Controller URL" help="/plugin/fortify/help-controllerUrl.html">
         <f:textbox name="ctrlUrl" field="ctrlUrl" id="ctrlUrl"/>
       </f:entry>
 
-      <f:entry title="Controller token" help="">
+      <f:entry title="Controller token" help="/plugin/fortify/help-controllerToken.html">
         <f:textbox name="ctrlToken" field="ctrlToken" id="ctrlToken" checkMethod="post"/>
       </f:entry>
 
       <f:entry>
-        <f:validateButton title="Test Controller connection" progress="Testing..." method="testConnection" with="ctrlUrl,ctrlToken,useProxy,proxyUrl,proxyUsername,proxyPassword" />
+        <f:validateButton title="Test Controller connection" progress="Testing..." method="testCtrlConnection" with="ctrlUrl" />
       </f:entry>
     </f:section>
 

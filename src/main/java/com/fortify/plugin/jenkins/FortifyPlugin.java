@@ -16,11 +16,14 @@
 package com.fortify.plugin.jenkins;
 
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1163,7 +1166,7 @@ public class FortifyPlugin extends Recorder {
 				if (t.getMessage().contains("Access Denied")) {
 					return FormValidation.error(t, "Invalid token");
 				}
-				return FormValidation.error(t, "Can't connect to SSC server");
+				return FormValidation.error(t, "Cannot connect to SSC server");
 			} finally {
 				this.url = orig_url;
 				this.token = orig_token;
@@ -1174,7 +1177,7 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public FormValidation doTestCtrlConnection(@QueryParameter String ctrlUrl) {
+		public FormValidation doTestCtrlConnection(@QueryParameter String ctrlUrl) throws IOException{
 			String controllerUrl = ctrlUrl == null ? "" : ctrlUrl.trim();
 			try {
 				checkUrlValue(controllerUrl);
@@ -1186,23 +1189,71 @@ public class FortifyPlugin extends Recorder {
 			String orig_url = this.ctrlUrl;
 
 			this.ctrlUrl = controllerUrl;
-			OkHttpClient client = new OkHttpClient();
+			OkHttpClient client;
+			if (Jenkins.get().proxy != null) {
+				client = configureProxy(Jenkins.get().proxy.name, Jenkins.get().proxy.port, Jenkins.get().proxy.getUserName(), Jenkins.get().proxy.getPassword());
+			} else {
+				client = new OkHttpClient();
+			}
+
 			Request request = new Request.Builder()
 					.url(controllerUrl)
 					.build();
-			//Response response = client.newCall(request).execute();
-			try (ResponseBody responseBody = client.newCall(request).execute().body()) {
-				return FormValidation.okWithMarkup("<font color=\"blue\">Connection successful!</font>");
+			Response response = null;
+			try {
+				response = client.newCall(request).execute();
+
+				if (response.isSuccessful() && response.body().string().contains("Fortify CloudScan Controller")) {
+					return FormValidation.okWithMarkup("<font color=\"blue\">Connection successful!</font>");
+				} else {
+					return FormValidation.error("Connection failed. Check the Controller URL.");
+				}
 			} catch (Throwable t) {
-				return FormValidation.error(t, "Can't connect to Controller");
+				return FormValidation.error(t, "Cannot connect to Controller");
 			} finally {
 				this.ctrlUrl = orig_url;
+				if (response != null && response.body() != null) {
+					response.body().close();
+				}
 			}
+		}
+
+		private OkHttpClient configureProxy(String host, int port, String user, String pass) {
+			int proxyPort = port;
+			String proxyHost = host;
+			final String username = user;
+			final String password = pass;
+
+			Authenticator proxyAuthenticator = new Authenticator() {
+				@Override public Request authenticate(Proxy proxy, Response response) throws IOException {
+					String credential = Credentials.basic(username, password);
+					return response.request().newBuilder()
+							.header("Authorization", credential)
+							.build();
+				}
+
+				@Override
+				public Request authenticateProxy(Proxy proxy, Response response) throws IOException {
+					String credential = Credentials.basic(username, password);
+					return response.request().newBuilder()
+							.header("Proxy-Authorization", credential)
+							.build();
+				}
+			};
+
+			OkHttpClient client = new OkHttpClient();
+			client.setConnectTimeout(60, TimeUnit.SECONDS);
+			client.setWriteTimeout(60, TimeUnit.SECONDS);
+			client.setReadTimeout(60, TimeUnit.SECONDS);
+			client.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)));
+			client.setAuthenticator(proxyAuthenticator);
+
+			return client;
 		}
 
 		private void checkUrlValue(String sscUrl) throws FortifyException {
 			if (StringUtils.isBlank(sscUrl)) {
-				throw new FortifyException(new Message(Message.ERROR, "URL can't be empty"));
+				throw new FortifyException(new Message(Message.ERROR, "URL cannot be empty"));
 			} else {
 				if (StringUtils.startsWith(sscUrl, "http://") || StringUtils.startsWith(sscUrl, "https://")) {
 					if (sscUrl.trim().equalsIgnoreCase("http://") || sscUrl.trim().equalsIgnoreCase("https://")) {
@@ -1212,7 +1263,7 @@ public class FortifyPlugin extends Recorder {
 					throw new FortifyException(new Message(Message.ERROR, "Invalid protocol"));
 				}
 				if (sscUrl.indexOf(' ') != -1) {
-					throw new FortifyException(new Message(Message.ERROR, "Please remove spaces from URL adress"));
+					throw new FortifyException(new Message(Message.ERROR, "URL cannot have spaces"));
 				}
 			}
 		}

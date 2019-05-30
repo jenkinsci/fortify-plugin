@@ -29,14 +29,9 @@ import com.fortify.plugin.jenkins.steps.*;
 import com.fortify.plugin.jenkins.steps.remote.Gradle;
 import com.fortify.plugin.jenkins.steps.remote.Maven;
 import com.fortify.plugin.jenkins.steps.remote.RemoteAnalysisProjectType;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import com.squareup.okhttp.*;
 import hudson.*;
 import hudson.model.*;
-import hudson.remoting.Channel;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.*;
@@ -67,9 +62,6 @@ import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 /**
  * Fortify Jenkins plugin to work with Fortify Software Security Center and
@@ -885,23 +877,7 @@ public class FortifyPlugin extends Recorder {
 					contextClassLoader = Thread.currentThread().getContextClassLoader();
 					Thread.currentThread().setContextClassLoader(FortifyPlugin.class.getClassLoader());
 					client = new FortifyClient();
-					/*boolean useProxy = DESCRIPTOR.getUseProxy();
-					String proxyUrl = DESCRIPTOR.getProxyUrl();
-					if (!useProxy || StringUtils.isEmpty(proxyUrl)) {
-						client.init(url, token);
-					} else {
-						String[] proxyUrlSplit = proxyUrl.split(":");
-						String proxyHost = proxyUrlSplit[0];
-						int proxyPort = 80;
-						if (proxyUrlSplit.length > 1) {
-							try {
-								proxyPort = Integer.parseInt(proxyUrlSplit[1]);
-							} catch (NumberFormatException nfe) {
-							}
-						}
-						client.init(url, token, proxyHost, proxyPort, DESCRIPTOR.getProxyUsername(),
-								DESCRIPTOR.getProxyPassword());
-					}*/
+
 					boolean useProxy = Jenkins.get().proxy != null;
 					if (!useProxy) {
 						client.init(url, token);
@@ -1211,20 +1187,16 @@ public class FortifyPlugin extends Recorder {
 
 			this.ctrlUrl = controllerUrl;
 			OkHttpClient client = new OkHttpClient();
-			try {
-				Request request = new Request.Builder()
-						.url(controllerUrl)
-						.build();
-
-				Call call = client.newCall(request);
-				Response response = call.execute();
-
+			Request request = new Request.Builder()
+					.url(controllerUrl)
+					.build();
+			//Response response = client.newCall(request).execute();
+			try (ResponseBody responseBody = client.newCall(request).execute().body()) {
 				return FormValidation.okWithMarkup("<font color=\"blue\">Connection successful!</font>");
 			} catch (Throwable t) {
 				return FormValidation.error(t, "Can't connect to Controller");
 			} finally {
 				this.ctrlUrl = orig_url;
-				client.getDispatcher().getExecutorService().shutdown();
 			}
 		}
 

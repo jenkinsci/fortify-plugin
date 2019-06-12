@@ -48,12 +48,12 @@
         </div>
       </f:entry>
 
-      <f:advanced title="Advanced settings">
+      <!--<f:advanced title="Advanced settings">-->
         <f:validateButton title="Test SSC connection" progress="Testing..." method="testConnection" with="url,token,useProxy,proxyUrl,proxyUsername,proxyPassword" />
-        <f:entry title="Issue breakdown page size" help="/plugin/fortify/help-breakdownPageSize.html">
+        <f:entry title="Maximum issues per page" help="/plugin/fortify/help-breakdownPageSize.html">
           <f:textbox field="breakdownPageSize" id="breakdownPageSize" />
         </f:entry>
-      </f:advanced>
+      <!--</f:advanced>-->
     </f:section>
 
     <f:section title="Controller configuration">

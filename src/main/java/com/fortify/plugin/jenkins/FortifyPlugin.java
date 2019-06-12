@@ -1053,7 +1053,7 @@ public class FortifyPlugin extends Recorder {
 		@POST
 		public FormValidation doCheckToken(@QueryParameter String value) {
 			if (StringUtils.isBlank(value)) {
-				return FormValidation.warning("SSC Authentication Token can't be empty");
+				return FormValidation.warning("Authentication token cannot be empty");
 			}
 			return FormValidation.ok();
 		}
@@ -1061,7 +1061,7 @@ public class FortifyPlugin extends Recorder {
 		@POST
 		public FormValidation doCheckCtrlToken(@QueryParameter String value) {
 			if (StringUtils.isBlank(value)) {
-				return FormValidation.warning("Controller Token can't be empty");
+				return FormValidation.warning("Controller token cannot be empty");
 			}
 			return FormValidation.ok();
 		}
@@ -1134,9 +1134,9 @@ public class FortifyPlugin extends Recorder {
 			}
 			String userToken = token == null ? "" : token.trim();
 			if (StringUtils.isBlank(userToken)) {
-				return FormValidation.error("Token can't be empty");
+				return FormValidation.error("Authentication token cannot be empty");
 			} else if (userToken.indexOf(' ') != -1) {
-				return FormValidation.error("Token should contain no spaces");
+				return FormValidation.error("Authentication token should not contain spaces");
 			}
 
 			// backup original values
@@ -1253,11 +1253,11 @@ public class FortifyPlugin extends Recorder {
 
 		private void checkUrlValue(String sscUrl) throws FortifyException {
 			if (StringUtils.isBlank(sscUrl)) {
-				throw new FortifyException(new Message(Message.ERROR, "URL cannot be empty"));
+				throw new FortifyException(new Message(Message.ERROR, "SSC URL cannot be empty"));
 			} else {
 				if (StringUtils.startsWith(sscUrl, "http://") || StringUtils.startsWith(sscUrl, "https://")) {
 					if (sscUrl.trim().equalsIgnoreCase("http://") || sscUrl.trim().equalsIgnoreCase("https://")) {
-						throw new FortifyException(new Message(Message.ERROR, "URL host is required."));
+						throw new FortifyException(new Message(Message.ERROR, "URL host is required"));
 					}
 				} else {
 					throw new FortifyException(new Message(Message.ERROR, "Invalid protocol"));
@@ -1278,13 +1278,13 @@ public class FortifyPlugin extends Recorder {
 				Pattern hostPattern = Pattern.compile("([\\w\\-]+\\.)*[\\w\\-]+");
 				Matcher hostMatcher = hostPattern.matcher(splits[0]);
 				if (!hostMatcher.matches()) {
-					throw new FortifyException(new Message(Message.ERROR, "Invalid proxy host."));
+					throw new FortifyException(new Message(Message.ERROR, "Invalid proxy host"));
 				}
 				if (splits.length == 2) {
 					try {
 						Integer.parseInt(splits[1]);
 					} catch (NumberFormatException nfe) {
-						throw new FortifyException(new Message(Message.ERROR, "Invalid proxy port."));
+						throw new FortifyException(new Message(Message.ERROR, "Invalid proxy port"));
 					}
 				}
 			}
@@ -1318,20 +1318,20 @@ public class FortifyPlugin extends Recorder {
 
 		private void checkCtrlUrlValue(String url) throws FortifyException {
 			if (StringUtils.isBlank(url)) {
-				throw new FortifyException(new Message(Message.ERROR, "URL cannot be empty."));
+				throw new FortifyException(new Message(Message.ERROR, "Controller URL cannot be empty"));
 			} else {
 				if (StringUtils.startsWith(url, "http://") || StringUtils.startsWith(url, "https://")) {
 					if (url.trim().equalsIgnoreCase("http://") || url.trim().equalsIgnoreCase("https://")) {
-						throw new FortifyException(new Message(Message.ERROR, "URL host is required."));
+						throw new FortifyException(new Message(Message.ERROR, "URL host is required"));
 					}
 					if (!StringUtils.endsWith(url,"/cloud-ctrl")) {
-						throw new FortifyException(new Message(Message.ERROR, "Invalid context."));
+						throw new FortifyException(new Message(Message.ERROR, "Invalid context"));
 					}
 				} else {
-					throw new FortifyException(new Message(Message.ERROR, "Invalid protocol."));
+					throw new FortifyException(new Message(Message.ERROR, "Invalid protocol"));
 				}
 				if (url.indexOf(' ') != -1) {
-					throw new FortifyException(new Message(Message.ERROR, "Please remove spaces from URL."));
+					throw new FortifyException(new Message(Message.ERROR, "URL cannot have spaces"));
 				}
 			}
 		}

@@ -144,11 +144,11 @@
         <f:optionalBlock field="runRemoteScan" title="Run Remote Fortify SCA scan" help="/plugin/fortify/help-runRemoteSCAScan.html">
           <f:block>
             <table style="width:100%;">
-              <f:radioBlock id="create-mbs" name="mbsType" value="create" title="Create Mobile Build Session file"
+              <f:radioBlock id="create-mbs" name="mbsType" value="create" title="Create mobile build session"
                             checked="${instance.isCreate()}" help="/plugin/fortify/help-remoteCreateMBS.html">
               </f:radioBlock>
               <f:radioBlock id="use-mbs" name="mbsType" value="useExisting" checked="${instance.isUseExisting()}"
-                            title="Use existing Mobile Build Session file" help="/plugin/fortify/help-remoteUseExistingMBS.html">
+                            title="Use existing mobile build session" help="/plugin/fortify/help-remoteUseExistingMBS.html">
                 <f:entry title="File name" help="/plugin/fortify/help-remoteMBSFilename.html">
                   <f:textbox field="fileName"/>
                 </f:entry>

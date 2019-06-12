@@ -15,13 +15,13 @@
     limitations under the License.
  -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <f:entry title="Python version" help="">
+    <f:entry title="Python version" help="/plugin/fortify/help-pythonVersion.html">
         <f:select field="pythonVersion"/>
     </f:entry>
-    <f:entry title="Python virtual environment" help="">
+    <f:entry title="Python virtual environment" help="/plugin/fortify/help-pythonVirtualEnv.html">
         <f:textbox field="pythonVirtualEnv"/>
     </f:entry>
-    <f:entry title="Python requirements file" help="">
+    <f:entry title="Python requirements file" help="/plugin/fortify/help-pythonRequirementsFile.html">
         <f:textbox field="pythonRequirementsFile"/>
     </f:entry>
     <!--<f:advanced>

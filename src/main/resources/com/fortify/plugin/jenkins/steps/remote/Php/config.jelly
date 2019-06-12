@@ -15,7 +15,7 @@
     limitations under the License.
  -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <f:entry title="PHP version" help="">
+    <f:entry title="PHP version" help="/plugin/fortify/help-phpVersion.html">
         <f:textbox field="phpVersion"/>
     </f:entry>
     <!--<f:advanced>

@@ -705,12 +705,12 @@ public class FortifyPlugin extends Recorder {
 		if (getRemoteOptionalConfig()) {
 			csStart.setRemoteOptionalConfig(analysisRunType.getRemoteOptionalConfig());
 
-			csArguments.setScanArgs(getScanArgs());
+			csArguments.setScanOptions(getScanArgs());
 		}
 
-		csArguments.setTransArgs(getTransArgs());
+		csArguments.setTransOptions(getTransArgs());
 
-		if (StringUtils.isNotEmpty(csArguments.getTransArgs()) || StringUtils.isNotEmpty(csArguments.getScanArgs())) {
+		if (StringUtils.isNotEmpty(csArguments.getTransOptions()) || StringUtils.isNotEmpty(csArguments.getScanOptions())) {
 			csArguments.perform(build, launcher, listener);
 		}
 
@@ -744,7 +744,7 @@ public class FortifyPlugin extends Recorder {
 			csStart.setMbsFile(getMbsFile());
 		}
 
-		csStart.setScanArgs(getScanArgs());
+		csStart.setScanOptions(getScanArgs());
 
 		if (getUploadSSC()) {
 			csStart.setUploadSSC(analysisRunType.getUploadSSC());

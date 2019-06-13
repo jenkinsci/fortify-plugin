@@ -21,22 +21,22 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBuildStep {
-    protected String transArgs;
+    protected String transOptions;
 
     @DataBoundConstructor
     public CloudScanArguments() {}
 
-    public String getTransArgs() {
-        return transArgs;
+    public String getTransOptions() {
+        return transOptions;
     }
 
     @DataBoundSetter
-    public void setTransArgs(String transArgs) {
-        this.transArgs = transArgs;
+    public void setTransOptions(String transOptions) {
+        this.transOptions = transOptions;
     }
 
     public String getResolvedTransArgs(TaskListener listener) {
-        return resolve(getTransArgs(), listener);
+        return resolve(getTransOptions(), listener);
     }
 
     @Override

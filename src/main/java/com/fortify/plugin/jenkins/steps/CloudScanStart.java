@@ -175,7 +175,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
 
     public String getResolvedBuildID(TaskListener listener) { return resolve(getBuildID(), listener); }
 
-    public String getResolvedScanArgs(TaskListener listener) { return resolve(getScanArgs(), listener); }
+    public String getResolvedScanArgs(TaskListener listener) { return resolve(getScanOptions(), listener); }
 
     public String getResolvedApplicationName(TaskListener listener) { return resolve(getApplicationName(), listener); }
 

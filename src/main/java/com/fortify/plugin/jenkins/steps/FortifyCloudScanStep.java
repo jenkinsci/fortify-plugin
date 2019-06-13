@@ -9,19 +9,19 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.io.IOException;
 
 public abstract class FortifyCloudScanStep extends FortifyStep {
-    protected String scanArgs;
+    protected String scanOptions;
 
-    public String getScanArgs() {
-        return scanArgs;
+    public String getScanOptions() {
+        return scanOptions;
     }
 
     @DataBoundSetter
-    public void setScanArgs(String scanArgs) {
-        this.scanArgs = scanArgs;
+    public void setScanOptions(String scanOptions) {
+        this.scanOptions = scanOptions;
     }
 
     public String getResolvedScanArgs(TaskListener listener) {
-        return resolve(getScanArgs(), listener);
+        return resolve(getScanOptions(), listener);
     }
 
     protected String getCloudScanExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,

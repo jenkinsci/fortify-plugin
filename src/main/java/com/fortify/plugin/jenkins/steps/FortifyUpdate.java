@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fortify.plugin.jenkins.FortifyPlugin;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -163,8 +164,9 @@ public class FortifyUpdate extends FortifyStep {
 				log.println(Messages.FortifyUpdate_URL_Invalid(updateServerUrl));
 			}
 		}
-		/*if (getUseProxy()) {
-			String proxy = getResolvedUpdateProxyURL(listener);
+		if (FortifyPlugin.DESCRIPTOR.getUseProxy()) {
+			//String proxy = getResolvedUpdateProxyURL(listener);
+			String proxy = FortifyPlugin.DESCRIPTOR.getProxyUrl();
 			if (!StringUtils.isEmpty(proxy)) {
 				String[] proxySplit = proxy.split(":");
 				if (proxySplit.length > 2) {
@@ -191,12 +193,14 @@ public class FortifyUpdate extends FortifyStep {
 						}
 						args.add("-proxyport");
 						args.add(proxyPort);
-						String proxyUser = getResolvedUpdateProxyUsername(listener);
+						//String proxyUser = getResolvedUpdateProxyUsername(listener);
+						String proxyUser = FortifyPlugin.DESCRIPTOR.getProxyUsername();
 						if (!StringUtils.isEmpty(proxyUser)) {
 							args.add("-proxyUsername");
 							args.add(proxyUser);
 						}
-						String proxyPassword = getResolvedUpdateProxyPassword(listener);
+						//String proxyPassword = getResolvedUpdateProxyPassword(listener);
+						String proxyPassword = FortifyPlugin.DESCRIPTOR.getProxyPassword();
 						if (!StringUtils.isEmpty(proxyPassword)) {
 							args.add("-proxyPassword");
 							args.add(proxyPassword);
@@ -206,8 +210,8 @@ public class FortifyUpdate extends FortifyStep {
 					}
 				}
 			}
-		}*/
-		if (Jenkins.get().proxy != null) {
+		}
+		/*if (Jenkins.get().proxy != null) {
 			String proxyHost = Jenkins.get().proxy.name;
 			int proxyPort = Jenkins.get().proxy.port;
 			String proxyUsername = Jenkins.get().proxy.getUserName();
@@ -229,7 +233,7 @@ public class FortifyUpdate extends FortifyStep {
 					args.add(proxyPassword);
 				}
 			}
-		}
+		}*/
 		EnvVars vars = build.getEnvironment(listener);
 		ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(workspace).cmds(args).envs(vars)
 				.stdout(listener.getLogger()).stderr(listener.getLogger());

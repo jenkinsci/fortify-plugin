@@ -880,8 +880,24 @@ public class FortifyPlugin extends Recorder {
 					contextClassLoader = Thread.currentThread().getContextClassLoader();
 					Thread.currentThread().setContextClassLoader(FortifyPlugin.class.getClassLoader());
 					client = new FortifyClient();
-
-					boolean useProxy = Jenkins.get().proxy != null;
+					boolean useProxy = DESCRIPTOR.getUseProxy();
+					String proxyUrl = DESCRIPTOR.getProxyUrl();
+					if (!useProxy || StringUtils.isEmpty(proxyUrl)) {
+						client.init(url, token);
+					} else {
+						String[] proxyUrlSplit = proxyUrl.split(":");
+						String proxyHost = proxyUrlSplit[0];
+						int proxyPort = 80;
+						if (proxyUrlSplit.length > 1) {
+							try {
+								proxyPort = Integer.parseInt(proxyUrlSplit[1]);
+							} catch (NumberFormatException nfe) {
+							}
+						}
+						client.init(url, token, proxyHost, proxyPort, DESCRIPTOR.getProxyUsername(),
+								DESCRIPTOR.getProxyPassword());
+					}
+					/*boolean useProxy = Jenkins.get().proxy != null;
 					if (!useProxy) {
 						client.init(url, token);
 					} else {
@@ -890,7 +906,7 @@ public class FortifyPlugin extends Recorder {
 						String proxyUsername = Jenkins.get().proxy.getUserName();
 						String proxyPassword = Jenkins.get().proxy.getPassword();
 						client.init(url, token, proxyHost, proxyPort, proxyUsername, proxyPassword);
-					}
+					}*/
 				}
 				return cmd.runWith(client);
 			} finally {
@@ -1177,7 +1193,8 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public FormValidation doTestCtrlConnection(@QueryParameter String ctrlUrl) throws IOException{
+		public FormValidation doTestCtrlConnection(@QueryParameter String ctrlUrl, @QueryParameter boolean useProxy, @QueryParameter String proxyUrl,
+												   @QueryParameter String proxyUsername, @QueryParameter String proxyPassword) throws IOException{
 			String controllerUrl = ctrlUrl == null ? "" : ctrlUrl.trim();
 			try {
 				checkUrlValue(controllerUrl);
@@ -1187,11 +1204,30 @@ public class FortifyPlugin extends Recorder {
 
 			// backup original values
 			String orig_url = this.ctrlUrl;
+			boolean orig_useProxy = this.useProxy;
+			String orig_proxyUrl = this.proxyUrl;
+			Secret orig_proxyUsername = this.proxyUsername;
+			Secret orig_proxyPassword = this.proxyPassword;
 
 			this.ctrlUrl = controllerUrl;
+			this.useProxy = useProxy;
+			this.proxyUrl = proxyUrl;
+			this.proxyUsername = proxyUsername == null ? null : Secret.fromString(proxyUsername);
+			this.proxyPassword = proxyPassword == null ? null : Secret.fromString(proxyPassword);
 			OkHttpClient client;
-			if (Jenkins.get().proxy != null) {
-				client = configureProxy(Jenkins.get().proxy.name, Jenkins.get().proxy.port, Jenkins.get().proxy.getUserName(), Jenkins.get().proxy.getPassword());
+
+			String[] proxyUrlSplit = proxyUrl.split(":");
+			String proxyHost = proxyUrlSplit[0];
+			int proxyPort = 80;
+			if (proxyUrlSplit.length > 1) {
+				try {
+					proxyPort = Integer.parseInt(proxyUrlSplit[1]);
+				} catch (NumberFormatException nfe) {
+				}
+			}
+
+			if (useProxy && proxyHost.length() > 0) {
+				client = configureProxy(proxyHost, proxyPort, proxyUsername, proxyPassword);
 			} else {
 				client = new OkHttpClient();
 			}
@@ -1212,6 +1248,10 @@ public class FortifyPlugin extends Recorder {
 				return FormValidation.error(t, "Cannot connect to Controller");
 			} finally {
 				this.ctrlUrl = orig_url;
+				this.useProxy = orig_useProxy;
+				this.proxyUrl = orig_proxyUrl;
+				this.proxyUsername = orig_proxyUsername;
+				this.proxyPassword = orig_proxyPassword;
 				if (response != null && response.body() != null) {
 					response.body().close();
 				}
@@ -1457,6 +1497,37 @@ public class FortifyPlugin extends Recorder {
 
 		public void doRefreshSensorPools(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
 				throws Exception {
+			// backup original values
+			String orig_url = this.url;
+			boolean orig_useProxy = this.useProxy;
+			String orig_proxyUrl = this.proxyUrl;
+			Secret orig_proxyUsername = this.proxyUsername;
+			Secret orig_proxyPassword = this.proxyPassword;
+			Secret orig_token = this.token;
+
+			String url = req.getParameter("url");
+			boolean useProxy = "true".equals(req.getParameter("useProxy"));
+			String proxyUrl = req.getParameter("proxyUrl");
+			String proxyUsername = req.getParameter("proxyUsername");
+			String proxyPassword = req.getParameter("proxyPassword");
+			String token = req.getParameter("token");
+			this.url = url != null ? url.trim() : "";
+			this.useProxy = useProxy;
+			if (useProxy) {
+				this.proxyUrl = proxyUrl != null ? proxyUrl.trim() : "";
+				this.proxyUsername = proxyUsername != null ? Secret.fromString(proxyUsername.trim()) : null;
+				this.proxyPassword = proxyPassword != null ? Secret.fromString(proxyPassword) : null;
+			} else {
+				this.proxyUrl = "";
+				this.proxyUsername = null;
+				this.proxyPassword = null;
+			}
+			this.token = token != null ? Secret.fromString(token.trim()) : null;
+
+			if (!doTestConnection(this.url, this.getToken(), null).kind.equals(FormValidation.Kind.OK)) {
+				return; // don't get sensor pools if server is unavailable
+			}
+
 			try {
 				// always retrieve data from SSC
 				sensorPoolList = getSensorPoolListNoCache();
@@ -1479,6 +1550,13 @@ public class FortifyPlugin extends Recorder {
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw e;
+			} finally {
+				this.url = orig_url;
+				this.useProxy = orig_useProxy;
+				this.proxyUrl = orig_proxyUrl;
+				this.proxyUsername = orig_proxyUsername;
+				this.proxyPassword = orig_proxyPassword;
+				this.token = orig_token;
 			}
 		}
 
@@ -1511,7 +1589,7 @@ public class FortifyPlugin extends Recorder {
 				url = o.getString("url").trim();
 				checkUrlValue(url);
 			} catch (JSONException e) {
-				System.out.println("Can't restore 'URL' property. Will use default (empty) values.");
+				System.out.println("Cannot restore 'URL' property. Will use default (empty) values.");
 				url = null;
 			} catch (FortifyException e) {
 				System.out.println(e.getMessage());
@@ -1531,7 +1609,7 @@ public class FortifyPlugin extends Recorder {
 					checkProxyUrlValue(proxyUrl);
 				} catch (JSONException e) {
 					e.printStackTrace();
-					System.out.println("Can't restore 'proxyUrl' property.  Will use default (empty) values.");
+					System.out.println("Cannot restore 'proxyUrl' property.  Will use default (empty) values.");
 					proxyUrl = null;
 				} catch (FortifyException e) {
 					System.out.println(e.getMessage());
@@ -1542,7 +1620,7 @@ public class FortifyPlugin extends Recorder {
 					checkProxyUsernameValue(usernameParam);
 					proxyUsername = usernameParam.isEmpty() ? null : Secret.fromString(usernameParam);
 				} catch (JSONException e) {
-					System.out.println("Can't restore 'proxyUsername' property.  Will use default (empty) values.");
+					System.out.println("Cannot restore 'proxyUsername' property.  Will use default (empty) values.");
 					proxyUsername = null;
 				} catch (FortifyException e) {
 					System.out.println(e.getMessage());
@@ -1553,7 +1631,7 @@ public class FortifyPlugin extends Recorder {
 					checkProxyPasswordValue(pwdParam);
 					proxyPassword = pwdParam.isEmpty() ? null : Secret.fromString(pwdParam);
 				} catch (JSONException e) {
-					System.out.println("Can't restore 'proxyPassword' property.  Will use default (empty) values.");
+					System.out.println("Cannot restore 'proxyPassword' property.  Will use default (empty) values.");
 					proxyPassword = null;
 				} catch (FortifyException e) {
 					System.out.println(e.getMessage());
@@ -1564,14 +1642,14 @@ public class FortifyPlugin extends Recorder {
 				String tokenParam = o.getString("token").trim();
 				token = tokenParam.isEmpty() ? null : Secret.fromString(tokenParam);
 			} catch (JSONException e) {
-				System.out.println("Can't restore 'Authentication Token' property. Will use default (empty) values.");
+				System.out.println("Cannot restore 'Authentication Token' property. Will use default (empty) values.");
 				token = null;
 			}
 
 			try {
 				projectTemplate = o.getString("projectTemplate").trim();
 			} catch (JSONException e) {
-				System.out.println("Can't restore 'Issue template' property. Will use default (empty) values.");
+				System.out.println("Cannot restore 'Issue template' property. Will use default (empty) values.");
 				projectTemplate = null;
 			}
 
@@ -1583,7 +1661,7 @@ public class FortifyPlugin extends Recorder {
 					breakdownPageSize = DEFAULT_PAGE_SIZE;
 				}
 			} catch (NumberFormatException | JSONException e) {
-				System.out.println("Can't restore 'Issue breakdown page size' property. Will use default (" + DEFAULT_PAGE_SIZE + ") value.");
+				System.out.println("Cannot restore 'Issue breakdown page size' property. Will use default (" + DEFAULT_PAGE_SIZE + ") value.");
 				breakdownPageSize = DEFAULT_PAGE_SIZE;
 			}
 
@@ -1591,7 +1669,7 @@ public class FortifyPlugin extends Recorder {
 				ctrlUrl = o.getString("ctrlUrl").trim();
 				checkCtrlUrlValue(ctrlUrl);
 			} catch (JSONException e) {
-				System.out.println("Can't restore 'CTRLURL' property. Will use default (empty) values.");
+				System.out.println("Cannot restore 'CTRLURL' property. Will use default (empty) values.");
 				ctrlUrl = null;
 			} catch (FortifyException e) {
 				System.out.println(e.getMessage());
@@ -1602,7 +1680,7 @@ public class FortifyPlugin extends Recorder {
 				String ctrlTokenParam = o.getString("ctrlToken").trim();
 				ctrlToken = ctrlTokenParam.isEmpty() ? null : Secret.fromString(ctrlTokenParam);
 			} catch (JSONException e) {
-				System.out.println("Can't restore 'Controller token' property. Will use default (empty) values.");
+				System.out.println("Cannot restore 'Controller token' property. Will use default (empty) values.");
 				ctrlToken = null;
 			}
 

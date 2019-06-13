@@ -758,7 +758,7 @@ public class FortifyUpload extends FortifyStep {
 					contextClassLoader = Thread.currentThread().getContextClassLoader();
 					Thread.currentThread().setContextClassLoader(FortifyPlugin.class.getClassLoader());
 					client = new FortifyClient();
-					/*boolean useProxy = FortifyPlugin.DESCRIPTOR.getUseProxy();
+					boolean useProxy = FortifyPlugin.DESCRIPTOR.getUseProxy();
 					String proxyUrl = FortifyPlugin.DESCRIPTOR.getProxyUrl();
 					if (!useProxy || StringUtils.isEmpty(proxyUrl)) {
 						client.init(url, token);
@@ -774,8 +774,8 @@ public class FortifyUpload extends FortifyStep {
 						}
 						client.init(url, token, proxyHost, proxyPort, FortifyPlugin.DESCRIPTOR.getProxyUsername(),
 								FortifyPlugin.DESCRIPTOR.getProxyPassword());
-					}*/
-					boolean useProxy = Jenkins.get().proxy != null;
+					}
+					/*boolean useProxy = Jenkins.get().proxy != null;
 					if (!useProxy) {
 						client.init(url, token);
 					} else {
@@ -784,7 +784,7 @@ public class FortifyUpload extends FortifyStep {
 						String proxyUsername = Jenkins.get().proxy.getUserName();
 						String proxyPassword = Jenkins.get().proxy.getPassword();
 						client.init(url, token, proxyHost, proxyPort, proxyUsername, proxyPassword);
-					}
+					}*/
 				}
 				return cmd.runWith(client);
 			} finally {

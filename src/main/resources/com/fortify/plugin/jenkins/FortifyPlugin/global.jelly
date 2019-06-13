@@ -25,6 +25,19 @@
   </style>
 
   <f:section title="Fortify Assessment">
+    <f:section title="General configuration">
+      <f:optionalBlock name="useProxy" title="Use proxy" checked="${instance.useProxy}" help="/plugin/fortify/help-proxy.html">
+        <f:entry title="Proxy server host:port">
+          <f:textbox name="proxyUrl" field="proxyUrl" id="proxyUrl"/>
+        </f:entry>
+        <f:entry title="Proxy server username">
+          <f:textbox name="proxyUsername" field="proxyUsername" id="proxyUsername" checkMethod="post"/>
+        </f:entry>
+        <f:entry title="Proxy server password">
+          <f:password name="proxyPassword" field="proxyPassword" id="proxyPassword" checkMethod="post"/>
+        </f:entry>
+      </f:optionalBlock>
+    </f:section>
 
     <f:section title="SSC configuration">
       <f:entry title="SSC URL" help="/plugin/fortify/help-sscUrl.html">
@@ -48,12 +61,10 @@
         </div>
       </f:entry>
 
-      <!--<f:advanced title="Advanced settings">-->
-        <f:validateButton title="Test SSC connection" progress="Testing..." method="testConnection" with="url,token,useProxy,proxyUrl,proxyUsername,proxyPassword" />
-        <f:entry title="Maximum issues per page" help="/plugin/fortify/help-breakdownPageSize.html">
-          <f:textbox field="breakdownPageSize" id="breakdownPageSize" />
-        </f:entry>
-      <!--</f:advanced>-->
+      <f:validateButton title="Test SSC connection" progress="Testing..." method="testConnection" with="url,token,useProxy,proxyUrl,proxyUsername,proxyPassword" />
+      <f:entry title="Maximum issues per page" help="/plugin/fortify/help-breakdownPageSize.html">
+        <f:textbox field="breakdownPageSize" id="breakdownPageSize" />
+      </f:entry>
     </f:section>
 
     <f:section title="Controller configuration">
@@ -66,7 +77,7 @@
       </f:entry>
 
       <f:entry>
-        <f:validateButton title="Test Controller connection" progress="Testing..." method="testCtrlConnection" with="ctrlUrl" />
+        <f:validateButton title="Test Controller connection" progress="Testing..." method="testCtrlConnection" with="ctrlUrl,useProxy,proxyUrl,proxyUsername,proxyPassword" />
       </f:entry>
     </f:section>
 

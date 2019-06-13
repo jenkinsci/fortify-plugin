@@ -55,6 +55,8 @@ function refreshProjectNames(url, elm)
                 updateComboBox(select.comboBox, items, selectedIndex);
             }
 
+            buttonVer.value = ''; // clear version selection
+
             buttonName.disabled=false;
             buttonVer.disabled=false;
         }
@@ -237,4 +239,9 @@ function refreshSensorPools(url, elm) {
             poolsButton.disabled=false;
         }
     });
+}
+
+var readOnlyElms = document.getElementsByClassName("read-only");
+for (var i = 0; i < readOnlyElms.length; i++) {
+    readOnlyElms[i].setAttribute("readonly", "true");
 }

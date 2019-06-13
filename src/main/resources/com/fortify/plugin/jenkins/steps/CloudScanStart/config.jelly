@@ -48,7 +48,7 @@
                     <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
                     <div style="float:left;width:80%;">
                         <f:editableComboBox id="projectName" name="projectName" field="projectName"
-                                            clazz="setting-input project-name" items="${descriptor.projectNameItems}"/>
+                                            clazz="setting-input project-name read-only" items="${descriptor.projectNameItems}"/>
                     </div>
                     <div style="float:left">
                         <input value="▼" type="button" id="refreshPrjButton"
@@ -62,7 +62,7 @@
                 <f:entry title="Application version" help="/plugin/fortify/help-sscProjVersion.html">
                     <div style="float:left;width:50%;">
                         <f:editableComboBox id="projectVersion" name="projectVersion" field="projectVersion"
-                                            clazz="setting-input project-version"
+                                            clazz="setting-input project-version read-only"
                                             items="${descriptor.projectVersionItems(projectName)}"/>
                     </div>
                     <div style="float:left">

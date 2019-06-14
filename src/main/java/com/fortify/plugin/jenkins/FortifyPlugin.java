@@ -1153,7 +1153,10 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public FormValidation doCheckCtrlUrl(@QueryParameter String value) {
+		public FormValidation doCheckCtrlUrl(@QueryParameter String value, @QueryParameter String url) {
+			if (doCheckUrl(url) == FormValidation.ok()) {
+				return FormValidation.okWithMarkup("<font color=\"blue\">Will use the SSC URL to determine the Controller location</font>");
+			}
 			try {
 				checkCtrlUrlValue(value.trim());
 			} catch (FortifyException e) {
@@ -1849,6 +1852,9 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		private List<SensorPoolBean> getSensorPoolListNoCache() {
+			if (DESCRIPTOR.getUrl() == null) {
+				return Collections.emptyList();
+			}
 			try {
 				Map<String, String> map = runWithFortifyClient(getToken(),
 						new FortifyClient.Command<Map<String, String>>() {

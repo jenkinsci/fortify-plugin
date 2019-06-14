@@ -8,7 +8,6 @@ import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.ComboBoxModel;
-import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang.StringUtils;
@@ -221,8 +220,21 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         ArrayList<String> args = new ArrayList<String>(2);
         args.add(cloudscanExec);
         args.add("-experimental"); // TODO: Remove when -experimental is no longer needed
-        args.add("-url");
-        args.add(FortifyPlugin.DESCRIPTOR.getCtrlUrl());
+
+        /*
+            if SSC is configured, use SSC's configuration to find the Controller
+         */
+        if (FortifyPlugin.DESCRIPTOR.getUrl() != null) {
+            args.add("-sscurl");
+            args.add(FortifyPlugin.DESCRIPTOR.getUrl());
+            args.add("-ssctoken");
+            args.add(FortifyPlugin.DESCRIPTOR.getCtrlToken());
+        } else if (FortifyPlugin.DESCRIPTOR.getCtrlUrl() != null) {
+            args.add("-url");
+            args.add(FortifyPlugin.DESCRIPTOR.getCtrlUrl());
+        } else {
+            throw new AbortException("Fortify CloudScan start command execution failed: No SSC or Controller URL found");
+        }
         args.add("start");
         if (StringUtils.isNotEmpty(getResolvedBuildTool(taskListener))) {
             args.add("-bt");

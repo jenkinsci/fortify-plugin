@@ -1,6 +1,5 @@
 package com.fortify.plugin.jenkins.steps;
 
-import com.fortify.plugin.jenkins.FortifyPlugin;
 import com.google.common.collect.ImmutableSet;
 import hudson.*;
 import hudson.model.Result;
@@ -61,8 +60,6 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
         ArrayList<String> args = new ArrayList<String>(2);
         args.add(cloudscanExec);
         args.add("-experimental"); // TODO: Remove when -experimental is no longer needed
-        args.add("-url");
-        args.add(FortifyPlugin.DESCRIPTOR.getCtrlUrl());
         args.add("arguments");
         args.add("-o");
 

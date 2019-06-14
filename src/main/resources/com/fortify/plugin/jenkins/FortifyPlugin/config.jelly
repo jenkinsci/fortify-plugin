@@ -83,7 +83,7 @@
           </f:entry>
           <f:entry title="Application version" help="/plugin/fortify/help-sscProjVersion.html">
             <div style="float:left;width:50%;">
-              <f:editableComboBox id="projectVersion" name="projectVersion" field="projectVersion" clazz="setting-input project-version read-only" items="${descriptor.projectVersionItems(projectName)}" />
+              <f:editableComboBox id="projectVersion" field="appVersion" clazz="setting-input project-version read-only" items="${descriptor.appVersionItems(appName)}" />
             </div>
             <div style="float:left">
               <input value="▼" type="button" id="refreshPrjVerButton" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
@@ -328,7 +328,7 @@
           </f:entry>
           <f:entry title="Application version" help="/plugin/fortify/help-sscProjVersion.html">
             <div style="float:left;width:50%;">
-              <f:editableComboBox id="projectVersion" name="projectVersion" field="projectVersion" clazz="setting-input project-version" items="${descriptor.projectVersionItems(projectName)}" />
+              <f:editableComboBox id="projectVersion" field="appVersion" clazz="setting-input project-version" items="${descriptor.appVersionItems(appName)}" />
             </div>
             <div style="float:left">
               <input value="▼" type="button" id="refreshPrjVerButton" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />

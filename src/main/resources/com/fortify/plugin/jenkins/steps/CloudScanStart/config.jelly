@@ -44,7 +44,7 @@
         <table style="width:100%;">
             <f:optionalBlock field="uploadSSC"
                              title="Upload Fortify SCA scan results to Fortify Software Security Center">
-                <f:entry title="Application name" help="/plugin/fortify/help-sscProjName.html">
+                <f:entry title="Application name" help="/plugin/fortify/help-remoteSscAppName.html">
                     <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
                     <div style="float:left;width:80%;">
                         <f:editableComboBox id="projectName" field="appName"
@@ -59,7 +59,7 @@
                         ${progress}
                     </div>
                 </f:entry>
-                <f:entry title="Application version" help="/plugin/fortify/help-sscProjVersion.html">
+                <f:entry title="Application version" help="/plugin/fortify/help-remoteSscAppVersion.html">
                     <div style="float:left;width:50%;">
                         <f:editableComboBox id="projectVersion" field="appVersion"
                                             clazz="setting-input project-version read-only"

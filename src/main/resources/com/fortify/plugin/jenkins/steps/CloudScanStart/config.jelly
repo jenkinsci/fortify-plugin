@@ -22,16 +22,16 @@
         <table style="width:100%;">
             <f:optionalBlock field="remoteOptionalConfig" title="Optional configuration" help="/plugin/fortify/help-remoteOptionalConfiguration.html">
                 <f:section class="section-header" title="Controller configuration">
-                    <f:entry field="sensorPoolName" title="Sensor pool" help="/plugin/fortify/help-remoteSensorPool.html">
+                    <f:entry field="sensorPoolUUID" title="Sensor pool" help="/plugin/fortify/help-remoteSensorPool.html">
                         <f:select/>
                     </f:entry>
                     <f:entry title="Notification email" help="/plugin/fortify/help-remoteNotificationEmail.html">
-                        <f:textbox field="emailAddr"/>
+                        <f:textbox field="notifyEmail"/>
                     </f:entry>
                 </f:section>
                 <f:section class="section-header" title="Fortify SCA configuration">
                     <f:entry title="Custom Rulepacks" help="/plugin/fortify/help-scanCustomRulepacks.html">
-                        <f:textbox field="rulepacks"/>
+                        <f:textbox field="customRulepacks"/>
                     </f:entry>
                     <f:entry title="Fortify SCA scan filter file" help="/plugin/fortify/help-remoteScanFilterFile.html">
                         <f:textbox field="filterFile"/>
@@ -47,8 +47,8 @@
                 <f:entry title="Application name" help="/plugin/fortify/help-sscProjName.html">
                     <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
                     <div style="float:left;width:80%;">
-                        <f:editableComboBox id="projectName" name="projectName" field="projectName"
-                                            clazz="setting-input project-name read-only" items="${descriptor.projectNameItems}"/>
+                        <f:editableComboBox id="projectName" field="appName"
+                                            clazz="setting-input project-name read-only" items="${descriptor.appNameItems}"/>
                     </div>
                     <div style="float:left">
                         <input value="▼" type="button" id="refreshPrjButton"
@@ -61,9 +61,9 @@
                 </f:entry>
                 <f:entry title="Application version" help="/plugin/fortify/help-sscProjVersion.html">
                     <div style="float:left;width:50%;">
-                        <f:editableComboBox id="projectVersion" name="projectVersion" field="projectVersion"
+                        <f:editableComboBox id="projectVersion" field="appVersion"
                                             clazz="setting-input project-version read-only"
-                                            items="${descriptor.projectVersionItems(projectName)}"/>
+                                            items="${descriptor.appVersionItems(appName)}"/>
                     </div>
                     <div style="float:left">
                         <input value="▼" type="button" id="refreshPrjVerButton"

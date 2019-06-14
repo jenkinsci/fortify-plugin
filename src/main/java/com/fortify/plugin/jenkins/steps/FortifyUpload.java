@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -707,11 +706,11 @@ public class FortifyUpload extends FortifyStep {
 		}
 
 		public ComboBoxModel getApplicationNameItems() {
-			return FortifyPlugin.DESCRIPTOR.getProjectNameItems();
+			return FortifyPlugin.DESCRIPTOR.getAppNameItems();
 		}
 
 		public ComboBoxModel getApplicationVersionItems(@QueryParameter String applicationName) {
-			return FortifyPlugin.DESCRIPTOR.getProjectVersionItems(applicationName);
+			return FortifyPlugin.DESCRIPTOR.getAppVersionItems(applicationName);
 		}
 
 		public void doRefreshApplications(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)

@@ -21,7 +21,12 @@ import com.fortify.plugin.jenkins.Messages;
 
 import hudson.util.FormValidation;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import java.util.regex.Pattern;
+
 public class Validators {
+	private static final String emailPattern = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
 
 	public static FormValidation checkFieldNotEmpty(String value) {
 		value = StringUtils.strip(value);
@@ -65,5 +70,24 @@ public class Validators {
 			return FormValidation.error(Messages.FortifySCAStep_Check_Number());
 		}
 		return FormValidation.ok();
+	}
+
+	public static FormValidation checkValidEmail(String value) {
+		if (StringUtils.isBlank(value)) {
+			return FormValidation.ok();
+		}
+
+		Pattern pat = Pattern.compile(emailPattern);
+		try {
+			InternetAddress emailAddr = new InternetAddress(value);
+			emailAddr.validate();
+			if (pat.matcher(value).matches()) {
+				return FormValidation.ok();
+			} else {
+				return FormValidation.error("Invalid email address");
+			}
+		} catch (AddressException ex) {
+			return FormValidation.error("Invalid email address");
+		}
 	}
 }

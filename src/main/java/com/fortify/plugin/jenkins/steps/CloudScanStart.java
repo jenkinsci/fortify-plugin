@@ -8,6 +8,7 @@ import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.ComboBoxModel;
+import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang.StringUtils;
@@ -29,8 +30,8 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
     private FortifyPlugin.RemoteOptionalConfigBlock remoteOptionalConfig;
     private FortifyPlugin.UploadSSCBlock uploadSSC;
 
-    private String mbsFile;
-    private boolean createMbs;
+    //private String mbsFile;
+    //private boolean createMbs;
     private String buildID;
 
     @DataBoundConstructor
@@ -55,6 +56,9 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
     }
 
     public String getBuildTool() {
+        if (remoteAnalysisProjectType == null) {
+            return null;
+        }
         if (getRemoteAnalysisProjectType() instanceof Gradle) {
             return "gradle";
         } else if (getRemoteAnalysisProjectType() instanceof Maven) {
@@ -84,7 +88,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         }
     }
 
-    public String getMbsFile() {
+    /*public String getMbsFile() {
         return mbsFile;
     }
 
@@ -98,30 +102,34 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
 
     public void setCreateMbs(boolean createMbs) {
         this.createMbs = createMbs;
-    }
+    }*/
 
     public String getSensorPoolName() {
-        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getSensorPoolName();
+        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getSensorPoolUUID();
     }
 
     public String getEmailAddr() {
-        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getEmailAddr();
+        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getNotifyEmail();
     }
 
     public String getRulepacks() {
-        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getRulepacks();
+        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getCustomRulepacks();
     }
 
     public String getFilterFile() {
         return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getFilterFile();
     }
 
+    /*public String getResultsFile() {
+        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getResultsFile();
+    }*/
+
     public String getApplicationName() {
-        return getUploadSSC() == null ? "" : getUploadSSC().getProjectName();
+        return getUploadSSC() == null ? "" : getUploadSSC().getAppName();
     }
 
     public String getApplicationVersion() {
-        return getUploadSSC() == null ? "" : getUploadSSC().getProjectVersion();
+        return getUploadSSC() == null ? "" : getUploadSSC().getAppVersion();
     }
 
     public String getPythonRequirementsFile() {
@@ -153,9 +161,9 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         return resolve(getBuildFile(), listener);
     }
 
-    public String getResolvedMbsFile(TaskListener listener) {
+    /*public String getResolvedMbsFile(TaskListener listener) {
         return resolve(getMbsFile(), listener);
-    }
+    }*/
 
     public String getResolvedSensorPoolName(TaskListener listener) {
         return resolve(getSensorPoolName(), listener);
@@ -188,6 +196,8 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
     public String getResolvedPythonVirtualEnv(TaskListener listener) { return resolve(getPythonVirtualEnv(), listener); }
 
     public String getResolvedPhpVersion(TaskListener listener) { return resolve(getPhpVersion(), listener); }
+
+    /*public String getResolvedResultsFile(TaskListener listener) { return resolve(getResultsFile(), listener); }*/
 
     @Override
     public StepExecution start(StepContext context) throws Exception {
@@ -240,7 +250,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
                 }
             }
         } else {
-            if (isCreateMbs() && StringUtils.isNotEmpty(getResolvedBuildID(taskListener))) {
+            /*if (isCreateMbs() && StringUtils.isNotEmpty(getResolvedBuildID(taskListener))) {
                 args.add("-b");
                 args.add(getResolvedBuildID(taskListener));
                 args.add("-project-root");
@@ -248,8 +258,17 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
             } else if (StringUtils.isNotEmpty(getResolvedMbsFile(taskListener))) {
                 args.add("-mbs");
                 args.add(getResolvedMbsFile(taskListener));
-            }
+            }*/
+            args.add("-b");
+            args.add(getResolvedBuildID(taskListener));
+            args.add("-project-root");
+            args.add(projectRoot);
         }
+        /*if (StringUtils.isNotEmpty(getResolvedResultsFile(taskListener))) {
+            args.add("-o"); // overwrite existing FPR
+            args.add("-f");
+            args.add(getResolvedResultsFile(taskListener));
+        }*/
         if (StringUtils.isNotEmpty(getResolvedEmailAddr(taskListener))) {
             args.add("-email");
             args.add(getResolvedEmailAddr(taskListener));
@@ -321,17 +340,18 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
             FortifyPlugin.DESCRIPTOR.doRefreshVersions(req, rsp, value);
         }
 
-        public ComboBoxModel doFillProjectNameItems() {
-            return FortifyPlugin.DESCRIPTOR.doFillProjectNameItems();
+        public ComboBoxModel doFillAppNameItems() {
+            return FortifyPlugin.DESCRIPTOR.doFillAppNameItems();
         }
 
-        public ComboBoxModel doFillProjectVersionItems(@QueryParameter String projectName) {
-            return FortifyPlugin.DESCRIPTOR.doFillProjectVersionItems(projectName);
+        public ComboBoxModel doFillAppVersionItems(@QueryParameter String appName) {
+            return FortifyPlugin.DESCRIPTOR.doFillAppVersionItems(appName);
         }
 
-        public ListBoxModel doFillSensorPoolNameItems() {
-            return FortifyPlugin.DESCRIPTOR.doFillSensorPoolNameItems();
+        public ListBoxModel doFillSensorPoolUUIDItems() {
+            return FortifyPlugin.DESCRIPTOR.doFillSensorPoolUUIDItems();
         }
+
     }
 
     private static class Execution extends SynchronousNonBlockingStepExecution<Void> {

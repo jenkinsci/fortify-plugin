@@ -106,9 +106,9 @@
         </f:optionalBlock>
         </table>
         </f:block>
-        <f:block>
+        <!--<f:block>
           <f:checkbox field="runSCAClean" title="Run Fortify SCA clean" value="true" help="/plugin/fortify/help-runSCAClean.html"/>
-        </f:block>
+        </f:block>-->
         <f:entry field="buildId" title="Build ID" help="/plugin/fortify/help-buildID.html">
           <f:textbox/>
         </f:entry>
@@ -249,9 +249,9 @@
         </f:optionalBlock>
           </table>
         </f:block>
-        <f:block>
+        <!--<f:block>
           <f:checkbox field="runSCAClean" title="Run Fortify SCA clean" value="true" help="/plugin/fortify/help-runSCAClean.html"/>
-        </f:block>
+        </f:block>-->
         <f:entry field="buildId" title="Build ID" help="/plugin/fortify/help-buildID.html">
           <f:textbox/>
         </f:entry>

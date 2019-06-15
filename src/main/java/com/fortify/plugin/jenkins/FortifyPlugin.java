@@ -144,7 +144,7 @@ public class FortifyPlugin extends Recorder {
 			if (updateContent != null) {
 				analysisRunType.setUpdateContent(updateContent);
 			}
-			analysisRunType.setRunSCAClean(runSCAClean);
+			//analysisRunType.setRunSCAClean(runSCAClean);
 
 			if (buildId != null) {
 				analysisRunType.setBuildId(buildId);
@@ -328,9 +328,9 @@ public class FortifyPlugin extends Recorder {
 		return getUpdateUseProxy() ? updateContent.getUpdateProxyPassword() : "";
 	}
 
-	public boolean getRunSCAClean() {
+	/*public boolean getRunSCAClean() {
 		return getAnalysisRunType() && analysisRunType.isRunSCAClean();
-	}
+	}*/
 
 	@Deprecated
 	public String getTranslationType() {
@@ -820,10 +820,12 @@ public class FortifyPlugin extends Recorder {
 			fu.perform(build, launcher, listener);
 		}
 		// run Fortify SCA clean
-		if (getRunSCAClean()) {
+		/*if (getRunSCAClean()) {
 			FortifyClean fc = new FortifyClean(getBuildId());
 			fc.perform(build, launcher, listener);
-		}
+		}*/
+		FortifyClean fc = new FortifyClean(getBuildId());
+		fc.perform(build, launcher, listener);
 
 		final ProjectScanType projectScanType = getProjectScanType();
 		if (projectScanType != null) {
@@ -2631,7 +2633,7 @@ public class FortifyPlugin extends Recorder {
 		// local translation
 		private ProjectScanType projectScanType;
 		private UpdateContentBlock updateContent;
-		private boolean runSCAClean;
+		//private boolean runSCAClean;
 		private String buildId;
 		private String scanFile;
 		private String maxHeap;
@@ -2678,9 +2680,9 @@ public class FortifyPlugin extends Recorder {
 		@DataBoundSetter
 		public void setUpdateContent(UpdateContentBlock updateContent) { this.updateContent = updateContent; }
 
-		public boolean isRunSCAClean() { return runSCAClean; }
+		/*public boolean isRunSCAClean() { return runSCAClean; }
 		@DataBoundSetter
-		public void setRunSCAClean(boolean runSCAClean) { this.runSCAClean = runSCAClean; }
+		public void setRunSCAClean(boolean runSCAClean) { this.runSCAClean = runSCAClean; }*/
 
 		public String getBuildId() { return buildId; }
 		@DataBoundSetter

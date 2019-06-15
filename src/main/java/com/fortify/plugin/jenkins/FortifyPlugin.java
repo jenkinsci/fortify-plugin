@@ -570,7 +570,7 @@ public class FortifyPlugin extends Recorder {
 		return !isLocal() && analysisRunType.getRemoteOptionalConfig() != null;
 	}
 
-	public String getSensorPoolName() {
+	public String getSensorPoolUUID() {
 		/*if (isRemote()) {
 			return analysisRunType.getRemoteOptionalConfig().getSensorPoolUUID();
 		} else if (isMixed()) {
@@ -582,7 +582,7 @@ public class FortifyPlugin extends Recorder {
 		return isLocal() ? "" : analysisRunType.getRemoteOptionalConfig().getSensorPoolUUID();
 	}
 
-	public String getEmailAddr() {
+	public String getNotifyEmail() {
 		/*if (isRemote()) {
 			return analysisRunType.getRemoteOptionalConfig().getNotifyEmail();
 		} else if (isMixed()) {
@@ -610,7 +610,7 @@ public class FortifyPlugin extends Recorder {
 		return isLocal() ? "" : analysisRunType.getRemoteOptionalConfig().getResultsFile();
 	}*/
 
-	public String getRulepacks() {
+	public String getCustomRulepacks() {
 		/*if (isRemote()) {
 			return analysisRunType.getRemoteOptionalConfig().getCustomRulepacks();
 		} else if (isMixed()) {
@@ -1326,7 +1326,7 @@ public class FortifyPlugin extends Recorder {
 
 		private void checkUrlValue(String sscUrl) throws FortifyException {
 			if (StringUtils.isBlank(sscUrl)) {
-				throw new FortifyException(new Message(Message.ERROR, "SSC URL cannot be empty"));
+				throw new FortifyException(new Message(Message.ERROR, "URL cannot be empty"));
 			} else {
 				if (StringUtils.startsWith(sscUrl, "http://") || StringUtils.startsWith(sscUrl, "https://")) {
 					if (sscUrl.trim().equalsIgnoreCase("http://") || sscUrl.trim().equalsIgnoreCase("https://")) {

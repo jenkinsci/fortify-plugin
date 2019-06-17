@@ -245,3 +245,17 @@ var readOnlyElms = document.getElementsByClassName("read-only");
 for (var i = 0; i < readOnlyElms.length; i++) {
     readOnlyElms[i].setAttribute("readonly", "true");
 }
+
+var sscUrl = document.getElementById("url");
+sscUrl.addEventListener("input", disableCtrlURLInput);
+
+function disableCtrlURLInput() {
+    var ctrlUrl = document.getElementById("ctrlUrl");
+    if (sscUrl.value.length > 0) {
+        ctrlUrl.setAttribute("disabled", "true");
+    } else {
+        ctrlUrl.removeAttribute("disabled");
+    }
+}
+
+window.addEventListener("load", disableCtrlURLInput);

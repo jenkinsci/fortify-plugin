@@ -40,6 +40,14 @@
     </f:section>-->
 
     <f:section title="SSC configuration">
+      <f:entry title="SSC URL" help="/plugin/fortify/help-sscUrl.html">
+        <f:textbox name="url" field="url" id="url"/>
+      </f:entry>
+
+      <f:entry title="Authentication token" help="/plugin/fortify/help-sscAuthToken.html">
+        <f:textbox name="token" field="token" id="token" checkMethod="post"/>
+      </f:entry>
+
       <f:optionalBlock name="useProxy" title="Use proxy" checked="${instance.useProxy}" help="/plugin/fortify/help-proxy.html">
         <f:entry title="Proxy server host:port">
           <f:textbox name="proxyUrl" field="proxyUrl" id="proxyUrl"/>
@@ -51,13 +59,6 @@
           <f:password name="proxyPassword" field="proxyPassword" id="proxyPassword" checkMethod="post"/>
         </f:entry>
       </f:optionalBlock>
-      <f:entry title="SSC URL" help="/plugin/fortify/help-sscUrl.html">
-        <f:textbox name="url" field="url" id="url"/>
-      </f:entry>
-
-      <f:entry title="Authentication token" help="/plugin/fortify/help-sscAuthToken.html">
-        <f:textbox name="token" field="token" id="token" checkMethod="post"/>
-      </f:entry>
 
       <f:entry title="Issue template" help="/plugin/fortify/help-sscProjTemplate.html">
         <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>

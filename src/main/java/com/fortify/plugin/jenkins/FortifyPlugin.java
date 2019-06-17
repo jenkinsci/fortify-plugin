@@ -1226,7 +1226,44 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public FormValidation doTestCtrlConnection(@QueryParameter String ctrlUrl, @QueryParameter boolean useProxy, @QueryParameter String proxyUrl,
+		public FormValidation doTestCtrlConnection(@QueryParameter String ctrlUrl) throws IOException {
+			String controllerUrl = ctrlUrl == null ? "" : ctrlUrl.trim();
+			try {
+				checkUrlValue(controllerUrl);
+			} catch (FortifyException e) {
+				return FormValidation.error(e.getMessage());
+			}
+
+			// backup original values
+			String orig_url = this.ctrlUrl;
+
+			this.ctrlUrl = controllerUrl;
+			OkHttpClient client = new OkHttpClient();
+
+			Request request = new Request.Builder()
+					.url(controllerUrl)
+					.build();
+			Response response = null;
+			try {
+				response = client.newCall(request).execute();
+
+				if (response.isSuccessful() && response.body().string().contains("Fortify CloudScan Controller")) {
+					return FormValidation.okWithMarkup("<font color=\"blue\">Connection successful!</font>");
+				} else {
+					return FormValidation.error("Connection failed. Check the Controller URL.");
+				}
+			} catch (Throwable t) {
+				return FormValidation.error(t, "Cannot connect to Controller");
+			} finally {
+				this.ctrlUrl = orig_url;
+
+				if (response != null && response.body() != null) {
+					response.body().close();
+				}
+			}
+		}
+
+		/*public FormValidation doTestCtrlConnection(@QueryParameter String ctrlUrl, @QueryParameter boolean useProxy, @QueryParameter String proxyUrl,
 												   @QueryParameter String proxyUsername, @QueryParameter String proxyPassword) throws IOException{
 			String controllerUrl = ctrlUrl == null ? "" : ctrlUrl.trim();
 			try {
@@ -1322,7 +1359,7 @@ public class FortifyPlugin extends Recorder {
 			client.setAuthenticator(proxyAuthenticator);
 
 			return client;
-		}
+		}*/
 
 		private void checkUrlValue(String sscUrl) throws FortifyException {
 			if (StringUtils.isBlank(sscUrl)) {

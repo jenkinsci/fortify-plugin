@@ -164,7 +164,7 @@ public class FortifyUpdate extends FortifyStep {
 				log.println(Messages.FortifyUpdate_URL_Invalid(updateServerUrl));
 			}
 		}
-		if (FortifyPlugin.DESCRIPTOR.getUseProxy()) {
+		/*if (FortifyPlugin.DESCRIPTOR.getUseProxy()) {
 			//String proxy = getResolvedUpdateProxyURL(listener);
 			String proxy = FortifyPlugin.DESCRIPTOR.getProxyUrl();
 			if (!StringUtils.isEmpty(proxy)) {
@@ -210,7 +210,7 @@ public class FortifyUpdate extends FortifyStep {
 					}
 				}
 			}
-		}
+		}*/
 		/*if (Jenkins.get().proxy != null) {
 			String proxyHost = Jenkins.get().proxy.name;
 			int proxyPort = Jenkins.get().proxy.port;

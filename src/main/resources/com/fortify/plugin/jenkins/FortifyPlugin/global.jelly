@@ -25,7 +25,7 @@
   </style>
 
   <f:section title="Fortify Assessment">
-    <f:section title="General configuration">
+    <!--<f:section title="General configuration">
       <f:optionalBlock name="useProxy" title="Use proxy" checked="${instance.useProxy}" help="/plugin/fortify/help-proxy.html">
         <f:entry title="Proxy server host:port">
           <f:textbox name="proxyUrl" field="proxyUrl" id="proxyUrl"/>
@@ -37,9 +37,20 @@
           <f:password name="proxyPassword" field="proxyPassword" id="proxyPassword" checkMethod="post"/>
         </f:entry>
       </f:optionalBlock>
-    </f:section>
+    </f:section>-->
 
     <f:section title="SSC configuration">
+      <f:optionalBlock name="useProxy" title="Use proxy" checked="${instance.useProxy}" help="/plugin/fortify/help-proxy.html">
+        <f:entry title="Proxy server host:port">
+          <f:textbox name="proxyUrl" field="proxyUrl" id="proxyUrl"/>
+        </f:entry>
+        <f:entry title="Proxy server username">
+          <f:textbox name="proxyUsername" field="proxyUsername" id="proxyUsername" checkMethod="post"/>
+        </f:entry>
+        <f:entry title="Proxy server password">
+          <f:password name="proxyPassword" field="proxyPassword" id="proxyPassword" checkMethod="post"/>
+        </f:entry>
+      </f:optionalBlock>
       <f:entry title="SSC URL" help="/plugin/fortify/help-sscUrl.html">
         <f:textbox name="url" field="url" id="url"/>
       </f:entry>
@@ -77,7 +88,8 @@
       </f:entry>
 
       <f:entry>
-        <f:validateButton title="Test Controller connection" progress="Testing..." method="testCtrlConnection" with="ctrlUrl,useProxy,proxyUrl,proxyUsername,proxyPassword" />
+        <!--<f:validateButton title="Test Controller connection" progress="Testing..." method="testCtrlConnection" with="ctrlUrl,useProxy,proxyUrl,proxyUsername,proxyPassword" />-->
+        <f:validateButton title="Test Controller connection" progress="Testing..." method="testCtrlConnection" with="ctrlUrl" />
       </f:entry>
     </f:section>
 

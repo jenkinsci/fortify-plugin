@@ -1,13 +1,13 @@
 package com.fortify.plugin.jenkins.steps;
 
 import com.fortify.plugin.jenkins.FortifyPlugin;
-import com.fortify.plugin.jenkins.steps.remote.*;
 import com.google.common.collect.ImmutableSet;
 import hudson.*;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.ComboBoxModel;
+import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang.StringUtils;
@@ -24,19 +24,16 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Set;
 
-public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildStep {
-    private RemoteAnalysisProjectType remoteAnalysisProjectType;
+public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildStep {
     private FortifyPlugin.RemoteOptionalConfigBlock remoteOptionalConfig;
     private FortifyPlugin.UploadSSCBlock uploadSSC;
 
-    //private String mbsFile;
-    //private boolean createMbs;
     private String buildID;
 
     @DataBoundConstructor
-    public CloudScanStart(RemoteAnalysisProjectType remoteAnalysisProjectType) { this.remoteAnalysisProjectType = remoteAnalysisProjectType; }
+    public CloudScanMbs(String buildID) { this.buildID = buildID; }
 
-    public RemoteAnalysisProjectType getRemoteAnalysisProjectType() { return remoteAnalysisProjectType; }
+    public String getBuildID() { return buildID; }
 
     public FortifyPlugin.RemoteOptionalConfigBlock getRemoteOptionalConfig() {
         return remoteOptionalConfig;
@@ -54,61 +51,16 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         this.uploadSSC = uploadSSC;
     }
 
-    public String getBuildTool() {
-        if (remoteAnalysisProjectType == null) {
-            return null;
-        }
-        if (getRemoteAnalysisProjectType() instanceof Gradle) {
-            return "gradle";
-        } else if (getRemoteAnalysisProjectType() instanceof Maven) {
-            return "mvn";
-        } else {
-            return "none";
-        }
-    }
-
-    public String getBuildFile() {
-        if (getRemoteAnalysisProjectType() instanceof Gradle) {
-            return ((Gradle)remoteAnalysisProjectType).getBuildFile();
-        } else if (getRemoteAnalysisProjectType() instanceof Maven) {
-            return ((Maven)remoteAnalysisProjectType).getBuildFile();
-        } else {
-            return "";
-        }
-    }
-
-    public boolean isIncludeTests() {
-        if (getRemoteAnalysisProjectType() instanceof Gradle) {
-            return ((Gradle)remoteAnalysisProjectType).getIncludeTests();
-        } else if (getRemoteAnalysisProjectType() instanceof Maven) {
-            return ((Maven)remoteAnalysisProjectType).getIncludeTests();
-        } else {
-            return false;
-        }
-    }
-
-    /*public String getMbsFile() {
-        return mbsFile;
-    }
-
-    public void setMbsFile(String mbsFile) {
-        this.mbsFile = mbsFile;
-    }
-
-    public boolean isCreateMbs() {
-        return createMbs;
-    }
-
-    public void setCreateMbs(boolean createMbs) {
-        this.createMbs = createMbs;
-    }*/
-
     public String getSensorPoolName() {
         return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getSensorPoolUUID();
     }
 
     public String getEmailAddr() {
         return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getNotifyEmail();
+    }
+
+    public String getScaScanOptions() {
+        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getScaScanOptions();
     }
 
     public String getRulepacks() {
@@ -119,10 +71,6 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getFilterFile();
     }
 
-    /*public String getResultsFile() {
-        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getResultsFile();
-    }*/
-
     public String getApplicationName() {
         return getUploadSSC() == null ? "" : getUploadSSC().getAppName();
     }
@@ -131,39 +79,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         return getUploadSSC() == null ? "" : getUploadSSC().getAppVersion();
     }
 
-    public String getPythonRequirementsFile() {
-        return getRemoteAnalysisProjectType() instanceof Python ? ((Python)remoteAnalysisProjectType).getPythonRequirementsFile() : "";
-    }
-
-    public String getPythonVersion() {
-        return getRemoteAnalysisProjectType() instanceof Python ? ((Python)remoteAnalysisProjectType).getPythonVersion() : "";
-    }
-
-    public String getPythonVirtualEnv() {
-        return getRemoteAnalysisProjectType() instanceof Python ? ((Python)remoteAnalysisProjectType).getPythonVirtualEnv() : "";
-    }
-
-    public String getPhpVersion() {
-        return getRemoteAnalysisProjectType() instanceof Php ? ((Php)remoteAnalysisProjectType).getPhpVersion() : "";
-    }
-
-    public String getBuildID() { return buildID; }
-
-    public void setBuildID(String buildID) { this.buildID = buildID; }
-
     // resolved variables
-    public String getResolvedBuildTool(TaskListener listener) {
-        return resolve(getBuildTool(), listener);
-    }
-
-    public String getResolvedBuildFile(TaskListener listener) {
-        return resolve(getBuildFile(), listener);
-    }
-
-    /*public String getResolvedMbsFile(TaskListener listener) {
-        return resolve(getMbsFile(), listener);
-    }*/
-
     public String getResolvedSensorPoolName(TaskListener listener) {
         return resolve(getSensorPoolName(), listener);
     }
@@ -182,21 +98,11 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
 
     public String getResolvedBuildID(TaskListener listener) { return resolve(getBuildID(), listener); }
 
-    /*public String getResolvedScanArgs(TaskListener listener) { return resolve(getScanOptions(), listener); }*/
+    public String getResolvedScanArgs(TaskListener listener) { return resolve(getScaScanOptions(), listener); }
 
     public String getResolvedApplicationName(TaskListener listener) { return resolve(getApplicationName(), listener); }
 
     public String getResolvedApplicationVersion(TaskListener listener) { return resolve(getApplicationVersion(), listener); }
-
-    public String getResolvedPythonRequirementsFile(TaskListener listener) { return resolve(getPythonRequirementsFile(), listener); }
-
-    public String getResolvedPythonVersion(TaskListener listener) { return resolve(getPythonVersion(), listener); }
-
-    public String getResolvedPythonVirtualEnv(TaskListener listener) { return resolve(getPythonVirtualEnv(), listener); }
-
-    public String getResolvedPhpVersion(TaskListener listener) { return resolve(getPhpVersion(), listener); }
-
-    /*public String getResolvedResultsFile(TaskListener listener) { return resolve(getResultsFile(), listener); }*/
 
     @Override
     public StepExecution start(StepContext context) throws Exception {
@@ -208,7 +114,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         setLastBuild(run);
         PrintStream log = taskListener.getLogger();
         log.println("Fortify Jenkins plugin v " + VERSION);
-        log.println("Launching Fortify CloudScan start command");
+        log.println("Launching Fortify CloudScan mbs command");
         String projectRoot = filePath.getRemote() + File.separator + ".fortify";
         String cloudscanExec = null;
 
@@ -233,54 +139,14 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
             args.add("-url");
             args.add(FortifyPlugin.DESCRIPTOR.getCtrlUrl());
         } else {
-            throw new AbortException("Fortify CloudScan start command execution failed: No SSC or Controller URL found");
+            throw new AbortException("Fortify CloudScan mbs command execution failed: No SSC or Controller URL found");
         }
         args.add("start");
-        if (StringUtils.isNotEmpty(getResolvedBuildTool(taskListener))) {
-            args.add("-bt");
-            args.add(getResolvedBuildTool(taskListener));
-            if (getResolvedBuildTool(taskListener).equals("none")) {
-                if (StringUtils.isNotEmpty(getResolvedPhpVersion(taskListener))) {
-                    args.add("-hv");
-                    args.add(getResolvedPhpVersion(taskListener));
-                }
-                if (StringUtils.isNotEmpty(getResolvedPythonRequirementsFile(taskListener))) {
-                    args.add("-pyr");
-                    args.add(getResolvedPythonRequirementsFile(taskListener));
-                }
-                if (StringUtils.isNotEmpty(getResolvedPythonVersion(taskListener))) {
-                    args.add("-yv");
-                    args.add(getResolvedPythonVersion(taskListener));
-                }
-                if (StringUtils.isNotEmpty(getResolvedPythonVirtualEnv(taskListener))) {
-                    args.add("-pyv");
-                    args.add(getResolvedPythonVirtualEnv(taskListener));
-                }
-            } else {
-                if (isIncludeTests()) {
-                    args.add("-t");
-                }
-            }
-        } else {
-            /*if (isCreateMbs() && StringUtils.isNotEmpty(getResolvedBuildID(taskListener))) {
-                args.add("-b");
-                args.add(getResolvedBuildID(taskListener));
-                args.add("-project-root");
-                args.add(projectRoot);
-            } else if (StringUtils.isNotEmpty(getResolvedMbsFile(taskListener))) {
-                args.add("-mbs");
-                args.add(getResolvedMbsFile(taskListener));
-            }*/
-            args.add("-b");
-            args.add(getResolvedBuildID(taskListener));
-            args.add("-project-root");
-            args.add(projectRoot);
-        }
-        /*if (StringUtils.isNotEmpty(getResolvedResultsFile(taskListener))) {
-            args.add("-o"); // overwrite existing FPR
-            args.add("-f");
-            args.add(getResolvedResultsFile(taskListener));
-        }*/
+        args.add("-b");
+        args.add(getResolvedBuildID(taskListener));
+        args.add("-project-root");
+        args.add(projectRoot);
+
         if (StringUtils.isNotEmpty(getResolvedEmailAddr(taskListener))) {
             args.add("-email");
             args.add(getResolvedEmailAddr(taskListener));
@@ -304,19 +170,19 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         if (StringUtils.isNotEmpty(getResolvedFilterFile(taskListener))) {
             addAllArguments(args, getResolvedFilterFile(taskListener), "-filter");
         }
-        /*if (StringUtils.isNotEmpty(getResolvedScanArgs(taskListener))) {
+        if (StringUtils.isNotEmpty(getResolvedScanArgs(taskListener))) {
             args.add("-scan");
             args.add(getResolvedScanArgs(taskListener));
-        }*/
+        }
 
         Launcher.ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(filePath).cmds(args).envs(vars)
                 .stdout(taskListener.getLogger()).stderr(taskListener.getLogger());
         int exitcode = ps.join();
-        log.println("Fortify CloudScan start command completed with exit code: " + exitcode);
+        log.println("Fortify CloudScan mbs command completed with exit code: " + exitcode);
 
         if (exitcode != 0) {
             run.setResult(Result.FAILURE);
-            throw new AbortException("Fortify CloudScan start command execution failed.");
+            throw new AbortException("Fortify CloudScan mbs command execution failed.");
         }
     }
 
@@ -329,17 +195,21 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
 
         @Override
         public String getFunctionName() {
-            return "fortifyRemoteStart";
+            return "fortifyRemoteScan";
         }
 
         @Override
         public String getDisplayName() {
-            return "Fortify Remote Start";
+            return "Fortify remote scan";
         }
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
             return ImmutableSet.of(Run.class, FilePath.class, Launcher.class, TaskListener.class);
+        }
+
+        public FormValidation doCheckBuildID(@QueryParameter String value) {
+            return Validators.checkFieldNotEmpty(value);
         }
 
         public void doRefreshProjects(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
@@ -367,21 +237,21 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
     }
 
     private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
-        private transient CloudScanStart csStart;
+        private transient CloudScanMbs csMbs;
 
-        protected Execution(CloudScanStart csStart, StepContext context) {
+        protected Execution(CloudScanMbs csMbs, StepContext context) {
             super(context);
-            this.csStart = csStart;
+            this.csMbs = csMbs;
         }
 
         @Override
         protected Void run() throws Exception {
-            getContext().get(TaskListener.class).getLogger().println("Running CloudScan start step");
+            getContext().get(TaskListener.class).getLogger().println("Running CloudScan mbs step");
             if (!getContext().get(FilePath.class).exists()) {
                 getContext().get(FilePath.class).mkdirs();
             }
 
-            csStart.perform(getContext().get(Run.class), getContext().get(FilePath.class), getContext().get(Launcher.class),
+            csMbs.perform(getContext().get(Run.class), getContext().get(FilePath.class), getContext().get(Launcher.class),
                     getContext().get(TaskListener.class));
 
             return null;

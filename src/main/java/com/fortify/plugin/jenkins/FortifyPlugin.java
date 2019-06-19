@@ -754,31 +754,26 @@ public class FortifyPlugin extends Recorder {
 
 		performLocalTranslation(build, launcher, listener);
 
-		final RemoteAnalysisProjectType remoteAnalysisProjectType = getRemoteAnalysisProjectType();
-		CloudScanStart csStart = new CloudScanStart(remoteAnalysisProjectType);
+		//final RemoteAnalysisProjectType remoteAnalysisProjectType = getRemoteAnalysisProjectType();
+		//CloudScanStart csStart = new CloudScanStart(remoteAnalysisProjectType);
 
-		csStart.setBuildID(getBuildId()); // set the build ID of the translation to create the MBS
+		//csStart.setBuildID(getBuildId()); // set the build ID of the translation to create the MBS
+
+		CloudScanMbs csMbs = new CloudScanMbs(getBuildId());
 
 		if (getRemoteOptionalConfig()) {
 			//csStart.setRemoteOptionalConfig(analysisRunType.getRunRemoteScan().getRemoteOptionalConfig());
-			csStart.setRemoteOptionalConfig(analysisRunType.getRemoteOptionalConfig());
+			csMbs.setRemoteOptionalConfig(analysisRunType.getRemoteOptionalConfig());
 		}
-		/*if (isCreate()) {
-			csStart.setCreateMbs(true);
-			csStart.setBuildID(getBuildId());
-		} else if (isUseExisting()) {
-			csStart.setCreateMbs(false);
-			csStart.setMbsFile(getMbsFile());
-		}*/
 
-		csStart.setScanOptions(getScanArgs());
+		//csMbs.setScanOptions(getScanArgs());
 
 		if (getUploadSSC()) {
-			csStart.setUploadSSC(analysisRunType.getUploadSSC());
+			csMbs.setUploadSSC(analysisRunType.getUploadSSC());
 		}
 
-		// run CloudScan start command
-		csStart.perform(build, launcher, listener);
+		// run CloudScan mbs command
+		csMbs.perform(build, launcher, listener);
 	}
 
 	private void runLocal(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {

@@ -60,7 +60,7 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
     }
 
     public String getScaScanOptions() {
-        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getScaScanOptions();
+        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getScanOptions();
     }
 
     public String getRulepacks() {
@@ -114,7 +114,7 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
         setLastBuild(run);
         PrintStream log = taskListener.getLogger();
         log.println("Fortify Jenkins plugin v " + VERSION);
-        log.println("Launching Fortify CloudScan mbs command");
+        log.println("Performing Fortify remote scan");
         String projectRoot = filePath.getRemote() + File.separator + ".fortify";
         String cloudscanExec = null;
 
@@ -139,7 +139,7 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
             args.add("-url");
             args.add(FortifyPlugin.DESCRIPTOR.getCtrlUrl());
         } else {
-            throw new AbortException("Fortify CloudScan mbs command execution failed: No SSC or Controller URL found");
+            throw new AbortException("Fortify remote scan execution failed: No SSC or Controller URL found");
         }
         args.add("start");
         args.add("-b");
@@ -178,11 +178,11 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
         Launcher.ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(filePath).cmds(args).envs(vars)
                 .stdout(taskListener.getLogger()).stderr(taskListener.getLogger());
         int exitcode = ps.join();
-        log.println("Fortify CloudScan mbs command completed with exit code: " + exitcode);
+        log.println("Fortify remote scan completed with exit code: " + exitcode);
 
         if (exitcode != 0) {
             run.setResult(Result.FAILURE);
-            throw new AbortException("Fortify CloudScan mbs command execution failed.");
+            throw new AbortException("Fortify remote scan execution failed.");
         }
     }
 
@@ -200,7 +200,7 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
 
         @Override
         public String getDisplayName() {
-            return "Fortify remote scan";
+            return "Upload a translated project for remote scan";
         }
 
         @Override
@@ -246,7 +246,7 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
 
         @Override
         protected Void run() throws Exception {
-            getContext().get(TaskListener.class).getLogger().println("Running CloudScan mbs step");
+            getContext().get(TaskListener.class).getLogger().println("Running Fortify remote scan step");
             if (!getContext().get(FilePath.class).exists()) {
                 getContext().get(FilePath.class).mkdirs();
             }

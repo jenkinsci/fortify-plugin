@@ -20,7 +20,7 @@ public class Maven extends RemoteAnalysisProjectType {
     @DataBoundSetter
     public void setBuildFile(String buildFile) { this.buildFile = buildFile; }
 
-    @Extension @Symbol("remoteMaven")
+    @Extension @Symbol("fortifyMaven")
     public static final class DescriptorImpl extends RemoteAnalysisProjectTypeDescriptor {
         public DescriptorImpl() {
             super(Maven.class);

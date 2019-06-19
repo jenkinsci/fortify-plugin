@@ -38,7 +38,7 @@ public class Python extends RemoteAnalysisProjectType {
         this.pythonVirtualEnv = pythonVirtualEnv;
     }
 
-    @Extension @Symbol("remotePython")
+    @Extension @Symbol("fortifyPython")
     public static final class DescriptorImpl extends RemoteAnalysisProjectTypeDescriptor {
         public DescriptorImpl() {
             super(Python.class);

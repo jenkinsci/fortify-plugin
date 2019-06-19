@@ -16,14 +16,11 @@
 package com.fortify.plugin.jenkins;
 
 import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -594,16 +591,16 @@ public class FortifyPlugin extends Recorder {
 		return isLocal() ? "" : analysisRunType.getRemoteOptionalConfig().getNotifyEmail();
 	}
 
-	public String getScaScanOptions() {
+	public String getScanOptions() {
 		/*if (isRemote()) {
-			return analysisRunType.getRemoteOptionalConfig().getScaScanOptions();
+			return analysisRunType.getRemoteOptionalConfig().getScanOptions();
 		} else if (isMixed()) {
-			//return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getScaScanOptions() : "";
+			//return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getScanOptions() : "";
 			return "";
 		} else {
 			return "";
 		}*/
-		return isLocal() ? "" : analysisRunType.getRemoteOptionalConfig().getScaScanOptions();
+		return isLocal() ? "" : analysisRunType.getRemoteOptionalConfig().getScanOptions();
 	}
 
 	/*public String getResultsFile() {
@@ -678,7 +675,7 @@ public class FortifyPlugin extends Recorder {
 	/*public String getMbsFile() {
 		return getRunRemoteScan() ? getFileName() : "";
 	}*/
-	public String getScanArgs() { return getRemoteOptionalConfig() ? getScaScanOptions() : ""; }
+	public String getScanArgs() { return getRemoteOptionalConfig() ? getScanOptions() : ""; }
 
 	@Override
 	public BuildStepMonitor getRequiredMonitorService() {
@@ -2805,7 +2802,7 @@ public class FortifyPlugin extends Recorder {
 	public static class RemoteOptionalConfigBlock {
 		private String sensorPoolUUID;
 		private String notifyEmail;
-		private String scaScanOptions;
+		private String scanOptions;
 		//private String resultsFile;
 		private String customRulepacks;
 		private String filterFile;
@@ -2821,9 +2818,9 @@ public class FortifyPlugin extends Recorder {
 		@DataBoundSetter
 		public void setNotifyEmail(String notifyEmail) { this.notifyEmail = notifyEmail; }
 
-		public String getScaScanOptions() { return scaScanOptions; }
+		public String getScanOptions() { return scanOptions; }
 		@DataBoundSetter
-		public void setScaScanOptions(String scaScanOptions) { this.scaScanOptions = scaScanOptions; }
+		public void setScanOptions(String scanOptions) { this.scanOptions = scanOptions; }
 
 		/*public String getResultsFile() { return resultsFile; }
 		@DataBoundSetter

@@ -33,7 +33,7 @@
                     </f:entry>
                 </f:section>
                 <f:section class="section-header" title="Fortify SCA configuration">
-                    <f:entry title="Fortify SCA scan options" field="scaScanOptions" help="/plugin/fortify/help-scanAddOptions.html">
+                    <f:entry title="Fortify SCA scan options" field="scanOptions" help="/plugin/fortify/help-scanAddOptions.html">
                         <f:textbox />
                     </f:entry>
                     <f:entry title="Custom Rulepacks" field="customRulepacks" help="/plugin/fortify/help-scanCustomRulepacks.html">

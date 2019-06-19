@@ -9,7 +9,7 @@ public class Ruby extends RemoteAnalysisProjectType {
     @DataBoundConstructor
     public Ruby() {}
 
-    @Extension @Symbol("remoteRuby")
+    @Extension @Symbol("fortifyRuby")
     public static final class DescriptorImpl extends RemoteAnalysisProjectTypeDescriptor {
         public DescriptorImpl() {
             super(Ruby.class);

@@ -20,7 +20,7 @@ public class Gradle extends RemoteAnalysisProjectType {
     @DataBoundSetter
     public void setBuildFile(String buildFile) { this.buildFile = buildFile; }
 
-    @Extension @Symbol("remoteGradle")
+    @Extension @Symbol("fortifyGradle")
     public static final class DescriptorImpl extends RemoteAnalysisProjectTypeDescriptor {
         public DescriptorImpl() {
             super(Gradle.class);

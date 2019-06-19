@@ -51,7 +51,7 @@
           </f:section>
           <f:section class="section-header" title="Fortify SCA configuration">
             <f:entry title="Fortify SCA scan options" help="/plugin/fortify/help-scanAddOptions.html">
-              <f:textbox field="scaScanOptions"/>
+              <f:textbox field="scanOptions"/>
             </f:entry>
             <!--<f:entry title="Results file" help="/plugin/fortify/help-fpr.html">
               <f:textbox field="resultsFile"/>
@@ -194,7 +194,7 @@
             </f:section>
             <f:section class="section-header" title="Fortify SCA configuration">
               <f:entry title="Fortify SCA scan options" help="/plugin/fortify/help-scanAddOptions.html">
-                <f:textbox field="scaScanOptions"/>
+                <f:textbox field="scanOptions"/>
               </f:entry>
               <!--<f:entry title="Results file" help="/plugin/fortify/help-fpr.html">
                 <f:textbox field="resultsFile"/>

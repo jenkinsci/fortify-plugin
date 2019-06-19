@@ -48,7 +48,7 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
         setLastBuild(run);
         PrintStream log = taskListener.getLogger();
         log.println("Fortify Jenkins plugin v " + VERSION);
-        log.println("Launching Fortify CloudScan arguments command");
+        log.println("Launching Fortify cloudscan arguments command");
         //String projectRoot = filePath.getRemote() + File.separator + ".fortify";
         String cloudscanExec = null;
 
@@ -76,11 +76,11 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
         Launcher.ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(filePath).cmds(args).envs(vars)
                 .stdout(taskListener.getLogger()).stderr(taskListener.getLogger());
         int exitcode = ps.join();
-        log.println("Fortify CloudScan arguments command completed with exit code: " + exitcode);
+        log.println("Fortify cloudscan arguments command completed with exit code: " + exitcode);
 
         if (exitcode != 0) {
             run.setResult(Result.FAILURE);
-            throw new AbortException("Fortify CloudScan arguments command execution failed.");
+            throw new AbortException("Fortify cloudscan arguments command execution failed.");
         }
     }
 
@@ -98,7 +98,7 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
 
         @Override
         public String getDisplayName() {
-            return "Fortify Remote Arguments";
+            return "Set options for remote Fortify SCA analysis";
         }
 
         @Override

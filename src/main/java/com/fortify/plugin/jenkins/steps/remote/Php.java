@@ -16,7 +16,7 @@ public class Php extends RemoteAnalysisProjectType {
     @DataBoundSetter
     public void setPhpVersion(String phpVersion) { this.phpVersion = phpVersion; }
 
-    @Extension @Symbol("remotePHP")
+    @Extension @Symbol("fortifyPHP")
     public static final class DescriptorImpl extends RemoteAnalysisProjectTypeDescriptor {
         public DescriptorImpl() {
             super(Php.class);

@@ -208,7 +208,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         setLastBuild(run);
         PrintStream log = taskListener.getLogger();
         log.println("Fortify Jenkins plugin v " + VERSION);
-        log.println("Launching Fortify CloudScan start command");
+        log.println("Performing Fortify remote analysis");
         String projectRoot = filePath.getRemote() + File.separator + ".fortify";
         String cloudscanExec = null;
 
@@ -233,7 +233,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
             args.add("-url");
             args.add(FortifyPlugin.DESCRIPTOR.getCtrlUrl());
         } else {
-            throw new AbortException("Fortify CloudScan start command execution failed: No SSC or Controller URL found");
+            throw new AbortException("Fortify remote analysis execution failed: No SSC or Controller URL found");
         }
         args.add("start");
         if (StringUtils.isNotEmpty(getResolvedBuildTool(taskListener))) {
@@ -312,11 +312,11 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         Launcher.ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(filePath).cmds(args).envs(vars)
                 .stdout(taskListener.getLogger()).stderr(taskListener.getLogger());
         int exitcode = ps.join();
-        log.println("Fortify CloudScan start command completed with exit code: " + exitcode);
+        log.println("Fortify remote analysis completed with exit code: " + exitcode);
 
         if (exitcode != 0) {
             run.setResult(Result.FAILURE);
-            throw new AbortException("Fortify CloudScan start command execution failed.");
+            throw new AbortException("Fortify remote analysis execution failed.");
         }
     }
 
@@ -329,12 +329,12 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
 
         @Override
         public String getFunctionName() {
-            return "fortifyRemoteStart";
+            return "fortifyRemoteAnalysis";
         }
 
         @Override
         public String getDisplayName() {
-            return "Fortify Remote Start";
+            return "Upload a project for remote Fortify SCA analysis";
         }
 
         @Override
@@ -376,7 +376,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
 
         @Override
         protected Void run() throws Exception {
-            getContext().get(TaskListener.class).getLogger().println("Running CloudScan start step");
+            getContext().get(TaskListener.class).getLogger().println("Running Fortify remote analysis step");
             if (!getContext().get(FilePath.class).exists()) {
                 getContext().get(FilePath.class).mkdirs();
             }

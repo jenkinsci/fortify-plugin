@@ -58,9 +58,9 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         if (remoteAnalysisProjectType == null) {
             return null;
         }
-        if (getRemoteAnalysisProjectType() instanceof Gradle) {
+        if (getRemoteAnalysisProjectType() instanceof GradleProjectType) {
             return "gradle";
-        } else if (getRemoteAnalysisProjectType() instanceof Maven) {
+        } else if (getRemoteAnalysisProjectType() instanceof MavenProjectType) {
             return "mvn";
         } else {
             return "none";
@@ -68,20 +68,20 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
     }
 
     public String getBuildFile() {
-        if (getRemoteAnalysisProjectType() instanceof Gradle) {
-            return ((Gradle)remoteAnalysisProjectType).getBuildFile();
-        } else if (getRemoteAnalysisProjectType() instanceof Maven) {
-            return ((Maven)remoteAnalysisProjectType).getBuildFile();
+        if (getRemoteAnalysisProjectType() instanceof GradleProjectType) {
+            return ((GradleProjectType)remoteAnalysisProjectType).getBuildFile();
+        } else if (getRemoteAnalysisProjectType() instanceof MavenProjectType) {
+            return ((MavenProjectType)remoteAnalysisProjectType).getBuildFile();
         } else {
             return "";
         }
     }
 
     public boolean isIncludeTests() {
-        if (getRemoteAnalysisProjectType() instanceof Gradle) {
-            return ((Gradle)remoteAnalysisProjectType).getIncludeTests();
-        } else if (getRemoteAnalysisProjectType() instanceof Maven) {
-            return ((Maven)remoteAnalysisProjectType).getIncludeTests();
+        if (getRemoteAnalysisProjectType() instanceof GradleProjectType) {
+            return ((GradleProjectType)remoteAnalysisProjectType).getIncludeTests();
+        } else if (getRemoteAnalysisProjectType() instanceof MavenProjectType) {
+            return ((MavenProjectType)remoteAnalysisProjectType).getIncludeTests();
         } else {
             return false;
         }
@@ -132,19 +132,19 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
     }
 
     public String getPythonRequirementsFile() {
-        return getRemoteAnalysisProjectType() instanceof Python ? ((Python)remoteAnalysisProjectType).getPythonRequirementsFile() : "";
+        return getRemoteAnalysisProjectType() instanceof PythonProjectType ? ((PythonProjectType)remoteAnalysisProjectType).getPythonRequirementsFile() : "";
     }
 
     public String getPythonVersion() {
-        return getRemoteAnalysisProjectType() instanceof Python ? ((Python)remoteAnalysisProjectType).getPythonVersion() : "";
+        return getRemoteAnalysisProjectType() instanceof PythonProjectType ? ((PythonProjectType)remoteAnalysisProjectType).getPythonVersion() : "";
     }
 
     public String getPythonVirtualEnv() {
-        return getRemoteAnalysisProjectType() instanceof Python ? ((Python)remoteAnalysisProjectType).getPythonVirtualEnv() : "";
+        return getRemoteAnalysisProjectType() instanceof PythonProjectType ? ((PythonProjectType)remoteAnalysisProjectType).getPythonVirtualEnv() : "";
     }
 
     public String getPhpVersion() {
-        return getRemoteAnalysisProjectType() instanceof Php ? ((Php)remoteAnalysisProjectType).getPhpVersion() : "";
+        return getRemoteAnalysisProjectType() instanceof PhpProjectType ? ((PhpProjectType)remoteAnalysisProjectType).getPhpVersion() : "";
     }
 
     public String getBuildID() { return buildID; }

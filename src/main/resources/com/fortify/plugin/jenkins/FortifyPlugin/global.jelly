@@ -39,7 +39,7 @@
       </f:optionalBlock>
     </f:section>-->
 
-    <f:section title="SSC configuration">
+    <f:section title="Software Security Center configuration">
       <f:entry title="SSC URL" help="/plugin/fortify/help-sscUrl.html">
         <f:textbox name="url" field="url" id="url"/>
       </f:entry>

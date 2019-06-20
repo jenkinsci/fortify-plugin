@@ -14,10 +14,5 @@
     See the License for the specific language governing permissions and
     limitations under the License.
  -->
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">>
-    <!--<f:advanced>
-        <f:entry title="Fortify SCA translation options" help="">
-            <f:textbox field="transArgs"/>
-        </f:entry>
-    </f:advanced>-->
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 </j:jelly>

@@ -4,22 +4,22 @@ import hudson.Extension;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class Ruby extends RemoteAnalysisProjectType {
-
+public class RubyProjectType extends RemoteAnalysisProjectType {
     @DataBoundConstructor
-    public Ruby() {}
+    public RubyProjectType() {}
 
-    @Extension @Symbol("fortifyRuby")
+    @Extension
+    @Symbol("fortifyRuby")
     public static final class DescriptorImpl extends RemoteAnalysisProjectTypeDescriptor {
         public DescriptorImpl() {
-            super(Ruby.class);
+            super(RubyProjectType.class);
         }
 
         @Override
         public String getDisplayName() {
-                return "Ruby";
-            }
-
+            return "Ruby";
+        }
     }
 
+    public static final RemoteAnalysisProjectTypeDescriptor DESCRIPTOR = new DescriptorImpl();
 }

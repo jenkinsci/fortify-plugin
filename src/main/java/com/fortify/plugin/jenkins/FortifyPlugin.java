@@ -26,8 +26,8 @@ import java.util.regex.Pattern;
 
 import com.fortify.plugin.jenkins.bean.SensorPoolBean;
 import com.fortify.plugin.jenkins.steps.*;
-import com.fortify.plugin.jenkins.steps.remote.Gradle;
-import com.fortify.plugin.jenkins.steps.remote.Maven;
+import com.fortify.plugin.jenkins.steps.remote.GradleProjectType;
+import com.fortify.plugin.jenkins.steps.remote.MavenProjectType;
 import com.fortify.plugin.jenkins.steps.remote.RemoteAnalysisProjectType;
 import com.squareup.okhttp.*;
 import hudson.*;
@@ -576,7 +576,7 @@ public class FortifyPlugin extends Recorder {
 		} else {
 			return "";
 		}*/
-		return isLocal() ? "" : analysisRunType.getRemoteOptionalConfig().getSensorPoolUUID();
+		return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getSensorPoolUUID() : "";
 	}
 
 	public String getNotifyEmail() {
@@ -588,7 +588,7 @@ public class FortifyPlugin extends Recorder {
 		} else {
 			return "";
 		}*/
-		return isLocal() ? "" : analysisRunType.getRemoteOptionalConfig().getNotifyEmail();
+		return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getNotifyEmail() : "";
 	}
 
 	public String getScanOptions() {
@@ -600,7 +600,7 @@ public class FortifyPlugin extends Recorder {
 		} else {
 			return "";
 		}*/
-		return isLocal() ? "" : analysisRunType.getRemoteOptionalConfig().getScanOptions();
+		return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getScanOptions() : "";
 	}
 
 	/*public String getResultsFile() {
@@ -616,7 +616,7 @@ public class FortifyPlugin extends Recorder {
 		} else {
 			return "";
 		}*/
-		return isLocal() ? "" : analysisRunType.getRemoteOptionalConfig().getCustomRulepacks();
+		return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getCustomRulepacks() : "";
 	}
 
 	public String getFilterFile() {
@@ -628,16 +628,16 @@ public class FortifyPlugin extends Recorder {
 		} else {
 			return "";
 		}*/
-		return isLocal() ? "" : analysisRunType.getRemoteOptionalConfig().getFilterFile();
+		return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getFilterFile() : "";
 	}
 
 	public String getBuildTool() {
 		if (!getAnalysisRunType()) {
 			return "";
 		}
-		if (getRemoteAnalysisProjectType() instanceof Gradle) {
+		if (getRemoteAnalysisProjectType() instanceof GradleProjectType) {
 			return "gradle";
-		} else if (getRemoteAnalysisProjectType() instanceof Maven) {
+		} else if (getRemoteAnalysisProjectType() instanceof MavenProjectType) {
 			return "mvn";
 		} else {
 			return "none";
@@ -648,10 +648,10 @@ public class FortifyPlugin extends Recorder {
 		if (!getAnalysisRunType()) {
 			return "";
 		}
-		if (getRemoteAnalysisProjectType() instanceof Gradle) {
-			return ((Gradle) getRemoteAnalysisProjectType()).getBuildFile();
-		} else if (getRemoteAnalysisProjectType() instanceof Maven) {
-			return ((Maven) getRemoteAnalysisProjectType()).getBuildFile();
+		if (getRemoteAnalysisProjectType() instanceof GradleProjectType) {
+			return ((GradleProjectType) getRemoteAnalysisProjectType()).getBuildFile();
+		} else if (getRemoteAnalysisProjectType() instanceof MavenProjectType) {
+			return ((MavenProjectType) getRemoteAnalysisProjectType()).getBuildFile();
 		} else {
 			return "";
 		}
@@ -659,10 +659,10 @@ public class FortifyPlugin extends Recorder {
 
 	public boolean getIncludeTests() {
 		if (getAnalysisRunType()) {
-			if (getRemoteAnalysisProjectType() instanceof Gradle) {
-				return ((Gradle) getRemoteAnalysisProjectType()).getIncludeTests();
-			} else if (getRemoteAnalysisProjectType() instanceof Maven) {
-				return ((Maven) getRemoteAnalysisProjectType()).getIncludeTests();
+			if (getRemoteAnalysisProjectType() instanceof GradleProjectType) {
+				return ((GradleProjectType) getRemoteAnalysisProjectType()).getIncludeTests();
+			} else if (getRemoteAnalysisProjectType() instanceof MavenProjectType) {
+				return ((MavenProjectType) getRemoteAnalysisProjectType()).getIncludeTests();
 			}
 		}
 		return false;

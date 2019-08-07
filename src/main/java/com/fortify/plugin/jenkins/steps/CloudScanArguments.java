@@ -59,7 +59,6 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
         EnvVars vars = run.getEnvironment(taskListener);
         ArrayList<String> args = new ArrayList<String>(2);
         args.add(cloudscanExec);
-        args.add("-experimental"); // TODO: Remove when -experimental is no longer needed
         args.add("arguments");
         args.add("-o");
 

@@ -219,7 +219,6 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         EnvVars vars = run.getEnvironment(taskListener);
         ArrayList<String> args = new ArrayList<String>(2);
         args.add(cloudscanExec);
-        args.add("-experimental"); // TODO: Remove when -experimental is no longer needed
 
         /*
             if SSC is configured, use SSC's configuration to find the Controller

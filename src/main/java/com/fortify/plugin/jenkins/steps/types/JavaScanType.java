@@ -91,6 +91,9 @@ public class JavaScanType extends ProjectScanType {
 			items.add("1.7", "1.7");
 			items.add("1.8", "1.8");
 			items.add("1.9", "1.9");
+			items.add("10", "10");
+			items.add("11", "11");
+			items.add("12", "12");
 
 			return items;
 		}

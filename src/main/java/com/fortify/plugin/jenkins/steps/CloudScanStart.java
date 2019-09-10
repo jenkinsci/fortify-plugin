@@ -261,15 +261,6 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
                 }
             }
         } else {
-            /*if (isCreateMbs() && StringUtils.isNotEmpty(getResolvedBuildID(taskListener))) {
-                args.add("-b");
-                args.add(getResolvedBuildID(taskListener));
-                args.add("-project-root");
-                args.add(projectRoot);
-            } else if (StringUtils.isNotEmpty(getResolvedMbsFile(taskListener))) {
-                args.add("-mbs");
-                args.add(getResolvedMbsFile(taskListener));
-            }*/
             args.add("-b");
             args.add(getResolvedBuildID(taskListener));
             args.add("-project-root");
@@ -303,10 +294,12 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         if (StringUtils.isNotEmpty(getResolvedFilterFile(taskListener))) {
             addAllArguments(args, getResolvedFilterFile(taskListener), "-filter");
         }
-        /*if (StringUtils.isNotEmpty(getResolvedScanArgs(taskListener))) {
-            args.add("-scan");
+
+        args.add("-scan");
+        // additional SCA arguments come after the -scan option
+        if (StringUtils.isNotEmpty(getResolvedScanArgs(taskListener))) {
             args.add(getResolvedScanArgs(taskListener));
-        }*/
+        }
 
         Launcher.ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(filePath).cmds(args).envs(vars)
                 .stdout(taskListener.getLogger()).stderr(taskListener.getLogger());

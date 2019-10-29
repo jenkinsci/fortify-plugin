@@ -256,6 +256,10 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
                     args.add(getResolvedPythonVirtualEnv(taskListener));
                 }
             } else {
+                if (StringUtils.isNotEmpty(getResolvedBuildFile(taskListener))) {
+                    args.add("-bf");
+                    args.add(getResolvedBuildFile(taskListener));
+                }
                 if (isIncludeTests()) {
                     args.add("-t");
                 }

@@ -295,10 +295,12 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
             addAllArguments(args, getResolvedFilterFile(taskListener), "-filter");
         }
 
-        args.add("-scan");
-        // additional SCA arguments come after the -scan option
-        if (StringUtils.isNotEmpty(getResolvedScanArgs(taskListener))) {
-            args.add(getResolvedScanArgs(taskListener));
+        if (StringUtils.isEmpty(getResolvedBuildTool(taskListener))) {
+            args.add("-scan");
+            // additional SCA arguments come after the -scan option
+            if (StringUtils.isNotEmpty(getResolvedScanArgs(taskListener))) {
+                args.add(getResolvedScanArgs(taskListener));
+            }
         }
 
         Launcher.ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(filePath).cmds(args).envs(vars)

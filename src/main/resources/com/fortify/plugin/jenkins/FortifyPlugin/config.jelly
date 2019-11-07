@@ -29,7 +29,7 @@
 
   <f:block>
     <table style="width:100%;">
-      <f:radioBlock title="Remote SCA translation and scan" value="remote" name="analysisRunType"
+      <f:radioBlock title="Remote translation &amp; remote scan" value="remote" name="analysisRunType"
                     checked="${instance.isRemote()}" help="/plugin/fortify/help-RemoteSCATranslationAndScan.html">
         <f:dropdownDescriptorSelector title="Application type" field="remoteAnalysisProjectType"
                                       descriptors="${descriptor.remoteAnalysisProjectTypeDescriptors}"/>
@@ -53,9 +53,6 @@
             <f:entry title="Fortify SCA scan options" help="/plugin/fortify/help-scanAddOptions.html">
               <f:textbox field="scanOptions"/>
             </f:entry>
-            <!--<f:entry title="Results file" help="/plugin/fortify/help-fpr.html">
-              <f:textbox field="resultsFile"/>
-            </f:entry>-->
             <f:entry title="Custom Rulepacks" help="/plugin/fortify/help-scanCustomRulepacks.html">
               <f:textbox field="customRulepacks"/>
             </f:entry>
@@ -93,7 +90,7 @@
         </table>
         </f:block>
       </f:radioBlock>
-      <f:radioBlock title="Local SCA translation and remote scan" value="mixed" name="analysisRunType"
+      <f:radioBlock title="Local translation &amp; remote scan" value="mixed" name="analysisRunType"
                     checked="${instance.isMixed()}" help="/plugin/fortify/help-localTranslationRemoteScan.html">
         <f:block>
         <table style="width:100%;">
@@ -106,17 +103,9 @@
         </f:optionalBlock>
         </table>
         </f:block>
-        <!--<f:block>
-          <f:checkbox field="runSCAClean" title="Run Fortify SCA clean" value="true" help="/plugin/fortify/help-runSCAClean.html"/>
-        </f:block>-->
         <f:entry field="buildId" title="Build ID" help="/plugin/fortify/help-buildID.html">
           <f:textbox/>
         </f:entry>
-
-        <!--<f:entry field="scanFile" title="Results file" help="/plugin/fortify/help-fpr.html">
-          <f:textbox/>
-        </f:entry>-->
-
         <f:entry field="maxHeap" title="Maximum heap memory (MB)" help="/plugin/fortify/help-maxHeap.html">
           <f:textbox/>
         </f:entry>
@@ -144,45 +133,6 @@
         </f:entry>
         <f:block>
         <table style="width:100%;">
-        <!--<f:optionalBlock field="runRemoteScan" title="Run Remote Fortify SCA scan" help="/plugin/fortify/help-runRemoteSCAScan.html">
-          <f:block>
-            <table style="width:100%;">
-              <f:radioBlock id="create-mbs" name="mbsType" value="create" title="Create mobile build session"
-                            checked="${instance.isCreate()}" help="/plugin/fortify/help-remoteCreateMBS.html">
-              </f:radioBlock>
-              <f:radioBlock id="use-mbs" name="mbsType" value="useExisting" checked="${instance.isUseExisting()}"
-                            title="Use existing mobile build session" help="/plugin/fortify/help-remoteUseExistingMBS.html">
-                <f:entry title="File name" help="/plugin/fortify/help-remoteMBSFilename.html">
-                  <f:textbox field="fileName"/>
-                </f:entry>
-              </f:radioBlock>
-                  <f:optionalBlock field="remoteOptionalConfig" title="Optional configuration" help="/plugin/fortify/help-remoteOptionalConfiguration.html">
-                    <f:section class="section-header" title="Controller configuration">
-                      <f:entry field="sensorPoolUUID" title="Sensor pool" help="/plugin/fortify/help-remoteSensorPool.html">
-                        <f:select/>
-                      </f:entry>
-                      <f:entry title="Notification email" help="/plugin/fortify/help-remoteNotificationEmail.html">
-                        <f:textbox field="notifyEmail"/>
-                      </f:entry>
-                    </f:section>
-                    <f:section class="section-header" title="Fortify SCA configuration">
-                      <f:entry title="Fortify SCA scan options" help="/plugin/fortify/help-scanAddOptions.html">
-                        <f:textbox field="scaScanOptions"/>
-                      </f:entry>
-                      <f:entry title="Results file" help="/plugin/fortify/help-fpr.html">
-                        <f:textbox field="resultsFile"/>
-                      </f:entry>
-                      <f:entry title="Custom Rulepacks" help="/plugin/fortify/help-scanCustomRulepacks.html">
-                        <f:textbox field="customRulepacks"/>
-                      </f:entry>
-                      <f:entry title="Fortify SCA scan filter file" help="/plugin/fortify/help-remoteScanFilterFile.html">
-                        <f:textbox field="filterFile"/>
-                      </f:entry>
-                    </f:section>
-                  </f:optionalBlock>
-            </table>
-          </f:block>
-        </f:optionalBlock>-->
           <f:optionalBlock field="remoteOptionalConfig" title="Optional configuration" help="/plugin/fortify/help-remoteOptionalConfiguration.html">
             <f:section class="section-header" title="Controller configuration">
               <f:entry field="sensorPoolUUID" title="Sensor pool" help="/plugin/fortify/help-remoteSensorPool.html">
@@ -196,9 +146,6 @@
               <f:entry title="Fortify SCA scan options" help="/plugin/fortify/help-scanAddOptions.html">
                 <f:textbox field="scanOptions"/>
               </f:entry>
-              <!--<f:entry title="Results file" help="/plugin/fortify/help-fpr.html">
-                <f:textbox field="resultsFile"/>
-              </f:entry>-->
               <f:entry title="Custom Rulepacks" help="/plugin/fortify/help-scanCustomRulepacks.html">
                 <f:textbox field="customRulepacks"/>
               </f:entry>
@@ -236,7 +183,7 @@
           </table>
         </f:block>
       </f:radioBlock>
-      <f:radioBlock title="Local SCA translation and scan" value="local" name="analysisRunType"
+      <f:radioBlock title="Local translation &amp; local scan" value="local" name="analysisRunType"
                     checked="${instance.isLocal()}" help="/plugin/fortify/help-localTranslationAndScan.html">
         <f:block>
           <table style="width:100%;">
@@ -249,9 +196,6 @@
         </f:optionalBlock>
           </table>
         </f:block>
-        <!--<f:block>
-          <f:checkbox field="runSCAClean" title="Run Fortify SCA clean" value="true" help="/plugin/fortify/help-runSCAClean.html"/>
-        </f:block>-->
         <f:entry field="buildId" title="Build ID" help="/plugin/fortify/help-buildID.html">
           <f:textbox/>
         </f:entry>

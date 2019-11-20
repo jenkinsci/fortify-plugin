@@ -1,12 +1,12 @@
 /*******************************************************************************
- * (c) Copyright 2019 Micro Focus or one of its affiliates. 
- * 
+ * (c) Copyright 2019 Micro Focus or one of its affiliates.
+ *
  * Licensed under the MIT License (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * https://opensource.org/licenses/MIT
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,48 +25,13 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import com.fortify.ssc.restclient.api.*;
+import com.fortify.ssc.restclient.model.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 
 import com.fortify.ssc.restclient.ApiClient;
 import com.fortify.ssc.restclient.ApiException;
-import com.fortify.ssc.restclient.api.ArtifactControllerApi;
-import com.fortify.ssc.restclient.api.ArtifactOfProjectVersionControllerApi;
-import com.fortify.ssc.restclient.api.AttributeDefinitionControllerApi;
-import com.fortify.ssc.restclient.api.AttributeOfProjectVersionControllerApi;
-import com.fortify.ssc.restclient.api.FilterSetOfProjectVersionControllerApi;
-import com.fortify.ssc.restclient.api.FolderOfProjectVersionControllerApi;
-import com.fortify.ssc.restclient.api.IssueGroupOfProjectVersionControllerApi;
-import com.fortify.ssc.restclient.api.IssueOfProjectVersionControllerApi;
-import com.fortify.ssc.restclient.api.IssueSelectorSetOfProjectVersionControllerApi;
-import com.fortify.ssc.restclient.api.IssueTemplateControllerApi;
-import com.fortify.ssc.restclient.api.ProjectControllerApi;
-import com.fortify.ssc.restclient.api.ProjectVersionControllerApi;
-import com.fortify.ssc.restclient.api.ProjectVersionOfProjectControllerApi;
-import com.fortify.ssc.restclient.model.ApiResultArtifact;
-import com.fortify.ssc.restclient.model.ApiResultIssueFilterSelectorSet;
-import com.fortify.ssc.restclient.model.ApiResultIssueTemplate;
-import com.fortify.ssc.restclient.model.ApiResultListAttributeDefinition;
-import com.fortify.ssc.restclient.model.ApiResultListFilterSet;
-import com.fortify.ssc.restclient.model.ApiResultListFolder;
-import com.fortify.ssc.restclient.model.ApiResultListIssueTemplate;
-import com.fortify.ssc.restclient.model.ApiResultListProject;
-import com.fortify.ssc.restclient.model.ApiResultListProjectVersion;
-import com.fortify.ssc.restclient.model.ApiResultListProjectVersionIssue;
-import com.fortify.ssc.restclient.model.ApiResultListProjectVersionIssueGroup;
-import com.fortify.ssc.restclient.model.ApiResultProjectVersion;
-import com.fortify.ssc.restclient.model.Artifact;
-import com.fortify.ssc.restclient.model.Attribute;
-import com.fortify.ssc.restclient.model.AttributeDefinition;
-import com.fortify.ssc.restclient.model.AttributeOption;
-import com.fortify.ssc.restclient.model.FilterSet;
-import com.fortify.ssc.restclient.model.Folder;
-import com.fortify.ssc.restclient.model.IssueSelector;
-import com.fortify.ssc.restclient.model.IssueTemplate;
-import com.fortify.ssc.restclient.model.Project;
-import com.fortify.ssc.restclient.model.ProjectVersion;
-import com.fortify.ssc.restclient.model.ProjectVersionIssue;
-import com.fortify.ssc.restclient.model.ProjectVersionIssueGroup;
 import com.squareup.okhttp.Authenticator;
 import com.squareup.okhttp.Credentials;
 import com.squareup.okhttp.Request;
@@ -122,7 +87,7 @@ public class ApiClientWrapper {
 	/**
 	 * Returns list of Applications in SSC. Returns empty list of no Applications
 	 * are found.
-	 * 
+	 *
 	 * @return List<Project>
 	 * @throws ApiException
 	 */
@@ -140,7 +105,7 @@ public class ApiClientWrapper {
 	/**
 	 * Returns list of Application Versions in SSC. Returns empty list of no
 	 * Applications Versions are found.
-	 * 
+	 *
 	 * @return List<ProjectVersion>
 	 * @throws ApiException
 	 */
@@ -159,7 +124,7 @@ public class ApiClientWrapper {
 	/**
 	 * Returns list of Attribute Definitions in SSC. Returns empty list if no
 	 * Attribute Definitions are found.
-	 * 
+	 *
 	 * @return List<AttributeDefinition>
 	 * @throws ApiException
 	 */
@@ -177,7 +142,7 @@ public class ApiClientWrapper {
 	/**
 	 * Returns list of Issue Templates in SSC. Returns empty list if no Issue
 	 * Templates are found.
-	 * 
+	 *
 	 * @return List<IssueTemplate>
 	 * @throws ApiException
 	 */
@@ -192,8 +157,25 @@ public class ApiClientWrapper {
 		return issueTemplateList;
 	}
 
+	/**
+	 * Returns a list of CloudScan Pools in SSC. Returns an empty list if no pools are found.
+	 * @return List<CloudPool>
+	 * @throws ApiException
+	 */
+	public List<CloudPool> getCloudScanPools() throws ApiException {
+		List<CloudPool> cloudPoolList = new ArrayList<>();
+		CloudPoolControllerApi cloudPoolControllerApi = new CloudPoolControllerApi(apiClient);
+		ApiResultListCloudPool apiResultListCloudPool = cloudPoolControllerApi.listCloudPool("name,uuid",
+				Integer.valueOf(0), Integer.MAX_VALUE, null, false, null);
+		for (CloudPool cloudPool : apiResultListCloudPool.getData()) {
+			cloudPoolList.add(cloudPool);
+		}
+
+		return cloudPoolList;
+	}
+
 	public List<ProjectVersionIssueGroup> getIssueGroupsForAvs(Long avId, String searchCondition, String folderId,
-			String filterSet, String groupingType) throws ApiException {
+															   String filterSet, String groupingType) throws ApiException {
 		List<ProjectVersionIssueGroup> issueGroups = new ArrayList<ProjectVersionIssueGroup>();
 		IssueGroupOfProjectVersionControllerApi issueGroupControllerApi = new IssueGroupOfProjectVersionControllerApi(
 				apiClient);
@@ -269,7 +251,7 @@ public class ApiClientWrapper {
 	}
 
 	public List<ProjectVersionIssue> getIssuesForAppVersion(Long appVersionId, int startPage, int pageSize,
-			String filter, String groupId, String groupingType) throws ApiException {
+															String filter, String groupId, String groupingType) throws ApiException {
 		List<ProjectVersionIssue> issues = new ArrayList<ProjectVersionIssue>();
 		IssueOfProjectVersionControllerApi issueSetOfProjectVersionControllerApi = new IssueOfProjectVersionControllerApi(
 				apiClient);
@@ -391,7 +373,7 @@ public class ApiClientWrapper {
 	 * @throws ApiException
 	 */
 	public Long createAppOrVersion(Long appId, String issueTemplateId, String appName, String appVersionName,
-			String masterAttrGuid, AppTypeEnum type) throws ApiException {
+								   String masterAttrGuid, AppTypeEnum type) throws ApiException {
 		Long appVersionId;
 		ProjectVersion appVersion = new ProjectVersion();
 		appVersion.setName(appVersionName);
@@ -504,7 +486,7 @@ public class ApiClientWrapper {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param fpr
 	 * @param appVersionId
 	 * @return id of the uploaded artifact

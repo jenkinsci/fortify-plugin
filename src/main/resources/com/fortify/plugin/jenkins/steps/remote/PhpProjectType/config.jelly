@@ -1,7 +1,7 @@
 <?jelly escape-by-default='true'?>
 <!--
     (c) Copyright 2019 Micro Focus or one of its affiliates.
-   
+
     Licensed under the MIT License (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -15,20 +15,12 @@
     limitations under the License.
  -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  	<f:entry title="${%Update server URL}" field="updateServerURL" help="/plugin/fortify/help-updateServerUrl.html">
-      	<f:textbox default="${descriptor.defaultURL}"/>
+    <f:entry title="PHP version" help="/plugin/fortify/help-phpVersion.html">
+        <f:textbox field="phpVersion"/>
     </f:entry>
-    <!--<f:optionalBlock title="${%Configure update server proxy}" field="useProxy" inline="true">
-      	<f:nested>
-    		<f:entry title="${%Proxy server host:port}" field="proxyURL">
-    			<f:textbox/>
-    		</f:entry>
-    		<f:entry title="${%Proxy server username}" field="proxyUsername">
-    			<f:textbox/>
-    		</f:entry>
-    		<f:entry title="${%Proxy server password}" field="proxyPassword">
-    			<f:password/>
-    		</f:entry>
-      	</f:nested>
-    </f:optionalBlock>-->
+    <!--<f:advanced>
+        <f:entry title="Fortify SCA translation options" help="">
+            <f:textbox field="transArgs"/>
+        </f:entry>
+    </f:advanced>-->
 </j:jelly>

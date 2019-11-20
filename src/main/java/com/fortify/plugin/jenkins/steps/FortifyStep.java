@@ -19,8 +19,10 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
+import hudson.Util;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -81,7 +83,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		String s = workspace.act(new FindExecutableRemoteService(filename, fortifyHome, path, workspace));
 		if (s == null) {
 			listener.getLogger().printf("executable not found: %s%n", filename);
-			listener.getLogger().printf("\thome: %s%n", fortifyHome);
+			listener.getLogger().printf("\tfortify_home: %s%n", fortifyHome);
 			listener.getLogger().printf("\tpath: %s%n", path);
 			listener.getLogger().printf("\tworkspace: %s%n", workspace.getRemote());
 			return filename;
@@ -139,4 +141,19 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		return null;
 	}
 
+	// breaks down argsToAdd into individual arguments before adding to args List.
+	protected void addAllArguments(List<String> args, String argsToAdd) {
+		for (String s : Util.tokenize(argsToAdd)) {
+			args.add(s);
+		}
+	}
+
+	// breaks down argsToAdd into individual arguments before adding to args List.
+	// Adds a flag argument before each individual argument.
+	protected void addAllArguments(List<String> args, String argsToAdd, String flag) {
+		for (String s : Util.tokenize(argsToAdd)) {
+			args.add(flag);
+			args.add(s);
+		}
+	}
 }

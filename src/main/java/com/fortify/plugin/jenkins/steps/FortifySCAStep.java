@@ -135,20 +135,4 @@ public abstract class FortifySCAStep extends FortifyStep {
 		return resolve(getLogFile(), listener);
 	}
 
-	// breaks down argsToAdd into individual arguments before adding to args List.
-	protected void addAllArguments(List<String> args, String argsToAdd) {
-		for (String s : Util.tokenize(argsToAdd)) {
-			args.add(s);
-		}
-	}
-
-	// breaks down argsToAdd into individual arguments before adding to args List.
-	// Adds a flag argument before each individual argument.
-	protected void addAllArguments(List<String> args, String argsToAdd, String flag) {
-		for (String s : Util.tokenize(argsToAdd)) {
-			args.add(flag);
-			args.add(s);
-		}
-	}
-
 }

@@ -706,11 +706,11 @@ public class FortifyUpload extends FortifyStep {
 		}
 
 		public ComboBoxModel getApplicationNameItems() {
-			return FortifyPlugin.DESCRIPTOR.getProjectNameItems();
+			return FortifyPlugin.DESCRIPTOR.getAppNameItems();
 		}
 
 		public ComboBoxModel getApplicationVersionItems(@QueryParameter String applicationName) {
-			return FortifyPlugin.DESCRIPTOR.getProjectVersionItems(applicationName);
+			return FortifyPlugin.DESCRIPTOR.getAppVersionItems(applicationName);
 		}
 
 		public void doRefreshApplications(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
@@ -774,6 +774,16 @@ public class FortifyUpload extends FortifyStep {
 						client.init(url, token, proxyHost, proxyPort, FortifyPlugin.DESCRIPTOR.getProxyUsername(),
 								FortifyPlugin.DESCRIPTOR.getProxyPassword());
 					}
+					/*boolean useProxy = Jenkins.get().proxy != null;
+					if (!useProxy) {
+						client.init(url, token);
+					} else {
+						String proxyHost = Jenkins.get().proxy.name;
+						int proxyPort = Jenkins.get().proxy.port;
+						String proxyUsername = Jenkins.get().proxy.getUserName();
+						String proxyPassword = Jenkins.get().proxy.getPassword();
+						client.init(url, token, proxyHost, proxyPort, proxyUsername, proxyPassword);
+					}*/
 				}
 				return cmd.runWith(client);
 			} finally {

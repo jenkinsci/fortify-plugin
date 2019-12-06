@@ -169,8 +169,8 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
         if (StringUtils.isNotEmpty(getResolvedFilterFile(taskListener))) {
             addAllArguments(args, getResolvedFilterFile(taskListener), "-filter");
         }
+        args.add("-scan"); // must have -scan argument for mbs scans
         if (StringUtils.isNotEmpty(getResolvedScanArgs(taskListener))) {
-            args.add("-scan");
             args.add(getResolvedScanArgs(taskListener));
         }
 

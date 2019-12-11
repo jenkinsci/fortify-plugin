@@ -111,8 +111,6 @@ public class FortifyPlugin extends Recorder {
 	private transient String addJVMOptions;
 
 	private AnalysisRunType analysisRunType;
-	private RemoteAnalysisProjectType remoteAnalysisProjectType;
-	private ProjectScanType projectScanType;
 
 	@DataBoundConstructor
 	public FortifyPlugin(AnalysisRunType analysisRunType) {
@@ -141,7 +139,6 @@ public class FortifyPlugin extends Recorder {
 			if (updateContent != null) {
 				analysisRunType.setUpdateContent(updateContent);
 			}
-			//analysisRunType.setRunSCAClean(runSCAClean);
 
 			if (buildId != null) {
 				analysisRunType.setBuildId(buildId);
@@ -277,26 +274,6 @@ public class FortifyPlugin extends Recorder {
 		return getAnalysisRunType() && analysisRunType.getRunScan() != null;
 	}
 
-	/*public boolean getRunRemoteScan() {
-		return getAnalysisRunType() && analysisRunType.getRunRemoteScan() != null;
-	}
-
-	public boolean getMbsType() {
-		return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getMbsType() != null;
-	}
-
-	public boolean isCreate() {
-		return getMbsType() && analysisRunType.getRunRemoteScan().getMbsType().getValue().equals("create");
-	}
-
-	public boolean isUseExisting() {
-		return getMbsType() && analysisRunType.getRunRemoteScan().getMbsType().getValue().equals("useExisting");
-	}
-
-	public String getFileName() {
-		return isUseExisting() ? analysisRunType.getRunRemoteScan().getMbsType().getFileName() : "";
-	}*/
-
 	public boolean getUploadSSC() {
 		return getAnalysisRunType() && analysisRunType.getUploadSSC() != null;
 	}
@@ -324,10 +301,6 @@ public class FortifyPlugin extends Recorder {
 	public String getUpdateProxyPassword() {
 		return getUpdateUseProxy() ? updateContent.getUpdateProxyPassword() : "";
 	}
-
-	/*public boolean getRunSCAClean() {
-		return getAnalysisRunType() && analysisRunType.isRunSCAClean();
-	}*/
 
 	@Deprecated
 	public String getTranslationType() {
@@ -556,78 +529,26 @@ public class FortifyPlugin extends Recorder {
 	}
 
 	public boolean getRemoteOptionalConfig() {
-		/*if (isRemote()) {
-			return analysisRunType.getRemoteOptionalConfig() != null;
-		} else if (isMixed()) {
-			//return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null;
-			return false;
-		} else {
-			return false;
-		}*/
 		return !isLocal() && analysisRunType.getRemoteOptionalConfig() != null;
 	}
 
 	public String getSensorPoolUUID() {
-		/*if (isRemote()) {
-			return analysisRunType.getRemoteOptionalConfig().getSensorPoolUUID();
-		} else if (isMixed()) {
-			//return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getSensorPoolUUID() : "";
-			return "";
-		} else {
-			return "";
-		}*/
 		return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getSensorPoolUUID() : "";
 	}
 
 	public String getNotifyEmail() {
-		/*if (isRemote()) {
-			return analysisRunType.getRemoteOptionalConfig().getNotifyEmail();
-		} else if (isMixed()) {
-			//return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getNotifyEmail() : "";
-			return "";
-		} else {
-			return "";
-		}*/
 		return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getNotifyEmail() : "";
 	}
 
 	public String getScanOptions() {
-		/*if (isRemote()) {
-			return analysisRunType.getRemoteOptionalConfig().getScanOptions();
-		} else if (isMixed()) {
-			//return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getScanOptions() : "";
-			return "";
-		} else {
-			return "";
-		}*/
 		return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getScanOptions() : "";
 	}
 
-	/*public String getResultsFile() {
-		return isLocal() ? "" : analysisRunType.getRemoteOptionalConfig().getResultsFile();
-	}*/
-
 	public String getCustomRulepacks() {
-		/*if (isRemote()) {
-			return analysisRunType.getRemoteOptionalConfig().getCustomRulepacks();
-		} else if (isMixed()) {
-			//return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getCustomRulepacks() : "";
-			return "";
-		} else {
-			return "";
-		}*/
 		return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getCustomRulepacks() : "";
 	}
 
 	public String getFilterFile() {
-		/*if (isRemote()) {
-			return analysisRunType.getRemoteOptionalConfig().getFilterFile();
-		} else if (isMixed()) {
-			//return getRunRemoteScan() && analysisRunType.getRunRemoteScan().getRemoteOptionalConfig() != null ? analysisRunType.getRunRemoteScan().getRemoteOptionalConfig().getFilterFile() : "";
-			return "";
-		} else {
-			return "";
-		}*/
 		return getRemoteOptionalConfig() ? analysisRunType.getRemoteOptionalConfig().getFilterFile() : "";
 	}
 
@@ -672,9 +593,6 @@ public class FortifyPlugin extends Recorder {
 		return getRemoteAnalysisProjectType() == null ? "" : analysisRunType.getTransArgs();
 	}
 
-	/*public String getMbsFile() {
-		return getRunRemoteScan() ? getFileName() : "";
-	}*/
 	public String getScanArgs() { return getRemoteOptionalConfig() ? getScanOptions() : ""; }
 
 	@Override
@@ -745,16 +663,7 @@ public class FortifyPlugin extends Recorder {
 		PrintStream log = listener.getLogger();
 		log.println("Running local translation and remote scan.");
 
-		/*if (isCreate()) { // only run the translation if you want to create an MBS
-			performLocalTranslation(build, launcher, listener);
-		}*/
-
 		performLocalTranslation(build, launcher, listener);
-
-		//final RemoteAnalysisProjectType remoteAnalysisProjectType = getRemoteAnalysisProjectType();
-		//CloudScanStart csStart = new CloudScanStart(remoteAnalysisProjectType);
-
-		//csStart.setBuildID(getBuildId()); // set the build ID of the translation to create the MBS
 
 		CloudScanMbs csMbs = new CloudScanMbs(getBuildId());
 
@@ -762,8 +671,6 @@ public class FortifyPlugin extends Recorder {
 			//csStart.setRemoteOptionalConfig(analysisRunType.getRunRemoteScan().getRemoteOptionalConfig());
 			csMbs.setRemoteOptionalConfig(analysisRunType.getRemoteOptionalConfig());
 		}
-
-		//csMbs.setScanOptions(getScanArgs());
 
 		if (getUploadSSC()) {
 			csMbs.setUploadSSC(analysisRunType.getUploadSSC());
@@ -812,10 +719,6 @@ public class FortifyPlugin extends Recorder {
 			fu.perform(build, launcher, listener);
 		}
 		// run Fortify SCA clean
-		/*if (getRunSCAClean()) {
-			FortifyClean fc = new FortifyClean(getBuildId());
-			fc.perform(build, launcher, listener);
-		}*/
 		FortifyClean fc = new FortifyClean(getBuildId());
 		fc.perform(build, launcher, listener);
 
@@ -1254,104 +1157,6 @@ public class FortifyPlugin extends Recorder {
 				}
 			}
 		}
-
-		/*public FormValidation doTestCtrlConnection(@QueryParameter String ctrlUrl, @QueryParameter boolean useProxy, @QueryParameter String proxyUrl,
-												   @QueryParameter String proxyUsername, @QueryParameter String proxyPassword) throws IOException{
-			String controllerUrl = ctrlUrl == null ? "" : ctrlUrl.trim();
-			try {
-				checkUrlValue(controllerUrl);
-			} catch (FortifyException e) {
-				return FormValidation.error(e.getMessage());
-			}
-
-			// backup original values
-			String orig_url = this.ctrlUrl;
-			boolean orig_useProxy = this.useProxy;
-			String orig_proxyUrl = this.proxyUrl;
-			Secret orig_proxyUsername = this.proxyUsername;
-			Secret orig_proxyPassword = this.proxyPassword;
-
-			this.ctrlUrl = controllerUrl;
-			this.useProxy = useProxy;
-			this.proxyUrl = proxyUrl;
-			this.proxyUsername = proxyUsername == null ? null : Secret.fromString(proxyUsername);
-			this.proxyPassword = proxyPassword == null ? null : Secret.fromString(proxyPassword);
-			OkHttpClient client;
-
-			String[] proxyUrlSplit = proxyUrl.split(":");
-			String proxyHost = proxyUrlSplit[0];
-			int proxyPort = 80;
-			if (proxyUrlSplit.length > 1) {
-				try {
-					proxyPort = Integer.parseInt(proxyUrlSplit[1]);
-				} catch (NumberFormatException nfe) {
-				}
-			}
-
-			if (useProxy && proxyHost.length() > 0) {
-				client = configureProxy(proxyHost, proxyPort, proxyUsername, proxyPassword);
-			} else {
-				client = new OkHttpClient();
-			}
-
-			Request request = new Request.Builder()
-					.url(controllerUrl)
-					.build();
-			Response response = null;
-			try {
-				response = client.newCall(request).execute();
-
-				if (response.isSuccessful() && response.body().string().contains("Fortify CloudScan Controller")) {
-					return FormValidation.okWithMarkup("<font color=\"blue\">Connection successful!</font>");
-				} else {
-					return FormValidation.error("Connection failed. Check the Controller URL.");
-				}
-			} catch (Throwable t) {
-				return FormValidation.error(t, "Cannot connect to Controller");
-			} finally {
-				this.ctrlUrl = orig_url;
-				this.useProxy = orig_useProxy;
-				this.proxyUrl = orig_proxyUrl;
-				this.proxyUsername = orig_proxyUsername;
-				this.proxyPassword = orig_proxyPassword;
-				if (response != null && response.body() != null) {
-					response.body().close();
-				}
-			}
-		}
-
-		private OkHttpClient configureProxy(String host, int port, String user, String pass) {
-			int proxyPort = port;
-			String proxyHost = host;
-			final String username = user;
-			final String password = pass;
-
-			Authenticator proxyAuthenticator = new Authenticator() {
-				@Override public Request authenticate(Proxy proxy, Response response) throws IOException {
-					String credential = Credentials.basic(username, password);
-					return response.request().newBuilder()
-							.header("Authorization", credential)
-							.build();
-				}
-
-				@Override
-				public Request authenticateProxy(Proxy proxy, Response response) throws IOException {
-					String credential = Credentials.basic(username, password);
-					return response.request().newBuilder()
-							.header("Proxy-Authorization", credential)
-							.build();
-				}
-			};
-
-			OkHttpClient client = new OkHttpClient();
-			client.setConnectTimeout(60, TimeUnit.SECONDS);
-			client.setWriteTimeout(60, TimeUnit.SECONDS);
-			client.setReadTimeout(60, TimeUnit.SECONDS);
-			client.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)));
-			client.setAuthenticator(proxyAuthenticator);
-
-			return client;
-		}*/
 
 		private void checkUrlValue(String sscUrl) throws FortifyException {
 			if (StringUtils.isBlank(sscUrl)) {
@@ -1925,6 +1730,9 @@ public class FortifyPlugin extends Recorder {
 			options.add("1.7", "1.7");
 			options.add("1.8", "1.8");
 			options.add("1.9", "1.9");
+			options.add("10", "10");
+			options.add("11", "11");
+			options.add("12", "12");
 			return options;
 		}
 	}
@@ -2629,14 +2437,14 @@ public class FortifyPlugin extends Recorder {
 	@Deprecated
 	public static class UseProxyBlock {
 		private String proxyUrl;
-		private String proxyUsername;
-		private String proxyPassword;
+		private Secret proxyUsername;
+		private Secret proxyPassword;
 
 		@DataBoundConstructor
 		public UseProxyBlock(String updateProxyUrl, String updateProxyUsername, String updateProxyPassword) {
 			this.proxyUrl = updateProxyUrl != null ? updateProxyUrl.trim() : "";
-			this.proxyUsername = updateProxyUsername != null ? updateProxyUsername.trim() : "";
-			this.proxyPassword = updateProxyPassword != null ? updateProxyPassword.trim() : "";
+			this.proxyUsername = updateProxyUsername != null ? Secret.fromString(updateProxyUsername.trim()) : null;
+			this.proxyPassword = updateProxyPassword != null ? Secret.fromString(updateProxyPassword.trim()) : null;
 		}
 
 		public String getProxyUrl() {
@@ -2644,11 +2452,11 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		public String getProxyUsername() {
-			return proxyUsername;
+			return proxyUsername == null ? "" : proxyUsername.getPlainText();
 		}
 
 		public String getProxyPassword() {
-			return proxyPassword;
+			return proxyPassword == null ? "" : proxyPassword.getPlainText();
 		}
 	}
 
@@ -2662,7 +2470,6 @@ public class FortifyPlugin extends Recorder {
 		// local translation
 		private ProjectScanType projectScanType;
 		private UpdateContentBlock updateContent;
-		//private boolean runSCAClean;
 		private String buildId;
 		private String scanFile;
 		private String maxHeap;
@@ -2672,8 +2479,6 @@ public class FortifyPlugin extends Recorder {
 		private boolean translationVerbose;
 		private String translationLogFile;
 
-		// mixed - remote scan
-		//private RunRemoteScanBlock runRemoteScan;
 		// local scan
 		private RunScanBlock runScan;
 
@@ -2708,10 +2513,6 @@ public class FortifyPlugin extends Recorder {
 		public UpdateContentBlock getUpdateContent() { return updateContent; }
 		@DataBoundSetter
 		public void setUpdateContent(UpdateContentBlock updateContent) { this.updateContent = updateContent; }
-
-		/*public boolean isRunSCAClean() { return runSCAClean; }
-		@DataBoundSetter
-		public void setRunSCAClean(boolean runSCAClean) { this.runSCAClean = runSCAClean; }*/
 
 		public String getBuildId() { return buildId; }
 		@DataBoundSetter
@@ -2753,57 +2554,16 @@ public class FortifyPlugin extends Recorder {
 		@DataBoundSetter
 		public void setRunScan(RunScanBlock runScan) { this.runScan = runScan; }
 
-		/*public RunRemoteScanBlock getRunRemoteScan() { return runRemoteScan; }
-		@DataBoundSetter
-		public void setRunRemoteScan(RunRemoteScanBlock runRemoteScan) { this.runRemoteScan = runRemoteScan; }*/
-
 		public UploadSSCBlock getUploadSSC() { return uploadSSC; }
 		@DataBoundSetter
 		public void setUploadSSC(UploadSSCBlock uploadSSC) { this.uploadSSC = uploadSSC; }
 
 	}
 
-	/*public static class RunRemoteScanBlock {
-		private MbsScanBlock mbsType;
-		private RemoteOptionalConfigBlock remoteOptionalConfig;
-
-		@DataBoundConstructor
-		public RunRemoteScanBlock() {}
-
-		public MbsScanBlock getMbsType() { return mbsType; }
-		@DataBoundSetter
-		public void setMbsType(MbsScanBlock mbsType) { this.mbsType = mbsType; }
-
-		public RemoteOptionalConfigBlock getRemoteOptionalConfig() { return remoteOptionalConfig; }
-		@DataBoundSetter
-		public void setRemoteOptionalConfig(RemoteOptionalConfigBlock remoteOptionalConfig) { this.remoteOptionalConfig = remoteOptionalConfig; }
-
-	}
-
-	public static class MbsScanBlock {
-		private String value;
-		private String fileName;
-
-		@DataBoundConstructor
-		public MbsScanBlock(String value, String fileName) {
-			this.value = value;
-			this.fileName = fileName;
-		}
-
-		public String getValue() {
-			return value;
-		}
-		public String getFileName() {
-			return fileName;
-		}
-
-	}*/
-
 	public static class RemoteOptionalConfigBlock {
 		private String sensorPoolUUID;
 		private String notifyEmail;
 		private String scanOptions;
-		//private String resultsFile;
 		private String customRulepacks;
 		private String filterFile;
 
@@ -2821,10 +2581,6 @@ public class FortifyPlugin extends Recorder {
 		public String getScanOptions() { return scanOptions; }
 		@DataBoundSetter
 		public void setScanOptions(String scanOptions) { this.scanOptions = scanOptions; }
-
-		/*public String getResultsFile() { return resultsFile; }
-		@DataBoundSetter
-		public void setResultsFile(String resultsFile) { this.resultsFile = resultsFile; }*/
 
 		public String getCustomRulepacks() { return customRulepacks; }
 		@DataBoundSetter

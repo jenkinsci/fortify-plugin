@@ -15,20 +15,7 @@
     limitations under the License.
  -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  	<f:entry title="${%Update server URL}" field="updateServerURL" help="/plugin/fortify/help-updateServerUrl.html">
-      	<f:textbox default="${descriptor.defaultURL}"/>
+    <f:entry title="${%Update server URL}" field="updateServerURL" help="/plugin/fortify/help-updateServerUrl.html">
+        <f:textbox default="${descriptor.defaultURL}"/>
     </f:entry>
-    <!--<f:optionalBlock title="${%Configure update server proxy}" field="useProxy" inline="true">
-      	<f:nested>
-    		<f:entry title="${%Proxy server host:port}" field="proxyURL">
-    			<f:textbox/>
-    		</f:entry>
-    		<f:entry title="${%Proxy server username}" field="proxyUsername">
-    			<f:textbox/>
-    		</f:entry>
-    		<f:entry title="${%Proxy server password}" field="proxyPassword">
-    			<f:password/>
-    		</f:entry>
-      	</f:nested>
-    </f:optionalBlock>-->
 </j:jelly>

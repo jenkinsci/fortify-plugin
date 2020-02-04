@@ -7,7 +7,7 @@ This is the official Jenkins plugin for Fortify Static Code Analyzer (SCA) and F
 
 ## Documentation
 
-You can find plugin documentation here: https://www.microfocus.com/documentation/fortify-jenkins-plugin/1910/Jenkins_Plugin_Help_19.1.0/index.htm
+You can find plugin documentation here: https://www.microfocus.com/documentation/fortify-jenkins-plugin/
 
 For more information about Fortify SCA, please visit https://www.microfocus.com/products/static-code-analysis-sast.
 

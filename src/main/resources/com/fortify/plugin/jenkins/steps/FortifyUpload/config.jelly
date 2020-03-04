@@ -19,10 +19,10 @@
     <f:entry title="${%Application name}" help="/plugin/fortify/help-sscProjName.html">
       <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
       <div style="float:left;width:80%;">
-        <f:editableComboBox id="projectName" name="appName" field="appName" clazz="setting-input" items="${descriptor.applicationNameItems}" />
+        <f:editableComboBox id="projectName" name="appName" field="appName" clazz="setting-input project-name" items="${descriptor.applicationNameItems}" />
       </div>
       <div style="float:left">
-        <input value="▼" type="button" id="refreshPrjButton" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshApplications')" />
+        <input value="▼" type="button" id="refreshPrjButton" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshApplications', this)" />
       </div>
       <div style="display:none;" id="refreshSpinner" >
         <img src="${imagesURL}/spinner.gif" /> ${progress}
@@ -31,10 +31,10 @@
 
     <f:entry title="${%Application version}" help="/plugin/fortify/help-sscProjVersion.html">
       <div style="float:left;width:50%;">
-        <f:editableComboBox id="projectVersion" name="appVersion" field="appVersion" clazz="setting-input" items="${descriptor.applicationVersionItems(appName)}" />
+        <f:editableComboBox id="projectVersion" name="appVersion" field="appVersion" clazz="setting-input project-version" items="${descriptor.applicationVersionItems(appName)}" />
       </div>
       <div style="float:left">
-        <input value="▼" type="button" id="refreshPrjVerButton" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions')" />
+        <input value="▼" type="button" id="refreshPrjVerButton" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
       </div>
     </f:entry>
 

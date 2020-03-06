@@ -48,13 +48,8 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
         setLastBuild(run);
         PrintStream log = taskListener.getLogger();
         log.println("Fortify Jenkins plugin v " + VERSION);
-        log.println("Launching Fortify cloudscan arguments command");
-        //String projectRoot = filePath.getRemote() + File.separator + ".fortify";
-        String cloudscanExec = null;
-
-        if (cloudscanExec == null) {
-            cloudscanExec = getCloudScanExecutable(run, filePath, launcher, taskListener);
-        }
+        log.println("Launching Fortify scancentral arguments command");
+        String cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener);
 
         EnvVars vars = run.getEnvironment(taskListener);
         ArrayList<String> args = new ArrayList<String>(2);

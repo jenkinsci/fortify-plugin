@@ -27,7 +27,7 @@ public abstract class FortifyCloudScanStep extends FortifyStep {
     protected String getCloudScanExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,
                                          TaskListener listener) throws InterruptedException, IOException {
         return getExecutable("cloudscan" + (launcher.isUnix() ? "" : ".bat"), true, build, workspace, launcher,
-                listener);
+                listener, null);
     }
 
     /* Look for scancentral executable in Jenkins environment, if not found, get the old cloudscan executable. It's considered not found
@@ -35,8 +35,9 @@ public abstract class FortifyCloudScanStep extends FortifyStep {
     protected String getScancentralExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,
                                             TaskListener listener) throws InterruptedException, IOException {
         String filename = "scancentral" + (launcher.isUnix() ? "" : ".bat");
+        String msg = "Checking for cloudscan executable";
         String exec = getExecutable(filename, true, build, workspace, launcher,
-                listener);
+                listener, msg);
         if (exec.equals(filename)) {
             return getCloudScanExecutable(build, workspace, launcher, listener);
         } else {

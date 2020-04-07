@@ -1142,7 +1142,8 @@ public class FortifyPlugin extends Recorder {
 			try {
 				response = client.newCall(request).execute();
 
-				if (response.isSuccessful() && response.body().string().contains("Fortify CloudScan Controller")) {
+				if (response.isSuccessful() && (response.body().string().contains("Fortify ScanCentral Controller") ||
+						response.body().string().contains("Fortify CloudScan Controller"))) {
 					return FormValidation.okWithMarkup("<font color=\"blue\">Connection successful!</font>");
 				} else {
 					return FormValidation.error("Connection failed. Check the Controller URL.");
@@ -1231,7 +1232,7 @@ public class FortifyPlugin extends Recorder {
 					if (url.trim().equalsIgnoreCase("http://") || url.trim().equalsIgnoreCase("https://")) {
 						throw new FortifyException(new Message(Message.ERROR, "URL host is required"));
 					}
-					if (!StringUtils.endsWith(url,"/cloud-ctrl")) {
+					if (!StringUtils.endsWith(url,"/scancentral-ctrl") && !StringUtils.endsWith(url,"/cloud-ctrl")) {
 						throw new FortifyException(new Message(Message.ERROR, "Invalid context"));
 					}
 				} else {

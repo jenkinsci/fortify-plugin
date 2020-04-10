@@ -86,8 +86,8 @@ public class JavaScanType extends ProjectScanType {
 
 		public ListBoxModel doFillJavaVersionItems(String value) {
 			ListBoxModel items = new ListBoxModel();
-			items.add("1.5", "1.5");
-			items.add("1.6", "1.6");
+			items.add("5", "5");
+			items.add("6", "6");
 			items.add("7", "7");
 			items.add("8", "8");
 			items.add("9", "9");
@@ -97,7 +97,7 @@ public class JavaScanType extends ProjectScanType {
 			items.add("13", "13");
 
 			if ((null == value) || (0 == value.length())) {
-				items.get(3).selected = true;
+				items.get(3).selected = true; // default to Java 8
 			}
 
 			return items;

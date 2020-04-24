@@ -1,5 +1,5 @@
 /*******************************************************************************
- * (c) Copyright 2019 Micro Focus or one of its affiliates. 
+ * (c) Copyright 2020 Micro Focus or one of its affiliates.
  * 
  * Licensed under the MIT License (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import com.fortify.plugin.jenkins.FortifyPlugin;
-import jenkins.model.Jenkins;
+import hudson.util.ListBoxModel;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -49,14 +46,16 @@ import hudson.model.TaskListener;
 
 public class FortifyUpdate extends FortifyStep {
 	private String updateServerURL;
+	private String localeString;
 	private transient String proxyURL;
 	private transient String proxyUsername;
 	private transient String proxyPassword;
 	private transient boolean useProxy;
 
 	@DataBoundConstructor
-	public FortifyUpdate(String updateServerURL) {
+	public FortifyUpdate(String updateServerURL, String localeString) {
 		this.updateServerURL = updateServerURL;
+		this.localeString = localeString;
 	}
 
 	@Deprecated
@@ -72,6 +71,8 @@ public class FortifyUpdate extends FortifyStep {
 	public String getUpdateServerURL() {
 		return updateServerURL;
 	}
+
+	public String getLocaleString() { return localeString; }
 
 	@Deprecated
 	public String getProxyURL() {
@@ -98,6 +99,9 @@ public class FortifyUpdate extends FortifyStep {
 		this.updateServerURL = updateServerURL;
 	}
 
+	@DataBoundSetter
+	public void setLocaleString(String localeString) { this.localeString = localeString; }
+
 	@DataBoundSetter @Deprecated
 	public void setProxyURL(String proxyURL) {
 		this.proxyURL = proxyURL;
@@ -120,6 +124,10 @@ public class FortifyUpdate extends FortifyStep {
 
 	public String getResolvedUpdateServerURL(TaskListener listener) {
 		return resolve(getUpdateServerURL(), listener);
+	}
+
+	public String getResolvedLocaleString(TaskListener listener) {
+		return resolve(getLocaleString(), listener);
 	}
 
 	@Deprecated
@@ -164,76 +172,13 @@ public class FortifyUpdate extends FortifyStep {
 				log.println(Messages.FortifyUpdate_URL_Invalid(updateServerUrl));
 			}
 		}
-		/*if (FortifyPlugin.DESCRIPTOR.getUseProxy()) {
-			//String proxy = getResolvedUpdateProxyURL(listener);
-			String proxy = FortifyPlugin.DESCRIPTOR.getProxyUrl();
-			if (!StringUtils.isEmpty(proxy)) {
-				String[] proxySplit = proxy.split(":");
-				if (proxySplit.length > 2) {
-					log.println(Messages.FortifyUpdate_Proxy_Invalid(proxy));
-				} else {
-					String proxyHost = proxySplit[0];
-					Pattern hostPattern = Pattern.compile("([\\w\\-]+\\.)*[\\w\\-]+");
-					Matcher hostMatcher = hostPattern.matcher(proxyHost);
-					if (hostMatcher.matches()) {
-						args.add("-proxyhost");
-						args.add(proxyHost);
-						String proxyPort = "80";
-						String testPort = null;
-						if (proxySplit.length == 2) {
-							testPort = proxySplit[1];
-						}
-						if (!StringUtils.isEmpty(testPort)) {
-							try {
-								Integer.parseInt(testPort);
-								proxyPort = testPort;
-							} catch (NumberFormatException nfe) {
-								log.println(Messages.FortifyUpdate_Proxy_Port_Invalid(testPort));
-							}
-						}
-						args.add("-proxyport");
-						args.add(proxyPort);
-						//String proxyUser = getResolvedUpdateProxyUsername(listener);
-						String proxyUser = FortifyPlugin.DESCRIPTOR.getProxyUsername();
-						if (!StringUtils.isEmpty(proxyUser)) {
-							args.add("-proxyUsername");
-							args.add(proxyUser);
-						}
-						//String proxyPassword = getResolvedUpdateProxyPassword(listener);
-						String proxyPassword = FortifyPlugin.DESCRIPTOR.getProxyPassword();
-						if (!StringUtils.isEmpty(proxyPassword)) {
-							args.add("-proxyPassword");
-							args.add(proxyPassword);
-						}
-					} else {
-						log.println(Messages.FortifyUpdate_Proxy_Host_Invalid(proxyHost));
-					}
-				}
-			}
-		}*/
-		/*if (Jenkins.get().proxy != null) {
-			String proxyHost = Jenkins.get().proxy.name;
-			int proxyPort = Jenkins.get().proxy.port;
-			String proxyUsername = Jenkins.get().proxy.getUserName();
-			String proxyPassword = Jenkins.get().proxy.getPassword();
 
-			if (StringUtils.isNotEmpty(proxyHost)) {
-				args.add("-proxyhost");
-				args.add(proxyHost);
-				if (proxyPort > -1) {
-					args.add("-proxyport");
-					args.add(Integer.toString(proxyPort));
-				}
-				if (StringUtils.isNotEmpty(proxyUsername)) {
-					args.add("-proxyUsername");
-					args.add(proxyUsername);
-				}
-				if (StringUtils.isNotEmpty(proxyPassword)) {
-					args.add("-proxyPassword");
-					args.add(proxyPassword);
-				}
-			}
-		}*/
+		String localeStr = getResolvedLocaleString(listener);
+		if (!"".equals(localeStr)) {
+			args.add("-locale");
+			args.add(localeStr);
+		}
+
 		EnvVars vars = build.getEnvironment(listener);
 		ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(workspace).cmds(args).envs(vars)
 				.stdout(listener.getLogger()).stderr(listener.getLogger());
@@ -275,6 +220,22 @@ public class FortifyUpdate extends FortifyStep {
 			return ImmutableSet.of(Run.class, FilePath.class, Launcher.class, TaskListener.class);
 		}
 
+		public ListBoxModel doFillLocaleStringItems(String value) {
+			ListBoxModel items = new ListBoxModel();
+			items.add("English (USA)", "en_US");
+			items.add("Spanish", "es");
+			items.add("Japanese", "ja");
+			items.add("Korean", "ko");
+			items.add("Portuguese (Brazil)", "pt_BR");
+			items.add("Chinese (China)", "zh_CN");
+			items.add("Chinese (Taiwan)", "zh_TW");
+
+			if ((null == value) || (0 == value.length())) {
+				items.get(0).selected = true; // default to en_US
+			}
+
+			return items;
+		}
 	}
 
 	private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
@@ -303,10 +264,7 @@ public class FortifyUpdate extends FortifyStep {
 
 	public static class Builder {
 		private String updateServerURL;
-		private String proxyURL;
-		private String proxyUsername;
-		private String proxyPassword;
-		private boolean useProxy;
+		private String localeString;
 
 		public Builder() {
 		}
@@ -318,34 +276,15 @@ public class FortifyUpdate extends FortifyStep {
 			return this;
 		}
 
-		public Builder proxyURL(String proxyURL) {
-			if (StringUtils.isNotBlank(proxyURL)) {
-				this.proxyURL = proxyURL;
+		public Builder localeString(String localeString) {
+			if (StringUtils.isNotBlank(localeString)) {
+				this.localeString = localeString;
 			}
-			return this;
-		}
-
-		public Builder proxyUsername(String proxyUsername) {
-			if (StringUtils.isNotBlank(proxyUsername)) {
-				this.proxyUsername = proxyUsername;
-			}
-			return this;
-		}
-
-		public Builder proxyPassword(String proxyPassword) {
-			if (StringUtils.isNotBlank(proxyPassword)) {
-				this.proxyPassword = proxyPassword;
-			}
-			return this;
-		}
-
-		public Builder useProxy(boolean useProxy) {
-			this.useProxy = useProxy;
 			return this;
 		}
 
 		public FortifyUpdate build() {
-			return new FortifyUpdate(updateServerURL, proxyURL, proxyUsername, proxyPassword, useProxy);
+			return new FortifyUpdate(updateServerURL, localeString);
 		}
 
 	}

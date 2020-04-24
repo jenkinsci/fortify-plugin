@@ -1,6 +1,6 @@
 <?jelly escape-by-default='true'?>
 <!--
-    (c) Copyright 2019 Micro Focus or one of its affiliates.
+    (c) Copyright 2020 Micro Focus or one of its affiliates.
 
     Licensed under the MIT License (the "License");
     you may not use this file except in compliance with the License.
@@ -24,9 +24,4 @@
     <f:entry title="Python requirements file" help="/plugin/fortify/help-pythonRequirementsFile.html">
         <f:textbox field="pythonRequirementsFile"/>
     </f:entry>
-    <!--<f:advanced>
-        <f:entry title="Fortify SCA translation options" help="">
-            <f:textbox field="transArgs"/>
-        </f:entry>
-    </f:advanced>-->
 </j:jelly>

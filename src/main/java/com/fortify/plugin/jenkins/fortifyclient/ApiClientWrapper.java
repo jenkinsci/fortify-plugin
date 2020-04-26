@@ -50,7 +50,9 @@ public class ApiClientWrapper {
 		apiClient.setBasePath(uri + "/api/v1");
 		try {
 			apiClient.setApiKeyPrefix(AUTH_HEADER_TOKEN);
-            apiClient.setConnectTimeout(Integer.parseInt(System.getenv("FORTIFY_CONNECT_TIMEOUT"))*1000);
+			if(System.getenv("FORTIFY_CONNECT_TIMEOUT") != null){
+            	apiClient.setConnectTimeout(Integer.parseInt(System.getenv("FORTIFY_CONNECT_TIMEOUT"))*1000);
+			}
 			apiClient.setApiKey(Base64.encodeBase64String(token.getBytes("UTF-8")));
 		} catch (UnsupportedEncodingException e) {
 			String msg = MessageFormat.format("[ERROR] Error encoding SSC auth token : {0}", token);

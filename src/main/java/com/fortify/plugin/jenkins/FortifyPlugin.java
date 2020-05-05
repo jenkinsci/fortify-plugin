@@ -282,8 +282,8 @@ public class FortifyPlugin extends Recorder {
 		return getUpdateContent() ? analysisRunType.getUpdateContent().getUpdateServerUrl() : "";
 	}
 
-	public String getLocaleString() {
-		return getUpdateContent() ? analysisRunType.getUpdateContent().getLocaleString() : "";
+	public String getLocale() {
+		return getUpdateContent() ? analysisRunType.getUpdateContent().getLocale() : "";
 	}
 
 	@Deprecated
@@ -719,7 +719,7 @@ public class FortifyPlugin extends Recorder {
 	private void performLocalTranslation(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
 		// Update security content
 		if (getUpdateContent()) {
-			FortifyUpdate fu = new FortifyUpdate.Builder().updateServerURL(getUpdateServerUrl()).localeString(getLocaleString()).build();
+			FortifyUpdate fu = new FortifyUpdate.Builder().updateServerURL(getUpdateServerUrl()).locale(getLocale()).build();
 			fu.perform(build, launcher, listener);
 		}
 		// run Fortify SCA clean
@@ -1708,15 +1708,15 @@ public class FortifyPlugin extends Recorder {
 			return Collections.emptyList();
 		}
 
-		public ListBoxModel doFillLocaleStringItems(String value) {
+		public ListBoxModel doFillLocaleItems(String value) {
 			ListBoxModel items = new ListBoxModel();
-			items.add("English (USA)", "en_US");
-			items.add("Spanish", "es");
+			items.add("English", "en");
+			items.add("Chinese Simplified", "zh_CN");
+			items.add("Chinese Traditional", "zh_TW");
 			items.add("Japanese", "ja");
 			items.add("Korean", "ko");
 			items.add("Portuguese (Brazil)", "pt_BR");
-			items.add("Chinese (China)", "zh_CN");
-			items.add("Chinese (Taiwan)", "zh_TW");
+			items.add("Spanish", "es");
 
 			if ((null == value) || (0 == value.length())) {
 				items.get(0).selected = true; // default to en_US
@@ -2385,7 +2385,7 @@ public class FortifyPlugin extends Recorder {
 
 	public static class UpdateContentBlock {
 		private String updateServerUrl;
-		private String localeString;
+		private String locale;
 		private UseProxyBlock useProxy;
 
 		@DataBoundConstructor
@@ -2403,9 +2403,9 @@ public class FortifyPlugin extends Recorder {
 		@DataBoundSetter
 		public void setUpdateServerUrl(String updateServerUrl) { this.updateServerUrl = updateServerUrl; }
 
-		public String getLocaleString() { return localeString; }
+		public String getLocale() { return locale; }
 		@DataBoundSetter
-		public void setLocaleString(String localeString) { this.localeString = localeString; }
+		public void setLocale(String locale) { this.locale = locale; }
 
 		@Deprecated
 		public boolean getUpdateUseProxy() {

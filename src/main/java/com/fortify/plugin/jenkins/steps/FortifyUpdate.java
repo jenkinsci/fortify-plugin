@@ -46,16 +46,16 @@ import hudson.model.TaskListener;
 
 public class FortifyUpdate extends FortifyStep {
 	private String updateServerURL;
-	private String localeString;
+	private String locale;
 	private transient String proxyURL;
 	private transient String proxyUsername;
 	private transient String proxyPassword;
 	private transient boolean useProxy;
 
 	@DataBoundConstructor
-	public FortifyUpdate(String updateServerURL, String localeString) {
+	public FortifyUpdate(String updateServerURL, String locale) {
 		this.updateServerURL = updateServerURL;
-		this.localeString = localeString;
+		this.locale = locale;
 	}
 
 	@Deprecated
@@ -72,7 +72,7 @@ public class FortifyUpdate extends FortifyStep {
 		return updateServerURL;
 	}
 
-	public String getLocaleString() { return localeString; }
+	public String getLocale() { return locale; }
 
 	@Deprecated
 	public String getProxyURL() {
@@ -100,7 +100,7 @@ public class FortifyUpdate extends FortifyStep {
 	}
 
 	@DataBoundSetter
-	public void setLocaleString(String localeString) { this.localeString = localeString; }
+	public void setLocale(String locale) { this.locale = locale; }
 
 	@DataBoundSetter @Deprecated
 	public void setProxyURL(String proxyURL) {
@@ -126,8 +126,8 @@ public class FortifyUpdate extends FortifyStep {
 		return resolve(getUpdateServerURL(), listener);
 	}
 
-	public String getResolvedLocaleString(TaskListener listener) {
-		return resolve(getLocaleString(), listener);
+	public String getResolvedLocale(TaskListener listener) {
+		return resolve(getLocale(), listener);
 	}
 
 	@Deprecated
@@ -173,7 +173,7 @@ public class FortifyUpdate extends FortifyStep {
 			}
 		}
 
-		String localeStr = getResolvedLocaleString(listener);
+		String localeStr = getResolvedLocale(listener);
 		if (!"".equals(localeStr)) {
 			args.add("-locale");
 			args.add(localeStr);
@@ -220,15 +220,15 @@ public class FortifyUpdate extends FortifyStep {
 			return ImmutableSet.of(Run.class, FilePath.class, Launcher.class, TaskListener.class);
 		}
 
-		public ListBoxModel doFillLocaleStringItems(String value) {
+		public ListBoxModel doFillLocaleItems(String value) {
 			ListBoxModel items = new ListBoxModel();
-			items.add("English (USA)", "en_US");
-			items.add("Spanish", "es");
+			items.add("English", "en");
+			items.add("Chinese Simplified", "zh_CN");
+			items.add("Chinese Traditional", "zh_TW");
 			items.add("Japanese", "ja");
 			items.add("Korean", "ko");
 			items.add("Portuguese (Brazil)", "pt_BR");
-			items.add("Chinese (China)", "zh_CN");
-			items.add("Chinese (Taiwan)", "zh_TW");
+			items.add("Spanish", "es");
 
 			if ((null == value) || (0 == value.length())) {
 				items.get(0).selected = true; // default to en_US
@@ -264,7 +264,7 @@ public class FortifyUpdate extends FortifyStep {
 
 	public static class Builder {
 		private String updateServerURL;
-		private String localeString;
+		private String locale;
 
 		public Builder() {
 		}
@@ -276,15 +276,15 @@ public class FortifyUpdate extends FortifyStep {
 			return this;
 		}
 
-		public Builder localeString(String localeString) {
+		public Builder locale(String localeString) {
 			if (StringUtils.isNotBlank(localeString)) {
-				this.localeString = localeString;
+				this.locale = localeString;
 			}
 			return this;
 		}
 
 		public FortifyUpdate build() {
-			return new FortifyUpdate(updateServerURL, localeString);
+			return new FortifyUpdate(updateServerURL, locale);
 		}
 
 	}

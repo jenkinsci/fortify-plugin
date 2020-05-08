@@ -1,5 +1,5 @@
 /*******************************************************************************
- * (c) Copyright 2019 Micro Focus or one of its affiliates. 
+ * (c) Copyright 2020 Micro Focus or one of its affiliates.
  * 
  * Licensed under the MIT License (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,6 +280,10 @@ public class FortifyPlugin extends Recorder {
 
 	public String getUpdateServerUrl() {
 		return getUpdateContent() ? analysisRunType.getUpdateContent().getUpdateServerUrl() : "";
+	}
+
+	public String getLocale() {
+		return getUpdateContent() ? analysisRunType.getUpdateContent().getLocale() : "";
 	}
 
 	@Deprecated
@@ -715,7 +719,7 @@ public class FortifyPlugin extends Recorder {
 	private void performLocalTranslation(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
 		// Update security content
 		if (getUpdateContent()) {
-			FortifyUpdate fu = new FortifyUpdate.Builder().updateServerURL(getUpdateServerUrl()).build();
+			FortifyUpdate fu = new FortifyUpdate.Builder().updateServerURL(getUpdateServerUrl()).locale(getLocale()).build();
 			fu.perform(build, launcher, listener);
 		}
 		// run Fortify SCA clean
@@ -821,16 +825,6 @@ public class FortifyPlugin extends Recorder {
 						client.init(url, token, proxyHost, proxyPort, DESCRIPTOR.getProxyUsername(),
 								DESCRIPTOR.getProxyPassword());
 					}
-					/*boolean useProxy = Jenkins.get().proxy != null;
-					if (!useProxy) {
-						client.init(url, token);
-					} else {
-						String proxyHost = Jenkins.get().proxy.name;
-						int proxyPort = Jenkins.get().proxy.port;
-						String proxyUsername = Jenkins.get().proxy.getUserName();
-						String proxyPassword = Jenkins.get().proxy.getPassword();
-						client.init(url, token, proxyHost, proxyPort, proxyUsername, proxyPassword);
-					}*/
 				}
 				return cmd.runWith(client);
 			} finally {
@@ -1142,7 +1136,8 @@ public class FortifyPlugin extends Recorder {
 			try {
 				response = client.newCall(request).execute();
 
-				if (response.isSuccessful() && response.body().string().contains("Fortify CloudScan Controller")) {
+				if (response.isSuccessful() && (response.body().string().contains("Fortify ScanCentral Controller") ||
+						response.body().string().contains("Fortify CloudScan Controller"))) {
 					return FormValidation.okWithMarkup("<font color=\"blue\">Connection successful!</font>");
 				} else {
 					return FormValidation.error("Connection failed. Check the Controller URL.");
@@ -1231,7 +1226,7 @@ public class FortifyPlugin extends Recorder {
 					if (url.trim().equalsIgnoreCase("http://") || url.trim().equalsIgnoreCase("https://")) {
 						throw new FortifyException(new Message(Message.ERROR, "URL host is required"));
 					}
-					if (!StringUtils.endsWith(url,"/cloud-ctrl")) {
+					if (!StringUtils.endsWith(url,"/scancentral-ctrl") && !StringUtils.endsWith(url,"/cloud-ctrl")) {
 						throw new FortifyException(new Message(Message.ERROR, "Invalid context"));
 					}
 				} else {
@@ -1713,27 +1708,21 @@ public class FortifyPlugin extends Recorder {
 			return Collections.emptyList();
 		}
 
-		public ListBoxModel doFillTranslationApplicationTypeItems() {
-			ListBoxModel options = new ListBoxModel(5);
-			options.add("Java", "java");
-			options.add(".NET", "dotnet");
-			options.add("Maven 3", "maven3");
-			options.add("Gradle", "gradle");
-			options.add("Other", "other");
-			return options;
-		}
+		public ListBoxModel doFillLocaleItems(String value) {
+			ListBoxModel items = new ListBoxModel();
+			items.add("English", "en");
+			items.add("Chinese Simplified", "zh_CN");
+			items.add("Chinese Traditional", "zh_TW");
+			items.add("Japanese", "ja");
+			items.add("Korean", "ko");
+			items.add("Portuguese (Brazil)", "pt_BR");
+			items.add("Spanish", "es");
 
-		public ListBoxModel doFillTranslationJavaVersionItems() {
-			ListBoxModel options = new ListBoxModel();
-			options.add("1.5", "1.5");
-			options.add("1.6", "1.6");
-			options.add("1.7", "1.7");
-			options.add("1.8", "1.8");
-			options.add("1.9", "1.9");
-			options.add("10", "10");
-			options.add("11", "11");
-			options.add("12", "12");
-			return options;
+			if ((null == value) || (0 == value.length())) {
+				items.get(0).selected = true; // default to en_US
+			}
+
+			return items;
 		}
 	}
 
@@ -2396,6 +2385,7 @@ public class FortifyPlugin extends Recorder {
 
 	public static class UpdateContentBlock {
 		private String updateServerUrl;
+		private String locale;
 		private UseProxyBlock useProxy;
 
 		@DataBoundConstructor
@@ -2412,6 +2402,10 @@ public class FortifyPlugin extends Recorder {
 		}
 		@DataBoundSetter
 		public void setUpdateServerUrl(String updateServerUrl) { this.updateServerUrl = updateServerUrl; }
+
+		public String getLocale() { return locale; }
+		@DataBoundSetter
+		public void setLocale(String locale) { this.locale = locale; }
 
 		@Deprecated
 		public boolean getUpdateUseProxy() {

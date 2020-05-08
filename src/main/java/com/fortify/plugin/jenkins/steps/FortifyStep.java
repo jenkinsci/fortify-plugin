@@ -61,12 +61,13 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 	 * @param workspace
 	 * @param launcher
 	 * @param listener
+	 * @param msg
 	 * @return found executable or filename if not found
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
 	protected String getExecutable(String filename, boolean checkFortifyHome, Run<?, ?> build, FilePath workspace,
-			Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
+			Launcher launcher, TaskListener listener, String msg) throws InterruptedException, IOException {
 		EnvVars env = build.getEnvironment(listener);
 		String fortifyHome = null;
 		String path = null;
@@ -82,13 +83,15 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		}
 		String s = workspace.act(new FindExecutableRemoteService(filename, fortifyHome, path, workspace));
 		if (s == null) {
-			listener.getLogger().printf("executable not found: %s%n", filename);
-			listener.getLogger().printf("\tfortify_home: %s%n", fortifyHome);
-			listener.getLogger().printf("\tpath: %s%n", path);
-			listener.getLogger().printf("\tworkspace: %s%n", workspace.getRemote());
+			listener.getLogger().printf("WARNING: %s executable not found in the Jenkins environment.%n", filename);
+			if (msg != null) {
+				listener.getLogger().println(msg);
+			} else {
+				listener.getLogger().printf("Checking system PATH for %s.%n", filename);
+			}
 			return filename;
 		} else {
-			listener.getLogger().printf("found executable: %s%n", s);
+			listener.getLogger().printf("Found executable: %s%n", s);
 			return s;
 		}
 	}

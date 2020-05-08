@@ -86,30 +86,32 @@ public abstract class FortifySCAStep extends FortifyStep {
 
 	protected String getSourceAnalyzerExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,
 			TaskListener listener) throws InterruptedException, IOException {
-		return getExecutable("sourceanalyzer" + (launcher.isUnix() ? "" : ".exe"), true, build, workspace, launcher,
-				listener);
+		return getExecutable("sourceanalyzer" + (launcher.isUnix() ? "" : ".exe"), true, build, workspace,
+				launcher, listener, null);
 	}
 
 	protected String getMavenExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
-		return getExecutable("mvn" + (launcher.isUnix() ? "" : ".cmd"), false, build, workspace, launcher, listener);
+		return getExecutable("mvn" + (launcher.isUnix() ? "" : ".cmd"), false, build, workspace, launcher,
+				listener, null);
 	}
 
 	protected String getGradleExecutable(boolean useWrapper, Run<?, ?> build, FilePath workspace, Launcher launcher,
 			TaskListener listener) throws InterruptedException, IOException {
 		return getExecutable("gradle" + (useWrapper ? "w" : "") + (launcher.isUnix() ? "" : ".bat"), false, build,
-				workspace, launcher, listener);
+				workspace, launcher, listener, null);
 	}
 
 	protected String getDevenvExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
-		return getExecutable("devenv" + (launcher.isUnix() ? "" : ".exe"), false, build, workspace, launcher, listener);
+		return getExecutable("devenv" + (launcher.isUnix() ? "" : ".exe"), false, build, workspace, launcher,
+				listener, null);
 	}
 
 	protected String getMSBuildExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
 		return getExecutable("msbuild" + (launcher.isUnix() ? "" : ".exe"), false, build, workspace, launcher,
-				listener);
+				listener, null);
 	}
 
 	public Integer getResolvedMaxHeap(TaskListener listener) {

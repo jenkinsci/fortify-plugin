@@ -116,11 +116,7 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
         log.println("Fortify Jenkins plugin v " + VERSION);
         log.println("Performing Fortify remote scan");
         String projectRoot = filePath.getRemote() + File.separator + ".fortify";
-        String cloudscanExec = null;
-
-        if (cloudscanExec == null) {
-            cloudscanExec = getCloudScanExecutable(run, filePath, launcher, taskListener);
-        }
+        String cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener);
 
         EnvVars vars = run.getEnvironment(taskListener);
         ArrayList<String> args = new ArrayList<String>(2);

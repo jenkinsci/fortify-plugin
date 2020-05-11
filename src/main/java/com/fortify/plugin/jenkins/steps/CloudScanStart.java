@@ -29,8 +29,6 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
     private FortifyPlugin.RemoteOptionalConfigBlock remoteOptionalConfig;
     private FortifyPlugin.UploadSSCBlock uploadSSC;
 
-    //private String mbsFile;
-    //private boolean createMbs;
     private String buildID;
 
     @DataBoundConstructor
@@ -87,22 +85,6 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         }
     }
 
-    /*public String getMbsFile() {
-        return mbsFile;
-    }
-
-    public void setMbsFile(String mbsFile) {
-        this.mbsFile = mbsFile;
-    }
-
-    public boolean isCreateMbs() {
-        return createMbs;
-    }
-
-    public void setCreateMbs(boolean createMbs) {
-        this.createMbs = createMbs;
-    }*/
-
     public String getSensorPoolName() {
         return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getSensorPoolUUID();
     }
@@ -118,10 +100,6 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
     public String getFilterFile() {
         return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getFilterFile();
     }
-
-    /*public String getResultsFile() {
-        return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getResultsFile();
-    }*/
 
     public String getApplicationName() {
         return getUploadSSC() == null ? "" : getUploadSSC().getAppName();
@@ -160,10 +138,6 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         return resolve(getBuildFile(), listener);
     }
 
-    /*public String getResolvedMbsFile(TaskListener listener) {
-        return resolve(getMbsFile(), listener);
-    }*/
-
     public String getResolvedSensorPoolName(TaskListener listener) {
         return resolve(getSensorPoolName(), listener);
     }
@@ -182,8 +156,6 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
 
     public String getResolvedBuildID(TaskListener listener) { return resolve(getBuildID(), listener); }
 
-    /*public String getResolvedScanArgs(TaskListener listener) { return resolve(getScanOptions(), listener); }*/
-
     public String getResolvedApplicationName(TaskListener listener) { return resolve(getApplicationName(), listener); }
 
     public String getResolvedApplicationVersion(TaskListener listener) { return resolve(getApplicationVersion(), listener); }
@@ -195,8 +167,6 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
     public String getResolvedPythonVirtualEnv(TaskListener listener) { return resolve(getPythonVirtualEnv(), listener); }
 
     public String getResolvedPhpVersion(TaskListener listener) { return resolve(getPhpVersion(), listener); }
-
-    /*public String getResolvedResultsFile(TaskListener listener) { return resolve(getResultsFile(), listener); }*/
 
     @Override
     public StepExecution start(StepContext context) throws Exception {
@@ -210,11 +180,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         log.println("Fortify Jenkins plugin v " + VERSION);
         log.println("Performing Fortify remote analysis");
         String projectRoot = filePath.getRemote() + File.separator + ".fortify";
-        String cloudscanExec = null;
-
-        if (cloudscanExec == null) {
-            cloudscanExec = getCloudScanExecutable(run, filePath, launcher, taskListener);
-        }
+        String cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener);
 
         EnvVars vars = run.getEnvironment(taskListener);
         ArrayList<String> args = new ArrayList<String>(2);
@@ -270,11 +236,6 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
             args.add("-project-root");
             args.add(projectRoot);
         }
-        /*if (StringUtils.isNotEmpty(getResolvedResultsFile(taskListener))) {
-            args.add("-o"); // overwrite existing FPR
-            args.add("-f");
-            args.add(getResolvedResultsFile(taskListener));
-        }*/
         if (StringUtils.isNotEmpty(getResolvedEmailAddr(taskListener))) {
             args.add("-email");
             args.add(getResolvedEmailAddr(taskListener));

@@ -27,9 +27,9 @@ call mvn -Djetty.port=8181 -DskipTests=true hpi:run
 
 You must obtain a Fortify SSC authentication token to use the plugin's server related functionality, which includes build failure conditions and getting all vulnerability results in Jenkins.
 
-* SSC authentication token (either JenkinsToken or CIToken). Token creation command:
+* SSC authentication token (CIToken). Token creation command:
   ```
-  $ fortifyclient token -gettoken JenkinsToken -url http://localhost:8180/ssc -user admin
+  $ fortifyclient token -gettoken CIToken -url http://localhost:8180/ssc -user admin
   ```
 * Tests. Some of the junit tests can utilize a connection to Fortify Software Security Center to verify the plugin functionality.
   To override the default SSC location (localhost:8080), you can specify the optional SSC URL parameter: 'ssc.url'.

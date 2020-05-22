@@ -1,5 +1,5 @@
 <!--
-    (c) Copyright 2019 Micro Focus or one of its affiliates. 
+    (c) Copyright 2019-2020 Micro Focus or one of its affiliates. 
 
     Licensed under the MIT License (the "License");
     you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
     </parent>
 
     <artifactId>fortify</artifactId>
-    <version>20.2.33-SNAPSHOT</version>
+    <version>20.1.33-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <properties>
@@ -36,7 +36,7 @@
 
     <name>Fortify</name>
     <description>Adds the ability to perform security analysis with Fortify Static Code Analyzer, upload results to Software Security Center, show analysis results summary, and set build failure criteria based on analysis results.</description>
-    <url>https://wiki.jenkins.io/display/JENKINS/Fortify+Plugin</url>
+    <url>https://github.com/jenkinsci/fortify-plugin</url>
 
     <licenses>
         <license>

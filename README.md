@@ -131,15 +131,15 @@ Analyzer is installed. For example, on Windows the default installation
 location is C:\\Program
 Files\\Fortify\\Fortify\_SCA\_and\_Apps\_*\<version\>*.
 
-Preview
+### Preview
 
-![](docs/images/Jenkins_wiki.png){height="250"}
+![](docs/images/Jenkins_wiki.png)
 
-![](docs/images/Jenkins_wiki_issues.png){height="250"}
+![](docs/images/Jenkins_wiki_issues.png)
 
-![](docs/images/Jenkins_wiki_freestyle.png){height="250"}
+![](docs/images/Jenkins_wiki_freestyle.png)
 
-![](docs/images/Jenkins_wiki_pipes.png){height="250"}
+![](docs/images/Jenkins_wiki_pipes.png)
 
 ### Advisory
 
@@ -156,7 +156,7 @@ code please let us know via GitHub Issues.
 
 ## License
 
-[MIT License](./LICENSE.md)
+[MIT License](./LICENSE)
 
 ## More information
 

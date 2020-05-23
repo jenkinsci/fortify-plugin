@@ -45,7 +45,7 @@ For more information about Fortify SSC, please visit https://www.microfocus.com/
     Center
 -   Provides pipeline support for source code analysis with Fortify
     Static Code Analyzer, Security Content update, and uploading to
-    Fortify Fortify Software Security Center
+    Fortify Software Security Center
 -   Displays Fortify security analysis results for each Job (a history
     trend and latest issues from Fortify Software Security Center), and
     navigates to individual issues on Fortify Software Security Center
@@ -57,12 +57,15 @@ For more information about Fortify SSC, please visit https://www.microfocus.com/
 
 ### Setup
 
-1.  Create an authentication token of type JenkinsToken or CIToken
+1.  Create an authentication token of type CIToken
 
     1.  either on the SSC server
 
         Log in to SSC, click the Administration tab and select Users -\>
         Token Management link on the left side.
+        
+        Click New to create an authentication token of type CIToken, 
+        and then click Save.
 
         Copy the second (decoded) token at the bottom of the message
         (the one that says it can be used with fortifyclient).
@@ -70,65 +73,65 @@ For more information about Fortify SSC, please visit https://www.microfocus.com/
     2.  or using the fortifyclient utility:
 
         From
-        the *\<ssc\_install\_dir\>*/Tools/fortifyclient/bin directory,
+        theÂ *\<ssc\_install\_dir\>*/Tools/fortifyclient/binÂ directory,
         run the following:
 
-            fortifyclient token -gettoken CIToken -url <ssc_url> -user <user_name> [-daysToLive <number_of_days>]
+            fortifyclient token -gettoken CIToken -urlÂ <ssc_url>Â -userÂ <user_name> [-daysToLiveÂ <number_of_days>]
 
-        **       Note: **Find the Tools folder in the directory where
-        the Fortify Software Security Center WAR file was extracted.
+        **Â  Â  Â  Â Note:Â **Find theÂ ToolsÂ folder in the directory where
+        theÂ Fortify SoftwareÂ Security CenterÂ WARÂ file was extracted.
 
         where:
 
-        -   *\<ssc\_url\>* includes both the port number and the context
-            path /ssc. For
-            example, http://*\<hostname\>*\>:*\<port\>*/ssc.
-        -   *\<user\_name\>* is the Fortify Software Security
-            Center username of an account that has the required
-            privileges to read or write information from or to Fortify
-            Software Security Center.
-        -   *\<number\_of\_days\>* is the number of days before the
+        -   *\<ssc\_url\>*Â includes both the port number and the context
+            pathÂ /ssc. For
+            example,Â http://*\<hostname\>*\>:*\<port\>*/ssc.
+        -   *\<user\_name\>*Â is theÂ Fortify SoftwareÂ Security
+            CenterÂ username of an account that has the required
+            privileges to read or write information from or toÂ Fortify
+            SoftwareÂ Security Center.
+        -   *\<number\_of\_days\>*Â is the number of days before the
             token expires. The default is 365.
 
         You are prompted for a password. Type the password
-        for *\<user\_name\>*.
+        forÂ *\<user\_name\>*.
 
         The fortifyclient utility displays a token of the general form:
         cb79c492-0a78-44e3-b26c-65c14df52e86.
 
-2.  From Jenkins, select **Manage Jenkins \> Manage Plugins**, on
-    the **Plugin Manager** page, click the **Available** tab, in
-    the **Filter** box, type Fortify. Select the checkbox for
-    the **Fortify** plugin, and then click either **Install without
-    restart** or **Download and install after restart**.
-3.  From the Jenkins menu, select **Jenkins \> Manage
-    Jenkins \> Configure System**. To use fail condition and see
-    security results in Jenkins you need to upload to Fortify
-    Software Security Center, so scroll down to
-    the **Fortify Assessment** section, and then do the following:
-    -   In the **SSC URL** box, type the Fortify Software Security
-        Center server URL. The correct format for the Fortify
-        Software Security Center URL
-        is: http://\<*host\_IP*\>:\<*port*\>/ssc.
-    -   To connect to Fortify Software Security Center with a proxy
-        server, select **Use Proxy for SSC**, and then specify the proxy
-        information. Use the following format for the **Proxy server
-        host:port**: *\<address\>*:*\<port\_number\>*
-    -   In the **Authentication token** box, type the authentication
-        token generated for the Fortify Software Security Center server
+2.  From Jenkins, selectÂ **Manage Jenkins \> Manage Plugins**, on
+    theÂ **Plugin Manager**Â page. Click theÂ **Available**Â tab. In
+    theÂ **Filter**Â box, typeÂ Fortify. Select the checkbox for
+    theÂ **Fortify**Â plugin, and then click eitherÂ **Install without
+    restart**Â orÂ **Download and install after restart**.
+3.  From the Jenkins menu, selectÂ **Jenkins \>Â Manage
+    Jenkins \>Â Configure System**.Â To use fail condition and see
+    security results in Jenkins you need to upload the scan results toÂ Fortify
+    SoftwareÂ Security Center, so scroll down to
+    theÂ **FortifyÂ Assessment**Â section, and then do the following:
+    -   In theÂ **SSCÂ URL**Â box, type theÂ Fortify SoftwareÂ Security
+        CenterÂ server URL.Â The correct format for theÂ Fortify
+        SoftwareÂ Security CenterÂ URL
+        is:Â http://\<*host\_IP*\>:\<*port*\>/ssc.
+    -   To connect toÂ Fortify SoftwareÂ Security CenterÂ with aÂ proxy
+        server, selectÂ **Use proxy**, and then specify the proxy
+        information.Â Use the following format for theÂ **Proxy server
+        host:port**:Â *\<address\>*:*\<port\_number\>*
+    -   In theÂ **Authentication token**Â box, type theÂ authentication
+        tokenÂ generated for theÂ Fortify SoftwareÂ Security CenterÂ server
         in Step 1.
-    -   Click **Advanced settings**, and then click **Test Connection**.
-4.  To analyze your project with Fortify Static Code Analyzer or to
-    update Fortify security content as part of your build, create a
-    Jenkins environment variable to specify the location of the Fortify
-    Static Code Analyzer executables. In **Global properties**, create
+    -   ClickÂ **Test SSC connection**.
+4.  To analyze your project withÂ Fortify Static Code AnalyzerÂ or to
+    updateÂ Fortify security contentÂ as part of your build, create a
+    Jenkins environmentÂ variableÂ to specify the location of theÂ Fortify
+    Static Code AnalyzerÂ executables. InÂ **Global properties**, create
     the following environment variable:
-    -   **Name:** FORTIFY\_HOME
-    -   **Value:** *\<sca\_install\_dir\>*
+    -   **Name:**Â FORTIFY\_HOME
+    -   **Value:**Â *\<sca\_install\_dir\>*
 
-where *\<sca\_install\_dir\>* is the path where Fortify Static Code
-Analyzer is installed. For example, on Windows the default installation
-location is C:\\Program
+whereÂ *\<sca\_install\_dir\>*Â is the path whereÂ Fortify Static Code
+AnalyzerÂ is installed.Â For example, on Windows the default installation
+location isÂ C:\\Program
 Files\\Fortify\\Fortify\_SCA\_and\_Apps\_*\<version\>*.
 
 ### Preview
@@ -136,8 +139,6 @@ Files\\Fortify\\Fortify\_SCA\_and\_Apps\_*\<version\>*.
 ![](docs/images/Jenkins_wiki.png)
 
 ![](docs/images/Jenkins_wiki_issues.png)
-
-![](docs/images/Jenkins_wiki_freestyle.png)
 
 ![](docs/images/Jenkins_wiki_pipes.png)
 

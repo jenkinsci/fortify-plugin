@@ -14,6 +14,7 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.*;
 
 import javax.annotation.Nonnull;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -49,7 +50,13 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
         PrintStream log = taskListener.getLogger();
         log.println("Fortify Jenkins plugin v " + VERSION);
         log.println("Launching Fortify scancentral arguments command");
-        String cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener);
+        String cloudscanExec;
+        try {
+            cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener);
+        } catch (FileNotFoundException ex) {
+            log.println("WARNING: Cannot find scancentral executable");
+            cloudscanExec = getCloudScanExecutable(run, filePath, launcher, taskListener);
+        }
 
         EnvVars vars = run.getEnvironment(taskListener);
         ArrayList<String> args = new ArrayList<String>(2);
@@ -70,11 +77,11 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
         Launcher.ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(filePath).cmds(args).envs(vars)
                 .stdout(taskListener.getLogger()).stderr(taskListener.getLogger());
         int exitcode = ps.join();
-        log.println("Fortify cloudscan arguments command completed with exit code: " + exitcode);
+        log.println("Fortify scancentral arguments command completed with exit code: " + exitcode);
 
         if (exitcode != 0) {
             run.setResult(Result.FAILURE);
-            throw new AbortException("Fortify cloudscan arguments command execution failed.");
+            throw new AbortException("Fortify scancentral arguments command execution failed.");
         }
     }
 
@@ -112,7 +119,7 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
 
         @Override
         protected Void run() throws Exception {
-            getContext().get(TaskListener.class).getLogger().println("Running CloudScan arguments step");
+            getContext().get(TaskListener.class).getLogger().println("Running ScanCentral arguments step");
             if (!getContext().get(FilePath.class).exists()) {
                 getContext().get(FilePath.class).mkdirs();
             }

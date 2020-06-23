@@ -1,5 +1,5 @@
 /*******************************************************************************
- * (c) Copyright 2019 Micro Focus or one of its affiliates. 
+ * (c) Copyright 2020 Micro Focus or one of its affiliates.
  * 
  * Licensed under the MIT License (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.fortify.plugin.jenkins.steps;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -62,7 +63,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 	 * @param launcher
 	 * @param listener
 	 * @param msg
-	 * @return found executable or filename if not found
+	 * @return found executable
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
@@ -71,6 +72,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		EnvVars env = build.getEnvironment(listener);
 		String fortifyHome = null;
 		String path = null;
+		// check env variables defined in Jenkins master
 		for (Map.Entry<String, String> entry : env.entrySet()) {
 			String key = entry.getKey();
 			if ("FORTIFY_HOME".equals(key)) {
@@ -83,13 +85,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		}
 		String s = workspace.act(new FindExecutableRemoteService(filename, fortifyHome, path, workspace));
 		if (s == null) {
-			listener.getLogger().printf("WARNING: %s executable not found in the Jenkins environment.%n", filename);
-			if (msg != null) {
-				listener.getLogger().println(msg);
-			} else {
-				listener.getLogger().printf("Checking system PATH for %s.%n", filename);
-			}
-			return filename;
+			throw new FileNotFoundException("ERROR: executable not found: " + filename);
 		} else {
 			listener.getLogger().printf("Found executable: %s%n", s);
 			return s;

@@ -19,6 +19,7 @@ import org.kohsuke.stapler.*;
 
 import javax.annotation.Nonnull;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -180,7 +181,13 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         log.println("Fortify Jenkins plugin v " + VERSION);
         log.println("Performing Fortify remote analysis");
         String projectRoot = filePath.getRemote() + File.separator + ".fortify";
-        String cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener);
+        String cloudscanExec;
+        try {
+            cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener);
+        } catch (FileNotFoundException ex) {
+            log.println("WARNING: Cannot find scancentral executable");
+            cloudscanExec = getCloudScanExecutable(run, filePath, launcher, taskListener);
+        }
 
         EnvVars vars = run.getEnvironment(taskListener);
         ArrayList<String> args = new ArrayList<String>(2);

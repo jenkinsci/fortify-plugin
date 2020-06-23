@@ -1,5 +1,5 @@
 /*******************************************************************************
- * (c) Copyright 2019 Micro Focus or one of its affiliates. 
+ * (c) Copyright 2020 Micro Focus or one of its affiliates.
  * 
  * Licensed under the MIT License (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 
 public class FindExecutableRemoteService implements FilePath.FileCallable<String> {
-	private String filename;
+	private final String filename;
 	private String home;
 	private String path;
-	private FilePath workspace;
+	private final FilePath workspace;
 
 	/**
 	 * Searches the PATH on the remote machine
@@ -61,6 +61,10 @@ public class FindExecutableRemoteService implements FilePath.FileCallable<String
 			if (f.isFile()) {
 				return s;
 			}
+		}
+		// if no path is passed in, get the system path
+		if (path == null) {
+			path = System.getenv("PATH");
 		}
 		File f = PathUtils.locateFileInPath(filename, path);
 		if (f != null) {

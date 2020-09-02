@@ -85,7 +85,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		}
 		String s = workspace.act(new FindExecutableRemoteService(filename, fortifyHome, path, workspace));
 		if (s == null) {
-			throw new FileNotFoundException("ERROR: executable not found: " + filename);
+			listener.getLogger().printf("Did not find executable: %s%n", filename);
 		} else {
 			listener.getLogger().printf("Found executable: %s%n", s);
 			return s;

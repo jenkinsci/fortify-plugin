@@ -17,6 +17,8 @@ package com.fortify.plugin.jenkins.steps;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
@@ -72,6 +74,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		EnvVars env = build.getEnvironment(listener);
 		String fortifyHome = null;
 		String path = null;
+		String hostname = getHostname();
 		// check env variables defined in Jenkins master
 		for (Map.Entry<String, String> entry : env.entrySet()) {
 			String key = entry.getKey();
@@ -85,10 +88,10 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		}
 		String s = workspace.act(new FindExecutableRemoteService(filename, fortifyHome, path, workspace));
 		if (s == null) {
-			listener.getLogger().printf("Did not find executable: %s%n", filename);
+			listener.getLogger().printf("Did not find executable '%s' on hostname '%s'%n", filename, hostname);
 			return filename;
 		} else {
-			listener.getLogger().printf("Found executable: %s%n", s);
+			listener.getLogger().printf("Found executable '%s' on hostname '%s'%n", s, hostname);
 			return s;
 		}
 	}
@@ -156,4 +159,20 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 			args.add(s);
 		}
 	}
+
+    /**
+     * Determine the hostname that this is executing on
+     *
+     * @return hostname
+     */
+    protected String getHostname()
+    {
+        String hostname;
+        try {
+            hostname = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            hostname = "(could not determine hostname)";
+        }
+        return hostname;
+    }
 }

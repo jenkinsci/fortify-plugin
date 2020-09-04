@@ -242,6 +242,10 @@ public class FortifyPlugin extends Recorder {
 		return getAnalysisRunType() && analysisRunType.value.equals("local");
 	}
 
+	public boolean isUploadOnly() {
+		return getAnalysisRunType() && analysisRunType.value.equals("uploadOnly");
+	}
+
 	public boolean isTranslationDebug() { return getAnalysisRunType() && analysisRunType.isTranslationDebug(); }
 	public boolean isTranslationVerbose() { return getAnalysisRunType() && analysisRunType.isTranslationVerbose(); }
 
@@ -533,7 +537,7 @@ public class FortifyPlugin extends Recorder {
 	}
 
 	public boolean getRemoteOptionalConfig() {
-		return !isLocal() && analysisRunType.getRemoteOptionalConfig() != null;
+		return !isLocal() && !isUploadOnly() && analysisRunType.getRemoteOptionalConfig() != null;
 	}
 
 	public String getSensorPoolUUID() {
@@ -630,6 +634,8 @@ public class FortifyPlugin extends Recorder {
 			runMixed(build, launcher, listener);
 		} else if (isLocal()) { // Local Translation
 			runLocal(build, launcher, listener);
+		} else if (isUploadOnly()) {
+			runUploadOnly(build, launcher, listener);
 		}
 
 		return true;
@@ -714,6 +720,21 @@ public class FortifyPlugin extends Recorder {
 			upload.perform(build, launcher, listener);
 		}
 
+	}
+
+	private void runUploadOnly(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+		PrintStream log = listener.getLogger();
+		log.println("Running upload-only step.");
+
+		if (getUploadSSC()) {
+			FortifyUpload upload = new FortifyUpload(false, getAppName(), getAppVersion());
+			upload.setFailureCriteria(getSearchCondition());
+			upload.setFilterSet(getFilterSet());
+			upload.setResultsFile(getScanFile());
+			upload.setPollingInterval(getPollingInterval());
+
+			upload.perform(build, launcher, listener);
+		}
 	}
 
 	private void performLocalTranslation(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {

@@ -80,7 +80,7 @@ public class FortifyClientTest {
 		}
 
 		fortifyclient = new FortifyClient();
-		fortifyclient.init(url, token); // TODO - cleanup later
+		fortifyclient.init(url, token, null, null, null); // TODO - cleanup later
 	}
 
 	@Test

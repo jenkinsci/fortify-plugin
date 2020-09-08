@@ -528,6 +528,18 @@ public class FortifyPlugin extends Recorder {
 		return uploadSSC == null ? null : uploadSSC.getPollingInterval();
 	}
 
+	public String getConnectTimeout() {
+		return getUploadSSC() ? analysisRunType.getUploadSSC().getConnectTimeout() : "";
+	}
+
+	public String getReadTimeout() {
+		return getUploadSSC() ? analysisRunType.getUploadSSC().getReadTimeout() : "";
+	}
+
+	public String getWriteTimeout() {
+		return getUploadSSC() ? analysisRunType.getUploadSSC().getWriteTimeout() : "";
+	}
+
 	public String getPollingInterval() {
 		return getUploadSSC() ? analysisRunType.getUploadSSC().getPollingInterval() : "";
 	}
@@ -709,6 +721,9 @@ public class FortifyPlugin extends Recorder {
 			upload.setFailureCriteria(getSearchCondition());
 			upload.setFilterSet(getFilterSet());
 			upload.setResultsFile(getScanFile());
+			upload.setConnectTimeout(getConnectTimeout());
+			upload.setReadTimeout(getReadTimeout());
+			upload.setWriteTimeout(getWriteTimeout());
 			upload.setPollingInterval(getPollingInterval());
 
 			upload.perform(build, launcher, listener);
@@ -811,7 +826,7 @@ public class FortifyPlugin extends Recorder {
 					boolean useProxy = DESCRIPTOR.getUseProxy();
 					String proxyUrl = DESCRIPTOR.getProxyUrl();
 					if (!useProxy || StringUtils.isEmpty(proxyUrl)) {
-						client.init(url, token);
+						client.init(url, token, null, null, null);
 					} else {
 						String[] proxyUrlSplit = proxyUrl.split(":");
 						String proxyHost = proxyUrlSplit[0];
@@ -823,7 +838,7 @@ public class FortifyPlugin extends Recorder {
 							}
 						}
 						client.init(url, token, proxyHost, proxyPort, DESCRIPTOR.getProxyUsername(),
-								DESCRIPTOR.getProxyPassword());
+								DESCRIPTOR.getProxyPassword(), null, null, null);
 					}
 				}
 				return cmd.runWith(client);
@@ -1733,6 +1748,9 @@ public class FortifyPlugin extends Recorder {
 		private String appVersion;
 		private String filterSet;
 		private String searchCondition;
+		private String connectTimeout;
+		private String readTimeout;
+		private String writeTimeout;
 		private String pollingInterval;
 
 		@DataBoundConstructor
@@ -1742,11 +1760,15 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		@Deprecated
-		public UploadSSCBlock(String projectName, String projectVersion, String filterSet, String searchCondition, String pollingInterval) {
+		public UploadSSCBlock(String projectName, String projectVersion, String filterSet, String searchCondition,
+							  String connectTimeout, String readTimeout, String writeTimeout, String pollingInterval) {
 			this.projectName = projectName != null ? projectName.trim() : "";
 			this.projectVersion = projectName != null ? projectVersion.trim() : "";
 			this.filterSet = filterSet != null ? filterSet.trim() : "";
 			this.searchCondition = searchCondition != null ? searchCondition.trim() : "";
+			this.connectTimeout = connectTimeout != null ? connectTimeout.trim() : "";
+			this.readTimeout = readTimeout != null ? readTimeout.trim() : "";
+			this.writeTimeout = writeTimeout != null ? writeTimeout.trim() : "";
 			this.pollingInterval = pollingInterval != null ? pollingInterval.trim() : "";
 		}
 
@@ -1790,6 +1812,33 @@ public class FortifyPlugin extends Recorder {
 		}
 		@DataBoundSetter
 		public void setSearchCondition(String searchCondition) { this.searchCondition = searchCondition; }
+
+		public String getConnectTimeout() {
+			return connectTimeout;
+		}
+
+		@DataBoundSetter
+		public void setConnectTimeout(String connectTimeout) {
+			this.connectTimeout = connectTimeout;
+		}
+
+		public String getReadTimeout() {
+			return readTimeout;
+		}
+
+		@DataBoundSetter
+		public void setReadTimeout(String readTimeout) {
+			this.readTimeout = readTimeout;
+		}
+
+		public String getWriteTimeout() {
+			return writeTimeout;
+		}
+
+		@DataBoundSetter
+		public void setWriteTimeout(String writeTimeout) {
+			this.writeTimeout = writeTimeout;
+		}
 
 		public String getPollingInterval() {
 			return pollingInterval;

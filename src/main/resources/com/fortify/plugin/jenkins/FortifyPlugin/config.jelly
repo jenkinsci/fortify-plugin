@@ -290,6 +290,15 @@
           <f:entry field="searchCondition" title="Build failure criteria" help="/plugin/fortify/help-search.html">
             <f:textbox/>
           </f:entry>
+          <f:entry field="connectTimeout" title="Connection timeout" help="/plugin/fortify/help-connectionTimeout.html">
+            <f:textbox/>
+          </f:entry>
+          <f:entry field="readTimeout" title="Read timeout" help="/plugin/fortify/help-readTimeout.html">
+            <f:textbox/>
+          </f:entry>
+          <f:entry field="writeTimeout" title="Write timeout" help="/plugin/fortify/help-writeTimeout.html">
+            <f:textbox/>
+          </f:entry>
           <f:advanced title="Advanced settings">
             <f:entry field="pollingInterval" title="Polling interval" help="/plugin/fortify/help-pollingInterval.html">
               <f:textbox/>

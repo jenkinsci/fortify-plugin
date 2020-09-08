@@ -58,13 +58,14 @@ public class FortifyClient {
 	 * @param token
 	 *            e.g. the AuditToken
 	 */
-	public void init(String uri, String token) throws ApiException {
-		apiClientWrapper = new ApiClientWrapper(uri, token);
+	public void init(String uri, String token, Integer connectTimeoutSeconds, Integer readTimeoutSeconds,
+					 Integer writeTimeoutSeconds) throws ApiException {
+		apiClientWrapper = new ApiClientWrapper(uri, token, connectTimeoutSeconds, readTimeoutSeconds, writeTimeoutSeconds);
 	}
 
-	public void init(String uri, String token, String proxyHost, int proxyPort, String proxyUsername,
-					 String proxyPassword) throws ApiException {
-		init(uri, token);
+	public void init(String uri, String token, String proxyHost, int proxyPort, String proxyUsername, String proxyPassword,
+					 Integer connectTimeoutSeconds, Integer readTimeoutSeconds, Integer writeTimeoutSeconds) throws ApiException {
+		init(uri, token, connectTimeoutSeconds, readTimeoutSeconds, writeTimeoutSeconds);
 		apiClientWrapper.setProxy(proxyHost, proxyPort, proxyUsername, proxyPassword);
 	}
 

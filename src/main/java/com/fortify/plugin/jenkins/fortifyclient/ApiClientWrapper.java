@@ -45,9 +45,19 @@ public class ApiClientWrapper {
 		APPLICATION, APP_VERSION
 	}
 
-	public ApiClientWrapper(String uri, String token) throws ApiException {
+	public ApiClientWrapper(String uri, String token, Integer connectTimeoutSeconds,
+							Integer readTimeoutSeconds, Integer writeTimeoutSeconds) throws ApiException {
 		apiClient = new ApiClient();
 		apiClient.setBasePath(uri + "/api/v1");
+		if (connectTimeoutSeconds != null) {
+			apiClient.setConnectTimeout(connectTimeoutSeconds * 1000);
+		}
+		if (readTimeoutSeconds != null) {
+			apiClient.setReadTimeout(readTimeoutSeconds * 1000);
+		}
+		if (writeTimeoutSeconds != null) {
+			apiClient.setWriteTimeout(writeTimeoutSeconds * 1000);
+		}
 		try {
 			apiClient.setApiKeyPrefix(AUTH_HEADER_TOKEN);
 			apiClient.setApiKey(Base64.encodeBase64String(token.getBytes("UTF-8")));

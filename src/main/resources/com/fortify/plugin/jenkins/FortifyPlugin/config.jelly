@@ -308,6 +308,54 @@
           </table>
         </f:block>
       </f:radioBlock>
+
+      <f:radioBlock title="No translation/scan - upload only" value="uploadOnly" name="analysisRunType"
+                    checked="${instance.isUploadOnly()}" help="/plugin/fortify/help-uploadOnly.html">
+
+        <f:entry field="scanFile" title="Results file" help="/plugin/fortify/help-fpr.html">
+          <f:textbox/>
+        </f:entry>
+
+        <f:block>
+          <table style="width:100%;">
+            <f:optionalBlock field="uploadSSC" title="Upload Fortify SCA scan results to Fortify Software Security Center">
+              <f:entry title="Application name" help="/plugin/fortify/help-sscProjName.html">
+                <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
+                <div style="float:left;width:80%;">
+                  <f:editableComboBox id="projectName" field="appName" clazz="setting-input project-name" items="${descriptor.appNameItems}" />
+                </div>
+                <div style="float:left">
+                  <input value="▼" type="button" id="refreshPrjButton" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)" />
+                </div>
+                <div style="display:none;" id="refreshSpinner" >
+                  <img src="${imagesURL}/spinner.gif" /> ${progress}
+                </div>
+              </f:entry>
+              <f:entry title="Application version" help="/plugin/fortify/help-sscProjVersion.html">
+                <div style="float:left;width:50%;">
+                  <f:editableComboBox id="projectVersion" field="appVersion" clazz="setting-input project-version" items="${descriptor.appVersionItems(appName)}" />
+                </div>
+                <div style="float:left">
+                  <input value="▼" type="button" id="refreshPrjVerButton" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
+                </div>
+              </f:entry>
+              <f:entry field="filterSet" title="Filter set" help="/plugin/fortify/help-filterSet.html">
+                <f:textbox/>
+              </f:entry>
+              <f:entry field="searchCondition" title="Build failure criteria" help="/plugin/fortify/help-search.html">
+                <f:textbox/>
+              </f:entry>
+              <f:advanced title="Advanced settings">
+                <f:entry field="pollingInterval" title="Polling interval" help="/plugin/fortify/help-pollingInterval.html">
+                  <f:textbox/>
+                </f:entry>
+              </f:advanced>
+            </f:optionalBlock>
+          </table>
+        </f:block>
+      </f:radioBlock>
+
+
     </table>
   </f:block>
 </j:jelly>

@@ -801,8 +801,11 @@ public class FortifyUpload extends FortifyStep {
 					client = new FortifyClient();
 					boolean useProxy = FortifyPlugin.DESCRIPTOR.getUseProxy();
 					String proxyUrl = FortifyPlugin.DESCRIPTOR.getProxyUrl();
+					Integer connectTimeoutSeconds = connectTimeout != null ? Integer.valueOf(connectTimeout) : null;
+					Integer readTimeoutSeconds = connectTimeout != null ? Integer.valueOf(readTimeout) : null;
+					Integer writeTimeoutSeconds = connectTimeout != null ? Integer.valueOf(writeTimeout) : null;
 					if (!useProxy || StringUtils.isEmpty(proxyUrl)) {
-						client.init(url, token, Integer.valueOf(connectTimeout), Integer.valueOf(readTimeout), Integer.valueOf(writeTimeout));
+						client.init(url, token, connectTimeoutSeconds, readTimeoutSeconds, writeTimeoutSeconds);
 					} else {
 						String[] proxyUrlSplit = proxyUrl.split(":");
 						String proxyHost = proxyUrlSplit[0];
@@ -813,9 +816,9 @@ public class FortifyUpload extends FortifyStep {
 							} catch (NumberFormatException nfe) {
 							}
 						}
-						client.init(url, token, proxyHost, proxyPort, FortifyPlugin.DESCRIPTOR.getProxyUsername(),
-								FortifyPlugin.DESCRIPTOR.getProxyPassword(), Integer.valueOf(connectTimeout), Integer.valueOf(readTimeout),
-								Integer.valueOf(writeTimeout));
+						client.init(url, token, proxyHost, proxyPort,
+								FortifyPlugin.DESCRIPTOR.getProxyUsername(), FortifyPlugin.DESCRIPTOR.getProxyPassword(),
+								connectTimeoutSeconds, readTimeoutSeconds, writeTimeoutSeconds);
 					}
 					/*boolean useProxy = Jenkins.get().proxy != null;
 					if (!useProxy) {

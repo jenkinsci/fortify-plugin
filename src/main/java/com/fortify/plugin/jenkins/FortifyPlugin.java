@@ -723,18 +723,8 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		if (getUploadSSC()) {
-			FortifyUpload upload = new FortifyUpload(false, getAppName(), getAppVersion());
-			upload.setFailureCriteria(getSearchCondition());
-			upload.setFilterSet(getFilterSet());
-			upload.setResultsFile(getScanFile());
-			upload.setConnectTimeout(getConnectTimeout());
-			upload.setReadTimeout(getReadTimeout());
-			upload.setWriteTimeout(getWriteTimeout());
-			upload.setPollingInterval(getPollingInterval());
-
-			upload.perform(build, launcher, listener);
+			runUpload(build, launcher, listener);
 		}
-
 	}
 
 	private void runUploadOnly(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
@@ -742,14 +732,21 @@ public class FortifyPlugin extends Recorder {
 		log.println("Running upload-only step.");
 
 		if (getUploadSSC()) {
-			FortifyUpload upload = new FortifyUpload(false, getAppName(), getAppVersion());
-			upload.setFailureCriteria(getSearchCondition());
-			upload.setFilterSet(getFilterSet());
-			upload.setResultsFile(getScanFile());
-			upload.setPollingInterval(getPollingInterval());
-
-			upload.perform(build, launcher, listener);
+			runUpload(build, launcher, listener);
 		}
+	}
+
+	private void runUpload(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+		FortifyUpload upload = new FortifyUpload(false, getAppName(), getAppVersion());
+		upload.setFailureCriteria(getSearchCondition());
+		upload.setFilterSet(getFilterSet());
+		upload.setResultsFile(getScanFile());
+		upload.setConnectTimeout(getConnectTimeout());
+		upload.setReadTimeout(getReadTimeout());
+		upload.setWriteTimeout(getWriteTimeout());
+		upload.setPollingInterval(getPollingInterval());
+
+		upload.perform(build, launcher, listener);
 	}
 
 	private void performLocalTranslation(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {

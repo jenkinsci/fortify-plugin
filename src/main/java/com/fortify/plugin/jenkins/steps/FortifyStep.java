@@ -17,6 +17,7 @@ package com.fortify.plugin.jenkins.steps;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
@@ -69,6 +70,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 	 */
 	protected String getExecutable(String filename, boolean checkFortifyHome, Run<?, ?> build, FilePath workspace,
 			Launcher launcher, TaskListener listener, String msg) throws InterruptedException, IOException {
+		PrintStream log = listener.getLogger();
 		EnvVars env = build.getEnvironment(listener);
 		String fortifyHome = null;
 		String path = null;
@@ -78,6 +80,9 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 			if ("FORTIFY_HOME".equals(key)) {
 				if (checkFortifyHome) {
 					fortifyHome = entry.getValue();
+					if (fortifyHome.endsWith("bin") || fortifyHome.endsWith("bin" + System.lineSeparator())) {
+						log.println("WARNING: Environment variable FORTIFY_HOME should not point to bin directory");
+					}
 				}
 			} else if ("PATH".equalsIgnoreCase(key)) {
 				path = entry.getValue();
@@ -85,9 +90,10 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		}
 		String s = workspace.act(new FindExecutableRemoteService(filename, fortifyHome, path, workspace));
 		if (s == null) {
-			throw new FileNotFoundException("ERROR: executable not found: " + filename);
+			throw new FileNotFoundException("ERROR: executable not found: " + filename
+					+ "; please, make sure that either FORTIFY_HOME is properly set or " + filename + " is on the PATH");
 		} else {
-			listener.getLogger().printf("Found executable: %s%n", s);
+			log.printf("Found executable: %s%n", s);
 			return s;
 		}
 	}

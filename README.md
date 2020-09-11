@@ -78,7 +78,7 @@ For more information about Fortify SSC, please visit https://www.microfocus.com/
 
             fortifyclient token -gettoken CIToken -url <ssc_url> -user <user_name> [-daysToLive <number_of_days>]
 
-        **       Note: **Find the Tools folder in the directory where
+        **Note:** Find the Tools folder in the directory where
         the Fortify Software Security Center WAR file was extracted.
 
         where:
@@ -133,6 +133,21 @@ where *\<sca\_install\_dir\>* is the path where Fortify Static Code
 Analyzer is installed. For example, on Windows the default installation
 location is C:\\Program
 Files\\Fortify\\Fortify\_SCA\_and\_Apps\_*\<version\>*.
+
+### Configuration when running Jenkins from the Docker
+
+When running Jenkins from under the Docker container you need to mount *\<sca\_install\_dir\>* 
+directory to the Docker container in order to make Fortify Static Code Analyzer executables
+accessible from under the Docker. For instance, next command does this:
+
+    docker container run \
+      -p 8080:8080 \
+      -v /home/admin/Fortify/Fortify_SCA_and_Apps_20.2.0:/var/jenkins_home/Fortify/Fortify_SCA_and_Apps_20.2.0 \
+      --name=jenkins \
+      jenkins/jenkins -d
+
+The corresponding FORTIFY\_HOME should have the value `/var/jenkins_home/Fortify/Fortify_SCA_and_Apps_20.2.0` 
+in this case.
 
 ### Preview
 

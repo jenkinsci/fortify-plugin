@@ -80,7 +80,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 			if ("FORTIFY_HOME".equals(key)) {
 				if (checkFortifyHome) {
 					fortifyHome = entry.getValue();
-					if (fortifyHome.endsWith("bin") || fortifyHome.endsWith("bin" + System.lineSeparator())) {
+					if (fortifyHome.endsWith("bin") || fortifyHome.endsWith("bin/") || fortifyHome.endsWith("bin\\")) {
 						log.println("WARNING: Environment variable FORTIFY_HOME should not point to bin directory");
 					}
 				}

@@ -81,9 +81,6 @@ public class FortifyUpload extends FortifyStep {
 	private String failureCriteria;
 	private String appName;
 	private String appVersion;
-	private String connectTimeout;
-	private String readTimeout;
-	private String writeTimeout;
 	private String pollingInterval;
 
 	public FortifyUpload(boolean isPipeline, String appName, String appVersion) {
@@ -133,33 +130,6 @@ public class FortifyUpload extends FortifyStep {
 		return failureCriteria;
 	}
 
-	public String getConnectTimeout() {
-		return connectTimeout;
-	}
-
-	@DataBoundSetter
-	public void setConnectTimeout(String connectTimeout) {
-		this.connectTimeout = connectTimeout;
-	}
-
-	public String getReadTimeout() {
-		return readTimeout;
-	}
-
-	@DataBoundSetter
-	public void setReadTimeout(String readTimeout) {
-		this.readTimeout = readTimeout;
-	}
-
-	public String getWriteTimeout() {
-		return writeTimeout;
-	}
-
-	@DataBoundSetter
-	public void setWriteTimeout(String writeTimeout) {
-		this.writeTimeout = writeTimeout;
-	}
-
 	@DataBoundSetter
 	public void setPollingInterval(String pollingInterval) {
 		this.pollingInterval = pollingInterval;
@@ -192,18 +162,6 @@ public class FortifyUpload extends FortifyStep {
 
 	public String getResolvedFailureCriteria(TaskListener listener) {
 		return resolve(getFailureCriteria(), listener);
-	}
-
-	public String getResolvedConnectTimeout(TaskListener listener) {
-		return resolve(getConnectTimeout(), listener);
-	}
-
-	public String getResolvedReadTimeout(TaskListener listener) {
-		return resolve(getReadTimeout(), listener);
-	}
-
-	public String getResolvedWriteTimeout(TaskListener listener) {
-		return resolve(getWriteTimeout(), listener);
 	}
 
 	public Integer getResolvedPollingInterval(TaskListener listener) {
@@ -802,7 +760,8 @@ public class FortifyUpload extends FortifyStep {
 					boolean useProxy = FortifyPlugin.DESCRIPTOR.getUseProxy();
 					String proxyUrl = FortifyPlugin.DESCRIPTOR.getProxyUrl();
 					if (!useProxy || StringUtils.isEmpty(proxyUrl)) {
-						client.init(url, token, Integer.valueOf(connectTimeout), Integer.valueOf(readTimeout), Integer.valueOf(writeTimeout));
+						client.init(url, token, FortifyPlugin.DESCRIPTOR.getConnectTimeout(),
+								FortifyPlugin.DESCRIPTOR.getReadTimeout(), FortifyPlugin.DESCRIPTOR.getWriteTimeout());
 					} else {
 						String[] proxyUrlSplit = proxyUrl.split(":");
 						String proxyHost = proxyUrlSplit[0];
@@ -813,9 +772,10 @@ public class FortifyUpload extends FortifyStep {
 							} catch (NumberFormatException nfe) {
 							}
 						}
-						client.init(url, token, proxyHost, proxyPort, FortifyPlugin.DESCRIPTOR.getProxyUsername(),
-								FortifyPlugin.DESCRIPTOR.getProxyPassword(), Integer.valueOf(connectTimeout), Integer.valueOf(readTimeout),
-								Integer.valueOf(writeTimeout));
+						client.init(url, token, proxyHost, proxyPort,
+								FortifyPlugin.DESCRIPTOR.getProxyUsername(), FortifyPlugin.DESCRIPTOR.getProxyPassword(),
+								FortifyPlugin.DESCRIPTOR.getConnectTimeout(), FortifyPlugin.DESCRIPTOR.getReadTimeout(),
+								FortifyPlugin.DESCRIPTOR.getWriteTimeout());
 					}
 					/*boolean useProxy = Jenkins.get().proxy != null;
 					if (!useProxy) {

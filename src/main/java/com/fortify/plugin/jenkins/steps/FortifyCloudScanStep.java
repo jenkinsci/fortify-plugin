@@ -27,13 +27,13 @@ public abstract class FortifyCloudScanStep extends FortifyStep {
     protected String getCloudScanExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,
                                          TaskListener listener) throws InterruptedException, IOException {
         listener.getLogger().println("Checking for cloudscan executable");
-        return getExecutable("cloudscan" + (launcher.isUnix() ? "" : ".bat"), true, build, workspace,
-                listener);
+        return getExecutable("cloudscan" + (launcher.isUnix() ? "" : ".bat"), build, workspace,
+                listener, "FORTIFY_HOME");
     }
 
     protected String getScancentralExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,
                                             TaskListener listener) throws InterruptedException, IOException {
-        return getExecutable("scancentral" + (launcher.isUnix() ? "" : ".bat"), true, build, workspace,
-                listener);
+        return getExecutable("scancentral" + (launcher.isUnix() ? "" : ".bat"), build, workspace,
+                listener, "FORTIFY_HOME");
     }
 }

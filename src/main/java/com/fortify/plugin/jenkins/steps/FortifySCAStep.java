@@ -84,32 +84,32 @@ public abstract class FortifySCAStep extends FortifyStep {
 
 	protected String getSourceAnalyzerExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,
 			TaskListener listener) throws InterruptedException, IOException {
-		return getExecutable("sourceanalyzer" + (launcher.isUnix() ? "" : ".exe"), true, build, workspace,
-				listener);
+		return getExecutable("sourceanalyzer" + (launcher.isUnix() ? "" : ".exe"), build, workspace,
+			listener, "FORTIFY_HOME");
 	}
 
 	protected String getMavenExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
-		return getExecutable("mvn" + (launcher.isUnix() ? "" : ".cmd"), false, build, workspace,
-				listener);
+		return getExecutable("mvn" + (launcher.isUnix() ? "" : ".cmd"), build, workspace,
+				listener, "MAVEN_HOME");
 	}
 
 	protected String getGradleExecutable(boolean useWrapper, Run<?, ?> build, FilePath workspace, Launcher launcher,
 			TaskListener listener) throws InterruptedException, IOException {
-		return getExecutable("gradle" + (useWrapper ? "w" : "") + (launcher.isUnix() ? "" : ".bat"), false, build,
-				workspace, listener);
+		return getExecutable("gradle" + (useWrapper ? "w" : "") + (launcher.isUnix() ? "" : ".bat"), build, workspace,
+			listener, "GRADLE_HOME");
 	}
 
 	protected String getDevenvExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
-		return getExecutable("devenv" + (launcher.isUnix() ? "" : ".exe"), false, build, workspace,
-				listener);
+		return getExecutable("devenv" + (launcher.isUnix() ? "" : ".exe"), build, workspace,
+				listener, null);
 	}
 
 	protected String getMSBuildExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
-		return getExecutable("msbuild" + (launcher.isUnix() ? "" : ".exe"), false, build, workspace,
-				listener);
+		return getExecutable("msbuild" + (launcher.isUnix() ? "" : ".exe"), build, workspace,
+				listener, null);
 	}
 
 	public Integer getResolvedMaxHeap(TaskListener listener) {

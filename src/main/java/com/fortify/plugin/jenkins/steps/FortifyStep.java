@@ -56,45 +56,52 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 	/**
 	 * Search for the executable filename in FORTIFY_HOME or PATH environment
 	 * variables or workspace
-	 * 
+	 *
 	 * @param filename
 	 * @param checkFortifyHome
 	 * @param build
 	 * @param workspace
-	 * @param launcher
 	 * @param listener
-	 * @param msg
 	 * @return found executable
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
 	protected String getExecutable(String filename, boolean checkFortifyHome, Run<?, ?> build, FilePath workspace,
-			Launcher launcher, TaskListener listener, String msg) throws InterruptedException, IOException {
+								   TaskListener listener) throws InterruptedException, IOException {
 		PrintStream log = listener.getLogger();
 		EnvVars env = build.getEnvironment(listener);
 		String fortifyHome = null;
+		String executableHome = null;
 		String path = null;
+		String msg = null;
 		// check env variables defined in Jenkins master
 		for (Map.Entry<String, String> entry : env.entrySet()) {
-			String key = entry.getKey();
-			if ("FORTIFY_HOME".equals(key)) {
+			String envVarName = entry.getKey();
+			String envVarValue = entry.getValue();
+			if ("FORTIFY_HOME".equals(envVarName) || "MAVEN_HOME".equals(envVarName) || "GRADLE_HOME".equals(envVarName)) {
 				if (checkFortifyHome) {
-					fortifyHome = entry.getValue();
-					if (fortifyHome.endsWith("bin") || fortifyHome.endsWith("bin/") || fortifyHome.endsWith("bin\\")) {
-						log.println("WARNING: Environment variable FORTIFY_HOME should not point to bin directory");
-					}
+					fortifyHome = envVarValue;
+				} else {
+					executableHome = envVarValue;
 				}
-			} else if ("PATH".equalsIgnoreCase(key)) {
-				path = entry.getValue();
+				if (envVarValue.endsWith("bin") || envVarValue.endsWith("bin/") || envVarValue.endsWith("bin\\")) {
+					log.println("WARNING: Environment variable " + envVarName + " should not point to bin directory");
+					msg = "Environment variable " + envVarName + " is not properly set. "
+							+ "Check out build console output for more details.";
+				}
+			} else if ("PATH".equalsIgnoreCase(envVarName)) {
+				path = envVarValue;
 			}
 		}
-		String s = workspace.act(new FindExecutableRemoteService(filename, fortifyHome, path, workspace));
-		if (s == null) {
+		String home = checkFortifyHome ? fortifyHome : executableHome;
+		String executablePath = workspace.act(new FindExecutableRemoteService(filename, home, path, workspace));
+		if (executablePath == null) {
+			msg = msg == null ? filename + " is neither on the PATH nor in workspace" : msg;
 			throw new FileNotFoundException("ERROR: executable not found: " + filename
-					+ "; please, make sure that either FORTIFY_HOME is properly set or " + filename + " is on the PATH");
+					+ ". Reason: " + msg);
 		} else {
-			log.printf("Found executable: %s%n", s);
-			return s;
+			log.printf("Found executable: %s%n", executablePath);
+			return executablePath;
 		}
 	}
 

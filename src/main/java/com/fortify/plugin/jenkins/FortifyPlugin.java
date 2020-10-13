@@ -726,15 +726,13 @@ public class FortifyPlugin extends Recorder {
 		PrintStream log = listener.getLogger();
 		log.println("Running upload-only step.");
 
-		if (getUploadSSC()) {
-			FortifyUpload upload = new FortifyUpload(false, getAppName(), getAppVersion());
-			upload.setFailureCriteria(getSearchCondition());
-			upload.setFilterSet(getFilterSet());
-			upload.setResultsFile(getScanFile());
-			upload.setPollingInterval(getPollingInterval());
+		FortifyUpload upload = new FortifyUpload(false, getAppName(), getAppVersion());
+		upload.setFailureCriteria(getSearchCondition());
+		upload.setFilterSet(getFilterSet());
+		upload.setResultsFile(getScanFile());
+		upload.setPollingInterval(getPollingInterval());
 
-			upload.perform(build, launcher, listener);
-		}
+		upload.perform(build, launcher, listener);
 	}
 
 	private void performLocalTranslation(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {

@@ -80,7 +80,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 			String envVarValue = entry.getValue();
 			if (targetEnvVarName != null && targetEnvVarName.equals(envVarName)) {
 				home = envVarValue;
-				if (envVarValue.endsWith("bin") || envVarValue.endsWith("bin/") || envVarValue.endsWith("bin\\")) {
+				if (endsWithBin(envVarValue)) {
 					logger.println("WARNING: Environment variable " + envVarName + " should not point to bin directory");
 					isEnvVarSetProperly = false;
 				}
@@ -95,6 +95,10 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		}
 		errorMsg += filename + " is on the PATH or in workspace";
 		return findExecutablePath(filename, home, path, workspace, logger, errorMsg);
+	}
+
+	private static boolean endsWithBin(String str) {
+		return str.endsWith("bin") || str.endsWith("bin/") || str.endsWith("bin\\");
 	}
 
 	private String findExecutablePath(String filename, String home, String path, FilePath workspace, PrintStream logger, String errorMsg)

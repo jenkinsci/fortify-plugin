@@ -15,8 +15,11 @@
  *******************************************************************************/
 package com.fortify.plugin.jenkins.steps;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 
+import hudson.EnvVars;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import hudson.FilePath;
@@ -90,8 +93,22 @@ public abstract class FortifySCAStep extends FortifyStep {
 
 	protected String getMavenExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
-		return getExecutable("mvn" + (launcher.isUnix() ? "" : ".cmd"), build, workspace,
-				listener, "MAVEN_HOME");
+		final EnvVars envVars = build.getEnvironment(listener);
+		if (envVars.containsKey("MAVEN_HOME")) {
+			try {
+				return getExecutable("mvn" + (launcher.isUnix() ? "" : ".bat"), build, workspace, listener, "MAVEN_HOME");
+			} catch (FileNotFoundException ex) {
+				return getExecutable("mvn" + (launcher.isUnix() ? "" : ".cmd"), build, workspace, listener, "MAVEN_HOME");
+			}
+		}
+		if (envVars.containsKey("M2_HOME")) {
+			try {
+				return getExecutable("mvn" + (launcher.isUnix() ? "" : ".cmd"), build, workspace, listener, "M2_HOME");
+			} catch (FileNotFoundException ex) {
+				return getExecutable("mvn" + (launcher.isUnix() ? "" : ".bat"), build, workspace, listener, "M2_HOME");
+			}
+		}
+		throw new RuntimeException("ERROR: neither MAVEN_HOME, nor M2_HOME environment variable is defined!");
 	}
 
 	protected String getGradleExecutable(boolean useWrapper, Run<?, ?> build, FilePath workspace, Launcher launcher,
@@ -102,14 +119,18 @@ public abstract class FortifySCAStep extends FortifyStep {
 
 	protected String getDevenvExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
-		return getExecutable("devenv" + (launcher.isUnix() ? "" : ".exe"), build, workspace,
-				listener, null);
+		if (launcher.isUnix()) {
+			throw new RuntimeException("Sorry, devenv is not supported on Unix platform.");
+		}
+		return getExecutable("devenv.exe", build, workspace, listener, null);
 	}
 
 	protected String getMSBuildExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
-		return getExecutable("msbuild" + (launcher.isUnix() ? "" : ".exe"), build, workspace,
-				listener, null);
+		if (launcher.isUnix()) {
+			throw new RuntimeException("Sorry, msbuild is not supported on Unix platform.");
+		}
+		return getExecutable("msbuild.exe", build, workspace, listener, null);
 	}
 
 	public Integer getResolvedMaxHeap(TaskListener listener) {

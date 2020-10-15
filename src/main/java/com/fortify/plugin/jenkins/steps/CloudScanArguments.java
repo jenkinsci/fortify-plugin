@@ -54,8 +54,12 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
         try {
             cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener);
         } catch (FileNotFoundException ex) {
-            log.println("WARNING: Cannot find scancentral executable");
-            cloudscanExec = getCloudScanExecutable(run, filePath, launcher, taskListener);
+            log.println("WARNING: Cannot find scancentral exeFcutable");
+            try {
+                cloudscanExec = getCloudScanExecutable(run, filePath, launcher, taskListener);
+            } catch (FileNotFoundException exception) {
+                throw new RuntimeException("Cannot find cloudscan executable");
+            }
         }
 
         EnvVars vars = run.getEnvironment(taskListener);

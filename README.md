@@ -136,8 +136,8 @@ Files\\Fortify\\Fortify\_SCA\_and\_Apps\_*\<version\>*.
 
 ### Configuration when running Jenkins from the Docker
 
-When running Jenkins from under the Docker container you need to mount *\<sca\_install\_dir\>* 
-directory to the Docker container in order to make Fortify Static Code Analyzer executables
+When running Jenkins from under a Docker container, mount *\<sca\_install\_dir\>* 
+directory to the Docker container to make Fortify Static Code Analyzer executables
 accessible from under the Docker. For instance, next command does this:
 
     docker container run \
@@ -146,8 +146,7 @@ accessible from under the Docker. For instance, next command does this:
       --name=jenkins \
       jenkins/jenkins -d
 
-The corresponding FORTIFY\_HOME should have the value `/var/jenkins_home/Fortify/Fortify_SCA_and_Apps_20.2.0` 
-in this case.
+For this example, the value of FORTIFY\_HOME is `/var/Jenkins_home/Fortify/Fortify_SCA_and_Apps_20.2.0`.
 
 ### Preview
 

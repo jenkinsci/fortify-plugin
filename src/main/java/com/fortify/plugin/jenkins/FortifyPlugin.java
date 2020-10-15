@@ -1465,11 +1465,11 @@ public class FortifyPlugin extends Recorder {
 		private boolean isSettingUpdated = false;
 
 		@Override
-		public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
+		public boolean configure(StaplerRequest req, JSONObject jsonObject) throws FormException {
 			// to persist global configuration information,
 			// set that to properties and call save().
 			try {
-				url = o.getString("url").trim();
+				url = jsonObject.getString("url").trim();
 				checkUrlValue(url);
 			} catch (JSONException e) {
 				System.out.println("Cannot restore 'URL' property. Will use default (empty) values.");
@@ -1480,7 +1480,7 @@ public class FortifyPlugin extends Recorder {
 			}
 			JSONObject useProxy = null;
 			try {
-				useProxy = o.getJSONObject("useProxy");
+				useProxy = jsonObject.getJSONObject("useProxy");
 			} catch (JSONException e) {
 			}
 			if (useProxy == null || useProxy.isNullObject()) {
@@ -1522,7 +1522,7 @@ public class FortifyPlugin extends Recorder {
 				}
 			}
 			try {
-				String tokenParam = o.getString("token").trim();
+				String tokenParam = jsonObject.getString("token").trim();
 				token = tokenParam.isEmpty() ? null : Secret.fromString(tokenParam);
 			} catch (JSONException e) {
 				System.out.println("Cannot restore 'Authentication Token' property. Will use default (empty) values.");
@@ -1530,14 +1530,14 @@ public class FortifyPlugin extends Recorder {
 			}
 
 			try {
-				projectTemplate = o.getString("projectTemplate").trim();
+				projectTemplate = jsonObject.getString("projectTemplate").trim();
 			} catch (JSONException e) {
 				System.out.println("Cannot restore 'Issue template' property. Will use default (empty) values.");
 				projectTemplate = null;
 			}
 
 			try {
-				String pageSizeString = o.getString("breakdownPageSize");
+				String pageSizeString = jsonObject.getString("breakdownPageSize");
 				if (pageSizeString != null && pageSizeString.trim().length() > 0) {
 					breakdownPageSize = Integer.parseInt(pageSizeString.trim());
 				} else {
@@ -1549,7 +1549,7 @@ public class FortifyPlugin extends Recorder {
 			}
 
 			try {
-				String connectTimeoutString = o.getString("connectTimeout");
+				String connectTimeoutString = jsonObject.getString("connectTimeout");
 				if (connectTimeoutString != null && connectTimeoutString.trim().length() > 0) {
 					connectTimeout = Integer.parseInt(connectTimeoutString.trim());
 				} else {
@@ -1561,7 +1561,7 @@ public class FortifyPlugin extends Recorder {
 			}
 
 			try {
-				String readTimeoutString = o.getString("readTimeout");
+				String readTimeoutString = jsonObject.getString("readTimeout");
 				if (readTimeoutString != null && readTimeoutString.trim().length() > 0) {
 					readTimeout = Integer.parseInt(readTimeoutString.trim());
 				} else {
@@ -1573,7 +1573,7 @@ public class FortifyPlugin extends Recorder {
 			}
 
 			try {
-				String writeTimeoutString = o.getString("writeTimeout");
+				String writeTimeoutString = jsonObject.getString("writeTimeout");
 				if (writeTimeoutString != null && writeTimeoutString.trim().length() > 0) {
 					writeTimeout = Integer.parseInt(writeTimeoutString.trim());
 				} else {
@@ -1585,7 +1585,7 @@ public class FortifyPlugin extends Recorder {
 			}
 
 			try {
-				ctrlUrl = o.getString("ctrlUrl").trim();
+				ctrlUrl = jsonObject.getString("ctrlUrl").trim();
 				checkCtrlUrlValue(ctrlUrl);
 			} catch (JSONException e) {
 				System.out.println("Cannot restore 'CTRLURL' property. Will use default (empty) values.");
@@ -1596,7 +1596,7 @@ public class FortifyPlugin extends Recorder {
 			}
 
 			try {
-				String ctrlTokenParam = o.getString("ctrlToken").trim();
+				String ctrlTokenParam = jsonObject.getString("ctrlToken").trim();
 				ctrlToken = ctrlTokenParam.isEmpty() ? null : Secret.fromString(ctrlTokenParam);
 			} catch (JSONException e) {
 				System.out.println("Cannot restore 'Controller token' property. Will use default (empty) values.");
@@ -1605,7 +1605,7 @@ public class FortifyPlugin extends Recorder {
 
 			save();
 			isSettingUpdated = true;
-			return super.configure(req, o);
+			return super.configure(req, jsonObject);
 		}
 
 		public boolean isSettingUpdated() {

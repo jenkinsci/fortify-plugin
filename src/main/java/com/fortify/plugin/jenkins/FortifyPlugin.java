@@ -532,6 +532,10 @@ public class FortifyPlugin extends Recorder {
 		return uploadSSC == null ? null : uploadSSC.getPollingInterval();
 	}
 
+	public String getTimeout() {
+		return getUploadSSC() ? analysisRunType.getUploadSSC().getTimeout() : "";
+	}
+
 	public String getPollingInterval() {
 		return getUploadSSC() ? analysisRunType.getUploadSSC().getPollingInterval() : "";
 	}
@@ -715,6 +719,7 @@ public class FortifyPlugin extends Recorder {
 			upload.setFailureCriteria(getSearchCondition());
 			upload.setFilterSet(getFilterSet());
 			upload.setResultsFile(getScanFile());
+			upload.setTimeout(getTimeout());
 			upload.setPollingInterval(getPollingInterval());
 
 			upload.perform(build, launcher, listener);
@@ -1809,6 +1814,7 @@ public class FortifyPlugin extends Recorder {
 		private String appVersion;
 		private String filterSet;
 		private String searchCondition;
+		private String timeout;
 		private String pollingInterval;
 
 		@DataBoundConstructor
@@ -1818,11 +1824,13 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		@Deprecated
-		public UploadSSCBlock(String projectName, String projectVersion, String filterSet, String searchCondition, String pollingInterval) {
+		public UploadSSCBlock(String projectName, String projectVersion, String filterSet, String searchCondition,
+							  String timeout, String pollingInterval) {
 			this.projectName = projectName != null ? projectName.trim() : "";
 			this.projectVersion = projectName != null ? projectVersion.trim() : "";
 			this.filterSet = filterSet != null ? filterSet.trim() : "";
 			this.searchCondition = searchCondition != null ? searchCondition.trim() : "";
+			this.timeout = timeout != null ? timeout.trim() : "";
 			this.pollingInterval = pollingInterval != null ? pollingInterval.trim() : "";
 		}
 
@@ -1866,6 +1874,15 @@ public class FortifyPlugin extends Recorder {
 		}
 		@DataBoundSetter
 		public void setSearchCondition(String searchCondition) { this.searchCondition = searchCondition; }
+
+		public String getTimeout() {
+			return timeout;
+		}
+
+		@DataBoundSetter
+		public void setTimeout(String timeout) {
+			this.timeout = timeout;
+		}
 
 		public String getPollingInterval() {
 			return pollingInterval;

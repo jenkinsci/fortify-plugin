@@ -400,7 +400,7 @@ public class FortifyUpload extends FortifyStep {
 		run.setResult(Result.NOT_BUILT);
 		run.setDescription("A timeout has been reached when checking SSC for status of artifacts, this could happen " +
 				"on long running processing jobs and does not mean that the build failed. You can check the status in SSC here: " +
-				"<a href=\"" + appArtifactsURL + "\">" + appArtifactsURL + "</a>");
+				appArtifactsURL);
 		throw new AbortException("Timeout of " + timeoutInMinutes + " minute(s) is reached.");
 	}
 

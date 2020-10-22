@@ -17,7 +17,6 @@ package com.fortify.plugin.jenkins.steps;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 
 import hudson.EnvVars;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -95,20 +94,24 @@ public abstract class FortifySCAStep extends FortifyStep {
 			throws InterruptedException, IOException {
 		final EnvVars envVars = build.getEnvironment(listener);
 		if (envVars.containsKey("MAVEN_HOME")) {
-			try {
-				return getExecutable("mvn" + (launcher.isUnix() ? "" : ".bat"), build, workspace, listener, "MAVEN_HOME");
-			} catch (FileNotFoundException ex) {
-				return getExecutable("mvn" + (launcher.isUnix() ? "" : ".cmd"), build, workspace, listener, "MAVEN_HOME");
-			}
+			return getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", "MAVEN_HOME");
 		}
 		if (envVars.containsKey("M2_HOME")) {
-			try {
-				return getExecutable("mvn" + (launcher.isUnix() ? "" : ".cmd"), build, workspace, listener, "M2_HOME");
-			} catch (FileNotFoundException ex) {
-				return getExecutable("mvn" + (launcher.isUnix() ? "" : ".bat"), build, workspace, listener, "M2_HOME");
-			}
+			return getExecutableForEnvVar(build, workspace, launcher, listener, ".cmd", ".bat", "M2_HOME");
 		}
-		throw new RuntimeException("ERROR: neither MAVEN_HOME, nor M2_HOME environment variable is defined!");
+		return getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", null);
+	}
+
+	private String getExecutableForEnvVar(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String ext1, String ext2,
+										  String targetEnvVarName) throws InterruptedException, IOException {
+		if (launcher.isUnix()) {
+			return getExecutable("mvn", build, workspace, listener, targetEnvVarName);
+		}
+		try {
+			return getExecutable("mvn" + ext1, build, workspace, listener, targetEnvVarName);
+		} catch (FileNotFoundException ex) {
+			return getExecutable("mvn" + ext2, build, workspace, listener, targetEnvVarName);
+		}
 	}
 
 	protected String getGradleExecutable(boolean useWrapper, Run<?, ?> build, FilePath workspace, Launcher launcher,

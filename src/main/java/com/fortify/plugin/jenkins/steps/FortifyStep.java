@@ -79,10 +79,14 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 			String envVarName = entry.getKey();
 			String envVarValue = entry.getValue();
 			if (targetEnvVarName != null && targetEnvVarName.equals(envVarName)) {
-				home = envVarValue;
-				if (endsWithBin(envVarValue)) {
-					logger.println("WARNING: Environment variable " + envVarName + " should not point to bin directory");
-					isEnvVarSetProperly = false;
+				if ("PATH".equalsIgnoreCase(targetEnvVarName)) {
+					path = envVarName;
+				} else {
+					home = envVarValue;
+					if (endsWithBin(envVarValue)) {
+						logger.println("WARNING: Environment variable " + envVarName + " should not point to bin directory");
+						isEnvVarSetProperly = false;
+					}
 				}
 			} else if ("PATH".equalsIgnoreCase(envVarName)) {
 				path = envVarValue;

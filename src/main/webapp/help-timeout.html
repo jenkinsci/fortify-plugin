@@ -15,7 +15,8 @@
  -->
 <div>
     <p>
-        Apply a timeout in minutes (0 to 60) of waiting for SSC to finish processing artifacts to avoid hanging build.
+        Apply a timeout in minutes (0 to 720) of waiting for SSC to finish processing artifacts to avoid hanging build.
+        If empty, there will be no timeout and the build will continue to poll indefinitely.
         Notice SCA and upload build have succeeded, this timeout applies only to checking status beyond that.
     </p>
 </div>

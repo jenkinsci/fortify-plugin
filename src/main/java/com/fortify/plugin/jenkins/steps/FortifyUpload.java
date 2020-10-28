@@ -29,8 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import hudson.markup.EscapedMarkupFormatter;
-import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -328,18 +326,15 @@ public class FortifyUpload extends FortifyStep {
 		PrintStream log = listener.getLogger();
 		boolean isProcessingComplete = false;
 
-		final long startTimeMillis = System.currentTimeMillis();
-
-		int sleepInMinutes = (getResolvedPollingInterval(listener) != null) ? getResolvedPollingInterval(listener) : 1;
-		int sleepInMillis = sleepInMinutes * 60 * 1000;
-		long sleepUntil = startTimeMillis + sleepInMillis;
-
 		int timeoutInMinutes = (getResolvedTimeout(listener) != null) ? getResolvedTimeout(listener) : 0;
 		int timeoutInMillis = timeoutInMinutes * 60 * 1000;
-		long timeoutAfter = startTimeMillis + timeoutInMillis;
+		long timeoutAfter = System.currentTimeMillis() + timeoutInMillis;
 
 		while (!isProcessingComplete) {
-			log.printf("Sleep for %d minute(s)%n", sleepInMinutes);
+			int sleep = (getResolvedPollingInterval(listener) != null) ? getResolvedPollingInterval(listener) : 1;
+			log.printf("Sleep for %d minute(s)%n", sleep);
+			sleep = sleep * 60 * 1000; // wait time is in minute(s)
+			long sleepUntil = System.currentTimeMillis() + sleep;
 			while (true) {
 				long diff = sleepUntil - System.currentTimeMillis();
 				if (diff > 0) {

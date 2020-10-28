@@ -1074,6 +1074,23 @@ public class FortifyPlugin extends Recorder {
 			return FormValidation.ok();
 		}
 
+		public FormValidation doCheckTimeout(@QueryParameter String value) {
+			if (StringUtils.isBlank(value)) {
+				return FormValidation.ok();
+			} else {
+				try {
+					int x = Integer.parseInt(value);
+					if (x >= 0 && x <= 720) {
+						return FormValidation.ok();
+					} else {
+						return FormValidation.error("Timeout must be in the range of 0 to 720");
+					}
+				} catch (NumberFormatException e) {
+					return FormValidation.error("Timeout is invalid");
+				}
+			}
+		}
+
 		public FormValidation doCheckPollingInterval(@QueryParameter String value) {
 			if (StringUtils.isBlank(value) || value.charAt(0) == '$') {
 				return FormValidation.ok();

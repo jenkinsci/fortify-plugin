@@ -1080,10 +1080,10 @@ public class FortifyPlugin extends Recorder {
 			} else {
 				try {
 					int x = Integer.parseInt(value);
-					if (x >= 0 && x <= 720) {
+					if (x >= 0 && x <= 10080) {
 						return FormValidation.ok();
 					} else {
-						return FormValidation.error("Timeout must be in the range of 0 to 720");
+						return FormValidation.error("Timeout must be in the range of 0 to 10080");
 					}
 				} catch (NumberFormatException e) {
 					return FormValidation.error("Timeout is invalid");

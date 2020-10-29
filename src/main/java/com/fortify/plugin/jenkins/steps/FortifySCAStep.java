@@ -15,14 +15,14 @@
  *******************************************************************************/
 package com.fortify.plugin.jenkins.steps;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
 
+import hudson.EnvVars;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
@@ -86,32 +86,54 @@ public abstract class FortifySCAStep extends FortifyStep {
 
 	protected String getSourceAnalyzerExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,
 			TaskListener listener) throws InterruptedException, IOException {
-		return getExecutable("sourceanalyzer" + (launcher.isUnix() ? "" : ".exe"), true, build, workspace,
-				launcher, listener, null);
+		return getExecutable("sourceanalyzer" + (launcher.isUnix() ? "" : ".exe"), build, workspace,
+			listener, "FORTIFY_HOME");
 	}
 
 	protected String getMavenExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
-		return getExecutable("mvn" + (launcher.isUnix() ? "" : ".cmd"), false, build, workspace, launcher,
-				listener, null);
+		final EnvVars envVars = build.getEnvironment(listener);
+		if (envVars.containsKey("MAVEN_HOME")) {
+			return getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", "MAVEN_HOME");
+		}
+		if (envVars.containsKey("M2_HOME")) {
+			return getExecutableForEnvVar(build, workspace, launcher, listener, ".cmd", ".bat", "M2_HOME");
+		}
+		return getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", null);
+	}
+
+	private String getExecutableForEnvVar(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String ext1, String ext2,
+										  String targetEnvVarName) throws InterruptedException, IOException {
+		if (launcher.isUnix()) {
+			return getExecutable("mvn", build, workspace, listener, targetEnvVarName);
+		}
+		try {
+			return getExecutable("mvn" + ext1, build, workspace, listener, targetEnvVarName);
+		} catch (FileNotFoundException ex) {
+			return getExecutable("mvn" + ext2, build, workspace, listener, targetEnvVarName);
+		}
 	}
 
 	protected String getGradleExecutable(boolean useWrapper, Run<?, ?> build, FilePath workspace, Launcher launcher,
 			TaskListener listener) throws InterruptedException, IOException {
-		return getExecutable("gradle" + (useWrapper ? "w" : "") + (launcher.isUnix() ? "" : ".bat"), false, build,
-				workspace, launcher, listener, null);
+		return getExecutable("gradle" + (useWrapper ? "w" : "") + (launcher.isUnix() ? "" : ".bat"), build, workspace,
+			listener, "GRADLE_HOME");
 	}
 
 	protected String getDevenvExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
-		return getExecutable("devenv" + (launcher.isUnix() ? "" : ".exe"), false, build, workspace, launcher,
-				listener, null);
+		if (launcher.isUnix()) {
+			throw new RuntimeException("Sorry, devenv is not supported on Unix platform.");
+		}
+		return getExecutable("devenv.exe", build, workspace, listener, null);
 	}
 
 	protected String getMSBuildExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
 			throws InterruptedException, IOException {
-		return getExecutable("msbuild" + (launcher.isUnix() ? "" : ".exe"), false, build, workspace, launcher,
-				listener, null);
+		if (launcher.isUnix()) {
+			throw new RuntimeException("Sorry, msbuild is not supported on Unix platform.");
+		}
+		return getExecutable("msbuild.exe", build, workspace, listener, null);
 	}
 
 	public Integer getResolvedMaxHeap(TaskListener listener) {

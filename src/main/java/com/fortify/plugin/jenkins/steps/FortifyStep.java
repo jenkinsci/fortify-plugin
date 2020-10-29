@@ -80,7 +80,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 			String envVarValue = entry.getValue();
 			if (targetEnvVarName != null && targetEnvVarName.equals(envVarName)) {
 				if ("PATH".equalsIgnoreCase(targetEnvVarName)) {
-					path = envVarName;
+					path = envVarValue;
 				} else {
 					home = envVarValue;
 					if (endsWithBin(envVarValue)) {

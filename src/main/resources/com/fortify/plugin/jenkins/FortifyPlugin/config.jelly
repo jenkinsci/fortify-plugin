@@ -290,6 +290,9 @@
           <f:entry field="searchCondition" title="Build failure criteria" help="/plugin/fortify/help-search.html">
             <f:textbox/>
           </f:entry>
+          <f:entry field="timeout" title="Timeout" help="/plugin/fortify/help-timeout.html">
+            <f:textbox/>
+          </f:entry>
           <f:advanced title="Advanced settings">
             <f:entry field="pollingInterval" title="Polling interval" help="/plugin/fortify/help-pollingInterval.html">
               <f:textbox/>
@@ -307,7 +310,7 @@
           <f:textbox/>
         </f:entry>
 
-        <f:section name="uploadSSC">
+        <f:rowSet name="uploadSSC">
           <f:entry title="Application name" help="/plugin/fortify/help-sscProjName.html">
             <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
             <div style="float:left;width:80%;">
@@ -334,12 +337,15 @@
           <f:entry field="searchCondition" title="Build failure criteria" help="/plugin/fortify/help-search.html">
             <f:textbox/>
           </f:entry>
+          <f:entry field="timeout" title="Timeout" help="/plugin/fortify/help-timeout.html">
+            <f:textbox/>
+          </f:entry>
           <f:advanced title="Advanced settings">
             <f:entry field="pollingInterval" title="Polling interval" help="/plugin/fortify/help-pollingInterval.html">
               <f:textbox/>
             </f:entry>
           </f:advanced>
-        </f:section>
+        </f:rowSet>
       </f:radioBlock>
 
 

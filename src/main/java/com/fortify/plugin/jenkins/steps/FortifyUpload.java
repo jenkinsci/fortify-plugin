@@ -281,7 +281,8 @@ public class FortifyUpload extends FortifyStep {
 		if (!StringUtils.isBlank(getResolvedAppName(listener)) && !StringUtils.isBlank(getResolvedAppVersion(listener))
 				&& FortifyPlugin.DESCRIPTOR.canUploadToSsc()) {
 			// the FPR may be in remote slave, we need to call launcher to do this for me
-			log.printf("Uploading FPR to SSC at %s%n", FortifyPlugin.DESCRIPTOR.getUrl());
+			log.printf("Uploading FPR to SSC at %s to application '%s' and application version '%s'%n",
+					FortifyPlugin.DESCRIPTOR.getUrl(), getResolvedAppName(listener), getResolvedAppVersion(listener));
 			try {
 				final Long projectId = createNewOrGetProject(listener);
 				final File fpr = localFPR;

@@ -51,7 +51,7 @@
     </f:entry>
 
     <f:entry title="Polling interval" field="pollingInterval" help="/plugin/fortify/help-pollingInterval.html">
-      <f:textbox field="pollingInterval" />
+      <f:number field="pollingInterval" />
     </f:entry>
 
 </j:jelly>

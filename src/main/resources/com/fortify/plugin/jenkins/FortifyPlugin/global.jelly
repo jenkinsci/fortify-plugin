@@ -61,16 +61,16 @@
 
       <f:validateButton title="Test SSC connection" progress="Testing..." method="testConnection" with="url,token,useProxy,proxyUrl,proxyUsername,proxyPassword" />
       <f:entry title="Maximum issues per page" help="/plugin/fortify/help-breakdownPageSize.html">
-        <f:textbox field="breakdownPageSize" id="breakdownPageSize" />
+        <f:number field="breakdownPageSize" id="breakdownPageSize" />
       </f:entry>
       <f:entry title="Connection timeout" help="/plugin/fortify/help-connectionTimeout.html">
-        <f:textbox field="connectTimeout" id="connectTimeout" />
+        <f:number field="connectTimeout" id="connectTimeout" />
       </f:entry>
       <f:entry title="Read timeout" help="/plugin/fortify/help-readTimeout.html">
-        <f:textbox field="readTimeout" id="readTimeout" />
+        <f:number field="readTimeout" id="readTimeout" />
       </f:entry>
       <f:entry title="Write timeout" help="/plugin/fortify/help-writeTimeout.html">
-        <f:textbox field="writeTimeout" id="writeTimeout" />
+        <f:number field="writeTimeout" id="writeTimeout" />
       </f:entry>
     </f:section>
 

@@ -23,7 +23,7 @@
     </parent>
 
     <artifactId>fortify</artifactId>
-    <version>20.1.34-SNAPSHOT</version>
+    <version>20.2.34</version>
     <packaging>hpi</packaging>
 
     <properties>

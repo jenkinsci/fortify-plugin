@@ -325,6 +325,19 @@ public class FortifyClient {
 		return result;
 	}
 
+	/**
+	 * Retrieves application version id from SSC by given application name and application version name.
+	 *
+	 * @param appName
+	 * @param appVersionName
+	 * @return application version id
+	 * @throws ApiException
+	 */
+	public Long getProjectVersionId(String appName, String appVersionName) throws ApiException {
+		final Long applicationId = apiClientWrapper.getApplicationId(appName);
+		return apiClientWrapper.getVersionForApplication(applicationId, appVersionName);
+	}
+
 	private void addAllFolderInfo(Map<String, List<String>> result, int allTotalCount, int allNewIssuesCount) {
 		List<String> attributes = new ArrayList<String>();
 		attributes.add("All");

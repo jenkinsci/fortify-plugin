@@ -42,12 +42,7 @@ public class RemoteService implements FilePath.FileCallable<FPRSummary> {
 	public FPRSummary invoke(File workspace, VirtualChannel channel) throws IOException {
 		FPRSummary summary = new FPRSummary();
 
-		// we have to locate the FPR even if we don't need to run re
 		File realFPR = locateFPR(workspace, fpr);
-		if (null == realFPR) {
-			throw new RuntimeException(
-					"Can't locate FPR file '" + fpr + "' under workspace: " + workspace.getAbsolutePath());
-		}
 		summary.setFprFile(new FilePath(realFPR));
 
 		// setup log message to FPRSummary
@@ -58,8 +53,28 @@ public class RemoteService implements FilePath.FileCallable<FPRSummary> {
 		return summary;
 	}
 
+	private static File locateFPR(File workspace, String fprPath) {
+		File fpr = new File(fprPath);
+
+		// If full path, locate FPR outside workspace
+		if (fpr.isAbsolute()) {
+			if (fpr.exists()) {
+				return fpr;
+			} else {
+				throw new RuntimeException("FPR file '" + fpr + "' doesn't exist!");
+			}
+		}
+		// If relative path, search in workspace
+		File fprInWorkspace = locateFPRInWorkspace(workspace, fprPath);
+		if (null == fprInWorkspace) {
+			throw new RuntimeException(
+					"Can't locate FPR file '" + fpr + "' under workspace: " + workspace.getAbsolutePath());
+		}
+		return fprInWorkspace;
+	}
+
 	@SuppressWarnings("unchecked")
-	private static File locateFPR(File path, String preferredFileName) {
+	private static File locateFPRInWorkspace(File path, String preferredFileName) {
 		String ext[] = { "fpr" };
 		Iterator<File> iterator = FileUtils.iterateFiles(path, ext, true);
 

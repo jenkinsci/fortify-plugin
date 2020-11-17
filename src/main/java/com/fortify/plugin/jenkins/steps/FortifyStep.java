@@ -17,6 +17,7 @@ package com.fortify.plugin.jenkins.steps;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,42 +54,65 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 	}
 
 	/**
-	 * Search for the executable filename in FORTIFY_HOME or PATH environment
-	 * variables or workspace
-	 * 
+	 * Search for the executable filename in executable home directory or on PATH environment
+	 * variable or in workspace
+	 *
 	 * @param filename
-	 * @param checkFortifyHome
 	 * @param build
 	 * @param workspace
-	 * @param launcher
 	 * @param listener
-	 * @param msg
+	 * @param targetEnvVarName
 	 * @return found executable
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	protected String getExecutable(String filename, boolean checkFortifyHome, Run<?, ?> build, FilePath workspace,
-			Launcher launcher, TaskListener listener, String msg) throws InterruptedException, IOException {
+	protected String getExecutable(String filename, Run<?, ?> build, FilePath workspace,
+								   TaskListener listener, String targetEnvVarName) throws InterruptedException, IOException {
+		PrintStream logger = listener.getLogger();
 		EnvVars env = build.getEnvironment(listener);
-		String fortifyHome = null;
+
+		String home = null;
 		String path = null;
+		boolean isEnvVarSetProperly = true;
 		// check env variables defined in Jenkins master
 		for (Map.Entry<String, String> entry : env.entrySet()) {
-			String key = entry.getKey();
-			if ("FORTIFY_HOME".equals(key)) {
-				if (checkFortifyHome) {
-					fortifyHome = entry.getValue();
+			String envVarName = entry.getKey();
+			String envVarValue = entry.getValue();
+			if (targetEnvVarName != null && targetEnvVarName.equals(envVarName)) {
+				if ("PATH".equalsIgnoreCase(targetEnvVarName)) {
+					path = envVarValue;
+				} else {
+					home = envVarValue;
+					if (endsWithBin(envVarValue)) {
+						logger.println("WARNING: Environment variable " + envVarName + " should not point to bin directory");
+						isEnvVarSetProperly = false;
+					}
 				}
-			} else if ("PATH".equalsIgnoreCase(key)) {
-				path = entry.getValue();
+			} else if ("PATH".equalsIgnoreCase(envVarName)) {
+				path = envVarValue;
 			}
 		}
-		String s = workspace.act(new FindExecutableRemoteService(filename, fortifyHome, path, workspace));
-		if (s == null) {
-			throw new FileNotFoundException("ERROR: executable not found: " + filename);
+
+		String errorMsg = "make sure that either ";
+		if (targetEnvVarName != null) {
+			errorMsg += targetEnvVarName + " environment variable is set" + (!isEnvVarSetProperly ? " properly" : "") + " or ";
+		}
+		errorMsg += filename + " is on the PATH or in workspace";
+		return findExecutablePath(filename, home, path, workspace, logger, errorMsg);
+	}
+
+	private static boolean endsWithBin(String str) {
+		return str.endsWith("bin") || str.endsWith("bin/") || str.endsWith("bin\\");
+	}
+
+	private String findExecutablePath(String filename, String home, String path, FilePath workspace, PrintStream logger, String errorMsg)
+			throws IOException, InterruptedException {
+		String executablePath = workspace.act(new FindExecutableRemoteService(filename, home, path, workspace));
+		if (executablePath == null) {
+			throw new FileNotFoundException("ERROR: executable not found: " + filename + "; " + errorMsg);
 		} else {
-			listener.getLogger().printf("Found executable: %s%n", s);
-			return s;
+			logger.printf("Found executable: %s%n", executablePath);
+			return executablePath;
 		}
 	}
 

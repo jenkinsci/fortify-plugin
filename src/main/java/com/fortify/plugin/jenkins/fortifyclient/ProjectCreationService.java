@@ -263,11 +263,15 @@ public class ProjectCreationService {
 		if (applicationId != null) {
 			appVersionId = apiClientWrapper.getVersionForApplication(applicationId, appVersionName);
 			if (appVersionId == null) {
+				logWriter.printf("Application version '%s' does not exist for application '%s'. Will create the application version.%n",
+						appVersionName, appName);
 				appVersionId = apiClientWrapper.createAppOrVersion(applicationId, issueTemplateId, appName,
 						appVersionName, masterAttrGuid, ApiClientWrapper.AppTypeEnum.APP_VERSION);
 				apiClientWrapper.setDefaultAttributesAndCommit(appVersionId);
 			}
 		} else {
+			logWriter.printf("Application '%s' does not exist. Will create application '%s' and application version '%s'.%n",
+					appName, appName, appVersionName);
 			appVersionId = apiClientWrapper.createAppOrVersion(null, issueTemplateId, appName, appVersionName,
 					masterAttrGuid, AppTypeEnum.APPLICATION);
 			apiClientWrapper.setDefaultAttributesAndCommit(appVersionId);

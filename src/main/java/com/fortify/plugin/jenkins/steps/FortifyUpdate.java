@@ -193,8 +193,8 @@ public class FortifyUpdate extends FortifyStep {
 
 	private String getFortifyUpdateExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,
 			TaskListener listener) throws InterruptedException, IOException {
-		return getExecutable("fortifyupdate" + (launcher.isUnix() ? "" : ".cmd"), true, build, workspace,
-				launcher, listener, null);
+		return getExecutable("fortifyupdate" + (launcher.isUnix() ? "" : ".cmd"), build, workspace,
+				listener, "FORTIFY_HOME");
 	}
 
 	@Extension

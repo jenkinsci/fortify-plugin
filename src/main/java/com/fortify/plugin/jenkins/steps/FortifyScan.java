@@ -21,6 +21,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Set;
 
+import com.fortify.plugin.jenkins.FortifyPlugin;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
@@ -206,6 +207,9 @@ public class FortifyScan extends FortifySCAStep {
 
 		@Override
 		protected Void run() throws Exception {
+			if (FortifyPlugin.DESCRIPTOR.isPreventLocalScans()) {
+				throw new AbortException(Messages.FortifyScan_Local_NotSupported());
+			}
 			getContext().get(TaskListener.class).getLogger().println("Running FortifyScan step");
 			if (!getContext().get(FilePath.class).exists()) {
 				getContext().get(FilePath.class).mkdirs();

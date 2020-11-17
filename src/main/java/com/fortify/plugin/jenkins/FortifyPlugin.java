@@ -701,6 +701,9 @@ public class FortifyPlugin extends Recorder {
 		performLocalTranslation(build, launcher, listener);
 
 		if (getRunScan()) {
+			if (FortifyPlugin.DESCRIPTOR.isPreventLocalScans()) {
+				throw new AbortException(Messages.FortifyScan_Local_NotSupported());
+			}
 			FortifyScan fs = new FortifyScan(getBuildId());
 			fs.setAddJVMOptions(getAddJVMOptions());
 			fs.setMaxHeap(getMaxHeap());
@@ -907,6 +910,9 @@ public class FortifyPlugin extends Recorder {
 		/** CloudScan Controller Token*/
 		private Secret ctrlToken;
 
+		/* Scan Settings */
+		private boolean preventLocalScans;
+
 		public DescriptorImpl() {
 			super(FortifyPlugin.class);
 			load();
@@ -973,6 +979,10 @@ public class FortifyPlugin extends Recorder {
 		public String getCtrlUrl() { return ctrlUrl; }
 
 		public String getCtrlToken() { return ctrlToken == null ? "" : ctrlToken.getPlainText(); }
+
+		public boolean isPreventLocalScans() {
+			return preventLocalScans;
+		}
 
 		public FormValidation doCheckBreakdownPageSize(@QueryParameter String value) {
 			if (StringUtils.isBlank(value)) {
@@ -1642,6 +1652,13 @@ public class FortifyPlugin extends Recorder {
 			} catch (JSONException e) {
 				System.out.println("Cannot restore 'Controller token' property. Will use default (empty) values.");
 				ctrlToken = null;
+			}
+
+			try {
+				preventLocalScans = jsonObject.getBoolean("preventLocalScans");
+			} catch (JSONException e) {
+				System.out.println("Cannot restore 'Prevent Local Scans' property. Will use default (false) values.");
+				preventLocalScans = false;
 			}
 
 			save();

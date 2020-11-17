@@ -88,6 +88,12 @@
       </f:entry>
     </f:section>
 
+    <f:section title="Scan Settings">
+      <f:entry title="Prevent Local Scans">
+        <f:checkbox name="preventLocalScans" field="preventLocalScans" id="preventLocalScans"/>
+      </f:entry>
+    </f:section>
+
   </f:section>
 
 </j:jelly>

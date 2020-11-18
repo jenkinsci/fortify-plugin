@@ -31,3 +31,6 @@ target/
 
 # Jenkins work dir
 work/
+
+# maven-release-plugin files
+release.properties

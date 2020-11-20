@@ -61,6 +61,8 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
             return "gradle";
         } else if (getRemoteAnalysisProjectType() instanceof MavenProjectType) {
             return "mvn";
+        } else if (getRemoteAnalysisProjectType() instanceof MSBuildProjectType) {
+            return "msbuild";
         } else {
             return "none";
         }
@@ -71,6 +73,8 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
             return ((GradleProjectType)remoteAnalysisProjectType).getBuildFile();
         } else if (getRemoteAnalysisProjectType() instanceof MavenProjectType) {
             return ((MavenProjectType)remoteAnalysisProjectType).getBuildFile();
+        } else if (getRemoteAnalysisProjectType() instanceof MSBuildProjectType) {
+            return ((MSBuildProjectType)remoteAnalysisProjectType).getDotnetProject();
         } else {
             return "";
         }
@@ -204,7 +208,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
             args.add("-sscurl");
             args.add(FortifyPlugin.DESCRIPTOR.getUrl());
             args.add("-ssctoken");
-            args.add(FortifyPlugin.DESCRIPTOR.getCtrlToken());
+            args.add(FortifyPlugin.DESCRIPTOR.getToken());
         } else if (FortifyPlugin.DESCRIPTOR.getCtrlUrl() != null) {
             args.add("-url");
             args.add(FortifyPlugin.DESCRIPTOR.getCtrlUrl());

@@ -9,9 +9,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 public class MSBuildProjectType extends RemoteAnalysisProjectType {
-
     private String dotnetProject;
-    private String dotnetAddOptions;
+    private boolean excludeDisabledProjects;
 
     @DataBoundConstructor
     public MSBuildProjectType() {
@@ -21,8 +20,8 @@ public class MSBuildProjectType extends RemoteAnalysisProjectType {
         return dotnetProject;
     }
 
-    public String getDotnetAddOptions() {
-        return dotnetAddOptions;
+    public boolean isExcludeDisabledProjects() {
+        return excludeDisabledProjects;
     }
 
     @DataBoundSetter
@@ -31,8 +30,8 @@ public class MSBuildProjectType extends RemoteAnalysisProjectType {
     }
 
     @DataBoundSetter
-    public void setDotnetAddOptions(String dotnetAddOptions) {
-        this.dotnetAddOptions = dotnetAddOptions;
+    public void setExcludeDisabledProjects(boolean excludeDisabledProjects) {
+        this.excludeDisabledProjects = excludeDisabledProjects;
     }
 
     @Extension

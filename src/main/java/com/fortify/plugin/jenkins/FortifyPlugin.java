@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 import com.fortify.plugin.jenkins.bean.SensorPoolBean;
 import com.fortify.plugin.jenkins.steps.*;
 import com.fortify.plugin.jenkins.steps.remote.GradleProjectType;
-import com.fortify.plugin.jenkins.steps.remote.MSBuildProjectType;
 import com.fortify.plugin.jenkins.steps.remote.MavenProjectType;
 import com.fortify.plugin.jenkins.steps.remote.RemoteAnalysisProjectType;
 import com.squareup.okhttp.*;

@@ -140,7 +140,7 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
             args.add("-sscurl");
             args.add(FortifyPlugin.DESCRIPTOR.getUrl());
             args.add("-ssctoken");
-            args.add(FortifyPlugin.DESCRIPTOR.getCtrlToken());
+            args.add(FortifyPlugin.DESCRIPTOR.getToken());
         } else if (FortifyPlugin.DESCRIPTOR.getCtrlUrl() != null) {
             args.add("-url");
             args.add(FortifyPlugin.DESCRIPTOR.getCtrlUrl());

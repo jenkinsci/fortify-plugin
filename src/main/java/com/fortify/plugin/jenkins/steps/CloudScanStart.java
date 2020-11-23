@@ -90,6 +90,13 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         }
     }
 
+    private boolean isExcludeDisabledProjects() {
+        if (getRemoteAnalysisProjectType() instanceof MSBuildProjectType) {
+            return ((MSBuildProjectType)remoteAnalysisProjectType).isExcludeDisabledProjects();
+        }
+        return false;
+    }
+
     public String getSensorPoolName() {
         return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getSensorPoolUUID();
     }
@@ -243,6 +250,9 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
                 }
                 if (isIncludeTests()) {
                     args.add("-t");
+                }
+                if (isExcludeDisabledProjects()) {
+                    args.add("-exclude-disabled-projects");
                 }
             }
         } else {

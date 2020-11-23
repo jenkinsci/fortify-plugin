@@ -186,122 +186,133 @@
           </table>
         </f:block>
       </f:radioBlock>
-      <f:radioBlock title="Local translation &amp; local scan" value="local" name="analysisRunType"
-                    checked="${instance.isLocal()}" help="/plugin/fortify/help-localTranslationAndScan.html">
-        <f:block>
-          <table style="width:100%;">
-        <f:optionalBlock field="updateContent" title="Update Fortify Security Content" help="/plugin/fortify/help-updateContent.html">
-          <f:nested>
-            <f:entry title="Update server URL" field="updateServerUrl" help="/plugin/fortify/help-updateServerUrl.html">
-              <f:textbox/>
-            </f:entry>
-            <f:entry title="Locale" field="locale" help="/plugin/fortify/help-fortifyupdateLocale.html">
-              <f:select/>
-            </f:entry>
-          </f:nested>
-        </f:optionalBlock>
-          </table>
-        </f:block>
-        <f:entry field="buildId" title="Build ID" help="/plugin/fortify/help-buildID.html">
-          <f:textbox/>
-        </f:entry>
-
-        <f:entry field="scanFile" title="Results file" help="/plugin/fortify/help-fpr.html">
-          <f:textbox/>
-        </f:entry>
-
-        <f:entry field="maxHeap" title="Maximum heap memory (MB)" help="/plugin/fortify/help-maxHeap.html">
-          <f:textbox/>
-        </f:entry>
-
-        <f:entry field="addJVMOptions" title="Additional JVM options" help="/plugin/fortify/help-addJVMOptions.html">
-          <f:textbox/>
-        </f:entry>
-        <f:dropdownDescriptorSelector title="${%Application type}" field="projectScanType"
-                                      descriptors="${descriptor.projectScanTypeDescriptors}"/>
-        <f:entry field="translationExcludeList" title="Exclude list"
-                 help="/plugin/fortify/help-translationExcludeList.html">
-          <f:textbox/>
-        </f:entry>
-        <f:block>
-          <f:checkbox field="translationDebug" title="Debug" checked="${instance.isTranslationDebug()}"
-                      help="/plugin/fortify/help-debug.html"/>
-        </f:block>
-        <f:block>
-          <f:checkbox field="translationVerbose" title="Verbose" checked="${instance.isTranslationVerbose()}"
-                      help="/plugin/fortify/help-verbose.html"/>
-        </f:block>
-        <f:entry field="translationLogFile" title="Log file location"
-                 help="/plugin/fortify/help-logFileLocation.html">
-          <f:textbox/>
-        </f:entry>
-      <f:block>
-        <table style="width:100%;">
-        <f:optionalBlock field="runScan" title="Run Fortify SCA scan" help="/plugin/fortify/help-runSCAScan.html">
-          <f:entry field="scanCustomRulepacks" title="Custom Rulepacks"
-                 help="/plugin/fortify/help-scanCustomRulepacks.html">
+      <j:if test="${not descriptor.preventLocalScans}">
+        <f:radioBlock title="Local translation &amp; local scan" value="local" name="analysisRunType"
+                      checked="${instance.isLocal()}" help="/plugin/fortify/help-localTranslationAndScan.html">
+          <f:block>
+            <table style="width:100%;">
+              <f:optionalBlock field="updateContent" title="Update Fortify Security Content"
+                               help="/plugin/fortify/help-updateContent.html">
+                <f:nested>
+                  <f:entry title="Update server URL" field="updateServerUrl"
+                           help="/plugin/fortify/help-updateServerUrl.html">
+                    <f:textbox/>
+                  </f:entry>
+                  <f:entry title="Locale" field="locale" help="/plugin/fortify/help-fortifyupdateLocale.html">
+                    <f:select/>
+                  </f:entry>
+                </f:nested>
+              </f:optionalBlock>
+            </table>
+          </f:block>
+          <f:entry field="buildId" title="Build ID" help="/plugin/fortify/help-buildID.html">
             <f:textbox/>
           </f:entry>
-          <f:entry field="scanAddOptions" title="Fortify SCA scan options"
-                 help="/plugin/fortify/help-scanAddOptions.html">
+
+          <f:entry field="scanFile" title="Results file" help="/plugin/fortify/help-fpr.html">
+            <f:textbox/>
+          </f:entry>
+
+          <f:entry field="maxHeap" title="Maximum heap memory (MB)" help="/plugin/fortify/help-maxHeap.html">
+            <f:textbox/>
+          </f:entry>
+
+          <f:entry field="addJVMOptions" title="Additional JVM options" help="/plugin/fortify/help-addJVMOptions.html">
+            <f:textbox/>
+          </f:entry>
+          <f:dropdownDescriptorSelector title="${%Application type}" field="projectScanType"
+                                        descriptors="${descriptor.projectScanTypeDescriptors}"/>
+          <f:entry field="translationExcludeList" title="Exclude list"
+                   help="/plugin/fortify/help-translationExcludeList.html">
             <f:textbox/>
           </f:entry>
           <f:block>
-            <f:checkbox field="scanDebug" title="Debug" value="true"
-                      help="/plugin/fortify/help-debug.html"/>
+            <f:checkbox field="translationDebug" title="Debug" checked="${instance.isTranslationDebug()}"
+                        help="/plugin/fortify/help-debug.html"/>
           </f:block>
           <f:block>
-            <f:checkbox field="scanVerbose" title="Verbose" value="true"
-                      help="/plugin/fortify/help-verbose.html"/>
+            <f:checkbox field="translationVerbose" title="Verbose" checked="${instance.isTranslationVerbose()}"
+                        help="/plugin/fortify/help-verbose.html"/>
           </f:block>
-          <f:entry field="scanLogFile" title="Log file location"
-                 help="/plugin/fortify/help-logFileLocation.html">
+          <f:entry field="translationLogFile" title="Log file location"
+                   help="/plugin/fortify/help-logFileLocation.html">
             <f:textbox/>
           </f:entry>
-        </f:optionalBlock>
-    </table>
-  </f:block>
-        <f:block>
-          <table style="width:100%;">
-        <f:optionalBlock field="uploadSSC" title="Upload Fortify SCA scan results to Fortify Software Security Center">
-          <f:entry title="Application name" help="/plugin/fortify/help-sscProjName.html">
-            <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
-            <div style="float:left;width:80%;">
-              <f:editableComboBox id="projectName" field="appName" clazz="setting-input project-name" items="${descriptor.appNameItems}" />
-            </div>
-            <div style="float:left">
-              <input value="▼" type="button" id="refreshPrjButton" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)" />
-            </div>
-            <div style="display:none;" id="refreshSpinner" >
-              <img src="${imagesURL}/spinner.gif" /> ${progress}
-            </div>
-          </f:entry>
-          <f:entry title="Application version" help="/plugin/fortify/help-sscProjVersion.html">
-            <div style="float:left;width:50%;">
-              <f:editableComboBox id="projectVersion" field="appVersion" clazz="setting-input project-version" items="${descriptor.appVersionItems(appName)}" />
-            </div>
-            <div style="float:left">
-              <input value="▼" type="button" id="refreshPrjVerButton" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
-            </div>
-          </f:entry>
-          <f:entry field="filterSet" title="Filter set" help="/plugin/fortify/help-filterSet.html">
-            <f:textbox/>
-          </f:entry>
-          <f:entry field="searchCondition" title="Build failure criteria" help="/plugin/fortify/help-search.html">
-            <f:textbox/>
-          </f:entry>
-          <f:entry field="timeout" title="Timeout" help="/plugin/fortify/help-timeout.html">
-            <f:textbox/>
-          </f:entry>
-          <f:advanced title="Advanced settings">
-            <f:entry field="pollingInterval" title="Polling interval" help="/plugin/fortify/help-pollingInterval.html">
-              <f:textbox/>
-            </f:entry>
-          </f:advanced>
-        </f:optionalBlock>
-          </table>
-        </f:block>
-      </f:radioBlock>
+          <f:block>
+            <table style="width:100%;">
+              <f:optionalBlock field="runScan" title="Run Fortify SCA scan" help="/plugin/fortify/help-runSCAScan.html">
+                <f:entry field="scanCustomRulepacks" title="Custom Rulepacks"
+                         help="/plugin/fortify/help-scanCustomRulepacks.html">
+                  <f:textbox/>
+                </f:entry>
+                <f:entry field="scanAddOptions" title="Fortify SCA scan options"
+                         help="/plugin/fortify/help-scanAddOptions.html">
+                  <f:textbox/>
+                </f:entry>
+                <f:block>
+                  <f:checkbox field="scanDebug" title="Debug" value="true"
+                              help="/plugin/fortify/help-debug.html"/>
+                </f:block>
+                <f:block>
+                  <f:checkbox field="scanVerbose" title="Verbose" value="true"
+                              help="/plugin/fortify/help-verbose.html"/>
+                </f:block>
+                <f:entry field="scanLogFile" title="Log file location"
+                         help="/plugin/fortify/help-logFileLocation.html">
+                  <f:textbox/>
+                </f:entry>
+              </f:optionalBlock>
+            </table>
+          </f:block>
+          <f:block>
+            <table style="width:100%;">
+              <f:optionalBlock field="uploadSSC"
+                               title="Upload Fortify SCA scan results to Fortify Software Security Center">
+                <f:entry title="Application name" help="/plugin/fortify/help-sscProjName.html">
+                  <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
+                  <div style="float:left;width:80%;">
+                    <f:editableComboBox id="projectName" field="appName" clazz="setting-input project-name"
+                                        items="${descriptor.appNameItems}"/>
+                  </div>
+                  <div style="float:left">
+                    <input value="▼" type="button" id="refreshPrjButton"
+                           onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)"/>
+                  </div>
+                  <div style="display:none;" id="refreshSpinner">
+                    <img src="${imagesURL}/spinner.gif"/>
+                    ${progress}
+                  </div>
+                </f:entry>
+                <f:entry title="Application version" help="/plugin/fortify/help-sscProjVersion.html">
+                  <div style="float:left;width:50%;">
+                    <f:editableComboBox id="projectVersion" field="appVersion" clazz="setting-input project-version"
+                                        items="${descriptor.appVersionItems(appName)}"/>
+                  </div>
+                  <div style="float:left">
+                    <input value="▼" type="button" id="refreshPrjVerButton"
+                           onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)"/>
+                  </div>
+                </f:entry>
+                <f:entry field="filterSet" title="Filter set" help="/plugin/fortify/help-filterSet.html">
+                  <f:textbox/>
+                </f:entry>
+                <f:entry field="searchCondition" title="Build failure criteria" help="/plugin/fortify/help-search.html">
+                  <f:textbox/>
+                </f:entry>
+                <f:entry field="timeout" title="Timeout" help="/plugin/fortify/help-timeout.html">
+                  <f:textbox/>
+                </f:entry>
+                <f:advanced title="Advanced settings">
+                  <f:entry field="pollingInterval" title="Polling interval"
+                           help="/plugin/fortify/help-pollingInterval.html">
+                    <f:textbox/>
+                  </f:entry>
+                </f:advanced>
+              </f:optionalBlock>
+            </table>
+          </f:block>
+        </f:radioBlock>
+      </j:if>
 
       <f:radioBlock title="Upload existing SCA results to Fortify Software Security Center" value="uploadOnly"
         name="analysisRunType" checked="${instance.isUploadOnly()}" help="/plugin/fortify/help-uploadOnly.html">

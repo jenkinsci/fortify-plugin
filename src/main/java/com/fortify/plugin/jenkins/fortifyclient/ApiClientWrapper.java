@@ -296,7 +296,7 @@ public class ApiClientWrapper {
 	public Long getApplicationId(String appName) throws ApiException {
 		Project application = null;
 		if (!StringUtils.isEmpty(appName)) {
-			String appQuery = "name:" + appName;
+			String appQuery = "name:\"" + appName + "\"";
 			ProjectControllerApi projectControllerApi = new ProjectControllerApi(apiClient);
 
 			ApiResultListProject apiResultListProject = projectControllerApi.listProject(null, 0, 1, appQuery, false,
@@ -310,7 +310,7 @@ public class ApiClientWrapper {
 
 	public Long getVersionForApplication(Long applicationId, String appVersionName) throws ApiException {
 		ProjectVersion applicationVersion = null;
-		String versionQuery = "name:" + appVersionName;
+		String versionQuery = "name:\"" + appVersionName + "\"";
 		ProjectVersionOfProjectControllerApi projectVersionOfProjectControllerApi = new ProjectVersionOfProjectControllerApi(
 				apiClient);
 		ApiResultListProjectVersion apiResultListProjectVersion;

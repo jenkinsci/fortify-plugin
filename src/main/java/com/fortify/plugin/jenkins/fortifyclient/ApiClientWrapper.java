@@ -267,11 +267,10 @@ public class ApiClientWrapper {
 				apiClient);
 
 		ApiResultListProjectVersionIssue apiResultListProjectVersionIssue = issueSetOfProjectVersionControllerApi
-				// .listIssueOfProjectVersion(parentId, start, limit, q, qm, orderby, filterset,
-				// fields, showhidden, showremoved, showsuppressed, showshortfilenames, filter,
-				// groupid, groupingtype)
+				// .listIssueOfProjectVersion(parentId, start, limit, q, qm, orderby, filterset, fields, 
+				// showhidden, showremoved, showsuppressed, showshortfilenames, filter, groupid, groupingtype, ids, progressListener, progressRequestListene)
 				.listIssueOfProjectVersion(appVersionId, startPage, pageSize, null, null, "issueName", null, null,
-						false, false, false, true, filter, null, null);
+						false, false, false, true, filter, null, null, null, null, null);
 		for (ProjectVersionIssue issue : apiResultListProjectVersionIssue.getData()) {
 			issues.add(issue);
 		}

@@ -23,7 +23,7 @@
     </parent>
 
     <artifactId>fortify</artifactId>
-    <version>20.2.35-SNAPSHOT</version>
+    <version>20.2.35</version>
     <packaging>hpi</packaging>
 
     <properties>
@@ -51,7 +51,7 @@
         <connection>scm:git:git@github.com:jenkinsci/fortify-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/fortify-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/fortify-plugin</url>
-        <tag>HEAD</tag>
+        <tag>v20.2.35</tag>
     </scm>
 
     <developers>

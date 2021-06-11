@@ -25,6 +25,7 @@ import com.fortify.plugin.jenkins.bean.IssueFolderBean;
 import com.thoughtworks.xstream.XStream;
 
 import hudson.FilePath;
+import hudson.Util;
 import hudson.XmlFile;
 import hudson.util.XStream2;
 
@@ -53,7 +54,9 @@ public class FPRSummary implements Serializable {
 			filename += "-" + appVersion;
 		}
 		filename += FILE_EXTENSION;
-		return filename;
+		//both appName and appVersion come from user input, so we must sanitize
+		String sanitizedFilename = Util.rawEncode(filename);
+		return sanitizedFilename;
 	}
 
 	public void load(File parent, String appName, String appVersion) throws IOException {

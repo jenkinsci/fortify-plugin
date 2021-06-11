@@ -137,6 +137,7 @@ public class TableAction implements Action {
 	@Override
 	public String getUrlName() {
 		String url = "fortify-issues";
+		/*
 		if (manager.isPipeline()) {
 			try {
 				url += URLEncoder.encode("-" + appName + "-" + appVersion, "UTF-8");
@@ -144,6 +145,7 @@ public class TableAction implements Action {
 				// just return without the app name and version
 			}
 		}
+		*/
 		return url;
 	}
 

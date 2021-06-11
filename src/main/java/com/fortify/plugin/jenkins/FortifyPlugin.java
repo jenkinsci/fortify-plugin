@@ -1313,7 +1313,7 @@ public class FortifyPlugin extends Recorder {
 					if (buf.length() > 0) {
 						buf.append(",");
 					}
-					buf.append("{ \"name\": \"" + prjName + "\" }\n");
+					buf.append("{ \"name\": \"" + escapeJsonValue(prjName) + "\" }\n");
 				}
 				buf.insert(0, "{ \"list\" : [\n");
 				buf.append("]}");
@@ -1340,7 +1340,7 @@ public class FortifyPlugin extends Recorder {
 						if (buf.length() > 0) {
 							buf.append(",");
 						}
-						buf.append("{ \"name\": \"" + prjVersion + "\", \"prj\": \"" + prj + "\" }\n");
+						buf.append("{ \"name\": \"" + escapeJsonValue(prjVersion) + "\", \"prj\": \"" + escapeJsonValue(prj.getKey()) + "\" }\n");
 					}
 				}
 				buf.insert(0, "{ \"list\" : [\n");
@@ -1352,6 +1352,10 @@ public class FortifyPlugin extends Recorder {
 				e.printStackTrace();
 				throw e;
 			}
+		}
+
+		private String escapeJsonValue(String stringValue) {
+			return stringValue.replace("\"", "\\\"");
 		}
 
 		public void doRefreshProjectTemplates(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
@@ -1395,7 +1399,7 @@ public class FortifyPlugin extends Recorder {
 				buf.append("{ \"list\" : [\n");
 				for (int i = 0; i < projTemplateList.size(); i++) {
 					ProjectTemplateBean b = projTemplateList.get(i);
-					buf.append("{ \"name\": \"" + b.getName() + "\", \"id\": \"" + b.getId() + "\" }");
+					buf.append("{ \"name\": \"" + escapeJsonValue(b.getName()) + "\", \"id\": \"" + escapeJsonValue(b.getId()) + "\" }");
 					if (i != projTemplateList.size() - 1) {
 						buf.append(",\n");
 					} else {
@@ -1460,7 +1464,7 @@ public class FortifyPlugin extends Recorder {
 				buf.append("{ \"list\" : [\n");
 				for (int i = 0; i < sensorPoolList.size(); i++) {
 					SensorPoolBean b = sensorPoolList.get(i);
-					buf.append("{ \"name\": \"" + b.getName() + "\", \"uuid\": \"" + b.getUuid() + "\" }");
+					buf.append("{ \"name\": \"" + escapeJsonValue(b.getName()) + "\", \"uuid\": \"" + escapeJsonValue(b.getUuid()) + "\" }");
 					if (i != sensorPoolList.size() - 1) {
 						buf.append(",\n");
 					} else {

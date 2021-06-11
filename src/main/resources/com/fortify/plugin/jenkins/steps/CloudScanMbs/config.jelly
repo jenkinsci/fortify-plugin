@@ -14,15 +14,31 @@
     See the License for the specific language governing permissions and
     limitations under the License.
  -->
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:local="local">
+  <d:taglib uri="local">
+    <d:tag name="blockWrapper">
+          <j:choose>
+              <j:when test="${divBasedFormLayout}">
+                  <div>
+                      <d:invokeBody/>
+                  </div>
+              </j:when>
+              <j:otherwise>
+                  <table style="width:100%">
+                      <d:invokeBody/>
+                  </table>
+              </j:otherwise>
+          </j:choose>
+      </d:tag>
+  </d:taglib>
+
     <f:block>
         <f:entry title="Build ID" field="buildID" help="/plugin/fortify/help-buildID.html">
             <f:textbox />
         </f:entry>
     </f:block>
     <f:block>
-        <table style="width:100%;">
+        <local:blockWrapper>
             <f:optionalBlock field="remoteOptionalConfig" title="Optional configuration" help="/plugin/fortify/help-remoteOptionalConfiguration.html">
                 <f:section class="section-header" title="Controller configuration">
                     <f:entry field="sensorPoolUUID" title="Sensor pool" help="/plugin/fortify/help-remoteSensorPool.html">
@@ -44,10 +60,10 @@
                     </f:entry>
                 </f:section>
             </f:optionalBlock>
-        </table>
+        </local:blockWrapper>
     </f:block>
     <f:block>
-        <table style="width:100%;">
+        <local:blockWrapper>
             <f:optionalBlock field="uploadSSC"
                              title="Upload Fortify SCA scan results to Fortify Software Security Center">
                 <f:entry title="Application name" help="/plugin/fortify/help-remoteSscAppName.html">
@@ -75,8 +91,9 @@
                         <input value="▼" type="button" id="refreshPrjVerButton"
                                onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)"/>
                     </div>
+                    <div style="clear:both" />
                 </f:entry>
             </f:optionalBlock>
-        </table>
+        </local:blockWrapper>
     </f:block>
 </j:jelly>

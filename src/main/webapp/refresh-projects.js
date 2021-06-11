@@ -26,7 +26,11 @@ function refreshProjectNames(url, elm)
     buttonName.disabled=true;
     //var buttonVer = document.getElementById('refreshPrjVerButton');
     //buttonVer.disabled=true;
-    var buttonVer = elm.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.querySelector("input.project-version");
+    var buttonVer = elm.parentNode.parentNode.parentNode.nextSibling;
+    if (buttonVer.classList.contains("validation-error-area")) {
+        buttonVer = buttonVer.nextSibling.nextSibling;
+    }
+    buttonVer = buttonVer.querySelector("input.project-version");
 
     buttonVer.disabled=true;
 
@@ -96,8 +100,12 @@ function refreshProjectVersions(url, elm)
             }
             //var select = document.getElementById('projectVersion');
             var select = elm.parentNode.previousSibling.querySelector("input.project-version");
-            //var selectedPrj = document.getElementById('projectName2').value;
-            var selectedPrj = elm.parentNode.parentNode.parentNode.previousSibling.previousSibling.previousSibling.querySelector("input.project-name").value;
+            //var selectedPrj = document.getElementById('projectName').value;
+            var selectedPrj = elm.parentNode.parentNode.parentNode.previousSibling;
+            if (selectedPrj.classList.contains("help-area")) {
+                selectedPrj = selectedPrj.previousSibling.previousSibling;
+            }
+            selectedPrj = selectedPrj.querySelector("input.project-name").value;
             var oldSelect = select.value;
             if (select) {
                 var items = new Array();
@@ -105,7 +113,7 @@ function refreshProjectVersions(url, elm)
                 // add new values
                 for(var i=0; i<jsr.list.length; i++) {
                     var item = jsr.list[i];
-                    if (item.prj.substring(0, item.prj.indexOf("={"))==selectedPrj) {
+                    if (item.prj==selectedPrj) {
                         items.push(item.name);
                         if (oldSelect==item.name) {
                             selectedIndex = items.length-1;
@@ -246,15 +254,20 @@ for (var i = 0; i < readOnlyElms.length; i++) {
     readOnlyElms[i].setAttribute("readonly", "true");
 }
 
+
 var sscUrl = document.getElementById("url");
-sscUrl.addEventListener("input", disableCtrlURLInput);
+if (sscUrl != null) {
+    sscUrl.addEventListener("input", disableCtrlURLInput);
+}
 
 function disableCtrlURLInput() {
     var ctrlUrl = document.getElementById("ctrlUrl");
-    if (sscUrl.value.length > 0) {
-        ctrlUrl.setAttribute("disabled", "true");
-    } else {
-        ctrlUrl.removeAttribute("disabled");
+    if (ctrlUrl != null) {
+        if (sscUrl.value.length > 0) {
+            ctrlUrl.setAttribute("disabled", "true");
+        } else {
+            ctrlUrl.removeAttribute("disabled");
+        }
     }
 }
 

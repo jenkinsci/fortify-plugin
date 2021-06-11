@@ -268,9 +268,9 @@ public class ApiClientWrapper {
 
 		ApiResultListProjectVersionIssue apiResultListProjectVersionIssue = issueSetOfProjectVersionControllerApi
 				// .listIssueOfProjectVersion(parentId, start, limit, q, qm, orderby, filterset, fields, 
-				// showhidden, showremoved, showsuppressed, showshortfilenames, filter, groupid, groupingtype, ids)
-				.listIssueOfProjectVersion(appVersionId, startPage, pageSize, null, null, "issueName", null, null,
-						false, false, false, true, filter, groupId, groupingType, null);
+				// showhidden, showremoved, showsuppressed, showshortfilenames, filter, groupid, groupingtype)
+		.listIssueOfProjectVersion(appVersionId, startPage, pageSize, null, null, "issueName", null, null, 
+				false, false, false, true, filter, groupId, groupingType);
 		for (ProjectVersionIssue issue : apiResultListProjectVersionIssue.getData()) {
 			issues.add(issue);
 		}
@@ -295,7 +295,7 @@ public class ApiClientWrapper {
 	public Long getApplicationId(String appName) throws ApiException {
 		Project application = null;
 		if (!StringUtils.isEmpty(appName)) {
-			String appQuery = "name:" + appName;
+			String appQuery = "name:\"" + appName + "\"";
 			ProjectControllerApi projectControllerApi = new ProjectControllerApi(apiClient);
 
 			ApiResultListProject apiResultListProject = projectControllerApi.listProject(null, 0, 1, appQuery, false,
@@ -309,7 +309,7 @@ public class ApiClientWrapper {
 
 	public Long getVersionForApplication(Long applicationId, String appVersionName) throws ApiException {
 		ProjectVersion applicationVersion = null;
-		String versionQuery = "name:" + appVersionName;
+		String versionQuery = "name:\"" + appVersionName + "\"";
 		ProjectVersionOfProjectControllerApi projectVersionOfProjectControllerApi = new ProjectVersionOfProjectControllerApi(
 				apiClient);
 		ApiResultListProjectVersion apiResultListProjectVersion;

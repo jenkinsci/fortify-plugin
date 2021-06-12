@@ -36,7 +36,7 @@ public class FindExecutableRemoteService implements FilePath.FileCallable<String
 	 *            - name of the executable to look for
 	 * @param home
 	 *            - potential home directory - if not null, will first search
-	 *            <home>/bin/filename
+	 *            [user.home]/bin/filename
 	 * @param path
 	 *            - path environment variable - depending on OS, must use correct
 	 *            path separator

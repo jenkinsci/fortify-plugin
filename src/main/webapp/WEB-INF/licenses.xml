@@ -14,17 +14,21 @@
     See the License for the specific language governing permissions and
     limitations under the License.
  -->
-<l:dependencies xmlns:l='licenses' groupId='org.jenkins-ci.plugins' artifactId='fortify' version='19.1.0.X'>
-	<l:dependency name='Fortify Jenkins Plugin' groupId='org.jenkins-ci.plugins' artifactId='fortify' version='19.1.0.X' url='https://software.microfocus.com/software/enterprise-security'>
+<l:dependencies xmlns:l='licenses' groupId='org.jenkins-ci.plugins' artifactId='fortify' version='21.1.0'>
+	<l:dependency name='Fortify Jenkins Plugin' groupId='org.jenkins-ci.plugins' artifactId='fortify' version='21.1.0' url='https://plugins.jenkins.io/fortify'>
 		<l:description>Adds the ability to perform security analysis with Fortify Static Code Analyzer, upload results to Software Security Center, show analysis results summary, and set build failure criteria based on analysis results.</l:description>
-		<l:license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt'/>
+		<l:license name='The MIT license' url='http://www.opensource.org/licenses/mit-license.php'/>
 	</l:dependency>
 	<l:dependency name='Fortify SSC REST API Client' groupId='com.fortify' artifactId='ssc-restapi-client' version='2.0' url='https://github.com/fortify/ssc-restapi-client'>
 		<l:description>Swagger generated client to communicate with Fortify Software Security Center web server via REST API to get vulnerability counts from the uploaded SCA results file</l:description>
-		<l:license name='The MIT license' url='https://opensource.org/licenses/MIT'/>
+		<l:license name='The MIT license' url='http://www.opensource.org/licenses/mit-license.php'/>
 	</l:dependency>
-	<l:dependency name='Pipeline: Step API' groupId='org.jenkins-ci.plugins.workflow' artifactId='workflow-step-api' version='2.16' url='https://plugins.jenkins.io/workflow-step-api'>
+	<l:dependency name='Pipeline: Step API' groupId='org.jenkins-ci.plugins.workflow' artifactId='workflow-step-api' version='2.23' url='https://plugins.jenkins.io/workflow-step-api'>
 		<l:description>API for asynchronous build step primitive</l:description>
+		<l:license name='The MIT license' url='http://www.opensource.org/licenses/mit-license.php'/>
+	</l:dependency>
+	<l:dependency name='Configuration as Code (JCasC)' groupId='io.jenkins' artifactId='configuration-as-code' version='1.51' url='https://plugins.jenkins.io/configuration-as-code'>
+		<l:description>The Configuration as Code plugin has been designed as an opinionated way to configure Jenkins based on human-readable declarative configuration files</l:description>
 		<l:license name='The MIT license' url='http://www.opensource.org/licenses/mit-license.php'/>
 	</l:dependency>
 	<l:dependency name='Swagger-Core Annotations' groupId='io.swagger' artifactId='swagger-annotations' version='1.5.15' url='https://github.com/swagger-api/swagger-core/wiki/annotations-1.5.x'>
@@ -53,10 +57,6 @@
 	</l:dependency>
 	<l:dependency name='Joda-Time' groupId='joda-time' artifactId='joda-time' version='2.9.3' url='https://www.joda.org/joda-time/'>
 		<l:description>Joda-Time provides a quality replacement for the Java date and time classes</l:description>
-		<l:license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt'/>
-	</l:dependency>
-	<l:dependency name='DOMPurify' groupId='dompurify' artifactId='purify.min.js' version='2.2.9' url='https://github.com/cure53/DOMPurify'>
-		<l:description>DOMPurify is a DOM-only, super-fast, uber-tolerant XSS sanitizer for HTML, MathML and SVG</l:description>
 		<l:license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt'/>
 	</l:dependency>
 </l:dependencies>

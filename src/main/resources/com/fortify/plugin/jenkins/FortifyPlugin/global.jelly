@@ -26,25 +26,15 @@
 
   <f:section title="Fortify Assessment">
     <f:section title="Software Security Center configuration">
-      <f:entry title="SSC URL" help="/plugin/fortify/help-sscUrl.html">
-        <f:textbox name="url" field="url" id="url"/>
+      <f:entry title="SSC URL" field="url" help="/plugin/fortify/help-sscUrl.html">
+        <f:textbox name="url" id="url"/>
       </f:entry>
 
       <f:entry title="Authentication token" help="/plugin/fortify/help-sscAuthToken.html">
         <f:textbox name="token" field="token" id="token" checkMethod="post"/>
       </f:entry>
 
-      <f:optionalBlock name="useProxy" title="Use proxy" checked="${instance.useProxy}" help="/plugin/fortify/help-proxy.html">
-        <f:entry title="Proxy server host:port">
-          <f:textbox name="proxyUrl" field="proxyUrl" id="proxyUrl"/>
-        </f:entry>
-        <f:entry title="Proxy server username">
-          <f:textbox name="proxyUsername" field="proxyUsername" id="proxyUsername" checkMethod="post"/>
-        </f:entry>
-        <f:entry title="Proxy server password">
-          <f:password name="proxyPassword" field="proxyPassword" id="proxyPassword" checkMethod="post"/>
-        </f:entry>
-      </f:optionalBlock>
+      <f:optionalProperty title="Use proxy" id="proxyConfig" name="proxyConfig" field="proxyConfig" help="/plugin/fortify/help-proxy.html"/>
 
       <f:entry title="Issue template" help="/plugin/fortify/help-sscProjTemplate.html">
         <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
@@ -52,7 +42,7 @@
           <f:editableComboBox id="projectTemplate" name="projectTemplate" field="projectTemplate" clazz="setting-input" items="${descriptor.projectTemplateItems}" />
         </div>
         <div style="float:left">
-          <input value="▼" type="button" id="refreshButton" onclick="refreshTemplateList('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjectTemplates','url,token,useProxy,proxyUrl,proxyUsername,proxyPassword')" />
+          <input value="▼" type="button" id="refreshButton" onclick="refreshTemplateList('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjectTemplates','url,token,proxyConfig,proxyUrl,proxyUsername,proxyPassword')" />
         </div>
         <div style="display:none;" id="refreshSpinner" >
           <img src="${imagesURL}/spinner.gif" /> ${progress}
@@ -60,7 +50,7 @@
         <div style="clear:both" />
       </f:entry>
 
-      <f:validateButton title="Test SSC connection" progress="Testing..." method="testConnection" with="url,token,useProxy,proxyUrl,proxyUsername,proxyPassword" />
+      <f:validateButton title="Test SSC connection" progress="Testing..." method="testConnection" with="url,token,proxyConfig,proxyUrl,proxyUsername,proxyPassword" />
       <f:entry title="Maximum issues per page" help="/plugin/fortify/help-breakdownPageSize.html">
         <f:textbox field="breakdownPageSize" id="breakdownPageSize" />
       </f:entry>

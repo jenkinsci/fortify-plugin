@@ -155,7 +155,7 @@ public class FortifyUpload extends FortifyStep {
 
 	public String getResolvedFpr(TaskListener listener) {
 		String s = resolve(getResultsFile(), listener);
-		return PathUtils.appendExtentionIfNotEmpty(s, ".fpr");
+		return PathUtils.appendExtentionIfNotEmpty(s, ".fpr", new String[] { ".fpr", ".zip" }); // .zip is for third party results
 	}
 
 	public String getResolvedAppName(TaskListener listener) {
@@ -608,9 +608,6 @@ public class FortifyUpload extends FortifyStep {
 					}
 				}
 
-				// System.out.printf("Obtained %d folders for '%s (%s)'%n", list.size(),
-				// getResolvedAppName(listener), getResolvedAppVersion(listener));
-
 				return list;
 			} catch (Throwable e) {
 				if (e instanceof ApiException) {
@@ -640,9 +637,6 @@ public class FortifyUpload extends FortifyStep {
 										getResolvedFilterSet(listener), new PrintWriter(log, true));
 							}
 						});
-				// System.out.printf("Obtained %d folders for '%s (%s)'%n", list.size(),
-				// getProjectName(), getProjectVersion());
-
 				return groupingProfiles;
 			} catch (Throwable e) {
 				if (e instanceof ApiException) {

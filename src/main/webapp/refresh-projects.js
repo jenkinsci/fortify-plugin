@@ -136,8 +136,13 @@ function refreshTemplateList(url,paramList)
         var p = document.getElementById(name);
         if (p==null) {
             p = document.getElementsByName(name);
-            if (p != null) {
+            if (p != null && p.length > 0) {
                 p = p[0];
+            } else {
+                p = document.getElementsByName("_."+name);
+                if (p != null && p.length > 0) {
+                    p = p[0];
+                }
             }
         }
         if(p!=null) {

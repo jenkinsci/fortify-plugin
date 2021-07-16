@@ -331,7 +331,7 @@
           <f:textbox/>
         </f:entry>
 
-        <f:rowSet name="uploadSSC">
+        <f:section name="uploadSSC">
           <f:entry title="Application name" help="/plugin/fortify/help-sscProjName.html">
             <div style="float:left;width:80%;">
               <f:editableComboBox id="projectName4" field="appName" clazz="setting-input project-name" items="${descriptor.appNameItems}" />
@@ -367,7 +367,7 @@
               <f:textbox/>
             </f:entry>
           </f:advanced>
-        </f:rowSet>
+        </f:section>
       </f:radioBlock>
 
 

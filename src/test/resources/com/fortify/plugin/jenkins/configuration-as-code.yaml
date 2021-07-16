@@ -1,0 +1,14 @@
+unclassified:
+  fortify:
+    url: "https://qa-plg-ssc3.prgqa.hpecorp.net:8443/ssc"
+    token: "3ab8c774-0850-483b-8be6-2907722a81d8"
+    proxyConfig:
+      proxyUrl: "web-proxy.us.softwaregrp.net:8080"
+      proxyUsername: "fakeuser"
+    projectTemplate: "Prioritized High Risk Issue Template"
+    connectTimeout: "10"
+    readTimeout: "20"
+    writeTimeout: "30"
+    breakdownPageSize: "40"
+    ctrlUrl: "https://qa-cs-r-ctrl.prgqa.hpecorp.net:8443/scancentral-ctrl/"
+    ctrlToken: "3ffd53a8-5932-4f10-9530-4af5d9950c7c"

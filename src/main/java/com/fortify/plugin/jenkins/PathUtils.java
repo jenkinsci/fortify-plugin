@@ -120,9 +120,18 @@ public class PathUtils {
 		return norm;
 	}
 
-	public static String appendExtentionIfNotEmpty(String s, String extention) {
-		if (StringUtils.isNotEmpty(s) && !s.toLowerCase().endsWith(extention)) {
-			s += extention;
+	public static String appendExtentionIfNotEmpty(String s, String defaultExtention, String... allowedExtentions) {
+		if (StringUtils.isNotEmpty(s)) {
+			boolean extentionFound = false;
+			for (String nextExtention : allowedExtentions) {
+				if (s.toLowerCase().endsWith(nextExtention)) {
+					extentionFound = true;
+					break;
+				}
+			}
+			if (!extentionFound && !s.toLowerCase().endsWith(defaultExtention)) {
+				s += defaultExtention;
+			}
 		}
 		return s;
 	}

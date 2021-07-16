@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.jvnet.hudson.test.RestartableJenkinsRule;
 
+import hudson.util.Secret;
 import io.jenkins.plugins.casc.misc.RoundTripAbstractTest;
 
 public class FortifyJCasCCompatibilityTest extends RoundTripAbstractTest {
@@ -42,8 +43,8 @@ public class FortifyJCasCCompatibilityTest extends RoundTripAbstractTest {
 		assertEquals(String.format("Wrong page size. Expected %s but received %s", Integer.valueOf(40), descriptor.getBreakdownPageSize()),
 				Integer.valueOf(40), descriptor.getBreakdownPageSize());
 		assertTrue("Proxy should be used", descriptor.getUseProxy());
-		assertEquals(String.format("Wrong proxy authentication. Username expected %s but received %s", "fakeuser",
-				descriptor.getProxyConfig().getProxyUsername()), "fakeuser", descriptor.getProxyConfig().getProxyUsername());
+		assertEquals(String.format("Wrong proxy authentication. Username expected %s but received %s", Secret.fromString("fakeuser"),
+				descriptor.getProxyConfig().getProxyUsername()), Secret.fromString("fakeuser"), descriptor.getProxyConfig().getProxyUsername());
 		assertEquals(String.format("Wrong proxy authentication. Username expected %s but received %s", "fakeuser",
 				descriptor.getProxyUsername()), "fakeuser", descriptor.getProxyUsername());
 	}

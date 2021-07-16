@@ -48,7 +48,7 @@ public class ProxyConfig extends AbstractDescribableImpl<ProxyConfig> {
 	}
 
 	String getProxyUsernameValueOrNull() {
-		return proxyUsername == null ? null : proxyUsername.getEncryptedValue();
+		return proxyUsername == null ? null : proxyUsername.getPlainText();
 	}
 
 	public Secret getProxyPassword() {
@@ -56,7 +56,7 @@ public class ProxyConfig extends AbstractDescribableImpl<ProxyConfig> {
 	}
 
 	String getProxyPasswordValueOrNull() {
-		return proxyPassword == null ? null : proxyPassword.getEncryptedValue();
+		return proxyPassword == null ? null : proxyPassword.getPlainText();
 	}
 
 	@Extension

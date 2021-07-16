@@ -973,13 +973,13 @@ public class FortifyPlugin extends Recorder {
 		// backwards compatibility
 		/** @deprecated use {@link #getProxyConfig()} */
 		public String getProxyUsername() {
-			return proxyConfig != null ? (proxyConfig.getProxyUsername() != null ? proxyConfig.getProxyUsername().getEncryptedValue() : null) : null;
+			return proxyConfig != null ? (proxyConfig.getProxyUsername() != null ? proxyConfig.getProxyUsername().getPlainText() : null) : null;
 		}
 
 		// backwards compatibility
 		/** @deprecated use {@link #getProxyConfig()} */
 		public String getProxyPassword() {
-			return proxyConfig != null ? (proxyConfig.getProxyPassword() != null ? proxyConfig.getProxyPassword().getEncryptedValue() : null) : null;
+			return proxyConfig != null ? (proxyConfig.getProxyPassword() != null ? proxyConfig.getProxyPassword().getPlainText() : null) : null;
 		}
 
 		public ProxyConfig getProxyConfig() {
@@ -1020,7 +1020,7 @@ public class FortifyPlugin extends Recorder {
 		@DataBoundSetter
 		public void setBreakdownPageSize(Integer breakdownPageSize) {
 			if (breakdownPageSize == null) {
-				breakdownPageSize = DEFAULT_PAGE_SIZE;
+				this.breakdownPageSize = DEFAULT_PAGE_SIZE;
 				LOGGER.log(Level.INFO, "Cannot restore 'Issue breakdown page size' property. Will use default (" + DEFAULT_PAGE_SIZE + ") value.");
 			} else {
 				this.breakdownPageSize = breakdownPageSize;

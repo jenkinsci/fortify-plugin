@@ -1,5 +1,5 @@
 unclassified:
-  fortify:
+  fortifyPlugin:
     url: "https://qa-plg-ssc3.prgqa.hpecorp.net:8443/ssc"
     token: "3ab8c774-0850-483b-8be6-2907722a81d8"
     proxyConfig:

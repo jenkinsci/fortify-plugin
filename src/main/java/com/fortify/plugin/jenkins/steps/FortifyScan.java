@@ -30,6 +30,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
+import com.fortify.plugin.jenkins.FortifyPlugin;
 import com.fortify.plugin.jenkins.Messages;
 import com.fortify.plugin.jenkins.PathUtils;
 import com.google.common.collect.ImmutableSet;
@@ -206,6 +207,9 @@ public class FortifyScan extends FortifySCAStep {
 
 		@Override
 		protected Void run() throws Exception {
+			if (FortifyPlugin.DESCRIPTOR.isPreventLocalScans()) {
+				throw new AbortException(Messages.FortifyScan_Local_NotSupported());
+			}
 			getContext().get(TaskListener.class).getLogger().println("Running FortifyScan step");
 			if (!getContext().get(FilePath.class).exists()) {
 				getContext().get(FilePath.class).mkdirs();

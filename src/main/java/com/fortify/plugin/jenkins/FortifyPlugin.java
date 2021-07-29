@@ -706,6 +706,9 @@ public class FortifyPlugin extends Recorder {
 		performLocalTranslation(build, launcher, listener);
 
 		if (getRunScan()) {
+			if (FortifyPlugin.DESCRIPTOR.isPreventLocalScans()) {
+				throw new AbortException(Messages.FortifyScan_Local_NotSupported());
+			}
 			FortifyScan fs = new FortifyScan(getBuildId());
 			fs.setAddJVMOptions(getAddJVMOptions());
 			fs.setMaxHeap(getMaxHeap());
@@ -920,6 +923,9 @@ public class FortifyPlugin extends Recorder {
 		/** CloudScan Controller Token*/
 		private Secret ctrlToken;
 
+		/** Scan Settings */
+		private boolean preventLocalScans;
+
 		public DescriptorImpl() {
 			super(FortifyPlugin.class);
 			load();
@@ -1072,6 +1078,15 @@ public class FortifyPlugin extends Recorder {
 		@DataBoundSetter
 		public void setCtrlToken(String ctrlToken) { 
 			this.ctrlToken = ctrlToken == null || ctrlToken.trim().isEmpty() ? null : Secret.fromString(ctrlToken.trim());
+		}
+
+		public boolean isPreventLocalScans() {
+			return preventLocalScans;
+		}
+
+		@DataBoundSetter
+		public void setPreventLocalScans(boolean preventLocalScans) {
+			this.preventLocalScans = preventLocalScans;
 		}
 
 		public FormValidation doCheckBreakdownPageSize(@QueryParameter String value) {
@@ -1528,6 +1543,7 @@ public class FortifyPlugin extends Recorder {
 				connectTimeout = null;
 				ctrlUrl = null;
 				ctrlToken = null;
+				preventLocalScans = false;
 				req.bindJSON(this, jsonObject);
 				b.commit();
 			} catch (JSONException e) {

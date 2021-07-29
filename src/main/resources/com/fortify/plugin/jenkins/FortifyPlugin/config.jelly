@@ -206,6 +206,7 @@
           </local:blockWrapper>
         </f:block>
       </f:radioBlock>
+      <j:if test="${not descriptor.preventLocalScans}">
       <f:radioBlock title="Local translation &amp; local scan" value="local" name="analysisRunType"
                     checked="${instance.isLocal()}" help="/plugin/fortify/help-localTranslationAndScan.html">
         <f:block>
@@ -323,6 +324,7 @@
           </local:blockWrapper>
         </f:block>
       </f:radioBlock>
+      </j:if>
 
       <f:radioBlock title="Upload existing SCA results to Fortify Software Security Center" value="uploadOnly"
         name="analysisRunType" checked="${instance.isUploadOnly()}" help="/plugin/fortify/help-uploadOnly.html">

@@ -29,7 +29,7 @@ import hudson.model.TaskListener;
 public abstract class FortifySCAStep extends FortifyStep {
 
 	protected String buildID;
-	protected String maxHeap;
+	protected Integer maxHeap;
 	protected String addJVMOptions;
 	protected boolean debug;
 	protected boolean verbose;
@@ -39,12 +39,12 @@ public abstract class FortifySCAStep extends FortifyStep {
 		return buildID;
 	}
 
-	public String getMaxHeap() {
+	public Integer getMaxHeap() {
 		return maxHeap;
 	}
 
 	@DataBoundSetter
-	public void setMaxHeap(String maxHeap) {
+	public void setMaxHeap(Integer maxHeap) {
 		this.maxHeap = maxHeap;
 	}
 

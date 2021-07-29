@@ -129,7 +129,7 @@
           <f:textbox/>
         </f:entry>
         <f:entry field="maxHeap" title="Maximum heap memory (MB)" help="/plugin/fortify/help-maxHeap.html">
-          <f:textbox/>
+          <f:number/>
         </f:entry>
 
         <f:entry field="addJVMOptions" title="Additional JVM options" help="/plugin/fortify/help-addJVMOptions.html">
@@ -231,7 +231,7 @@
         </f:entry>
 
         <f:entry field="maxHeap" title="Maximum heap memory (MB)" help="/plugin/fortify/help-maxHeap.html">
-          <f:textbox/>
+          <f:number/>
         </f:entry>
 
         <f:entry field="addJVMOptions" title="Additional JVM options" help="/plugin/fortify/help-addJVMOptions.html">
@@ -312,11 +312,11 @@
             <f:textbox/>
           </f:entry>
           <f:entry field="timeout" title="Timeout" help="/plugin/fortify/help-timeout.html">
-            <f:textbox/>
+            <f:number/>
           </f:entry>
           <f:advanced title="Advanced settings">
             <f:entry field="pollingInterval" title="Polling interval" help="/plugin/fortify/help-pollingInterval.html">
-              <f:textbox/>
+              <f:number/>
             </f:entry>
           </f:advanced>
         </f:optionalBlock>
@@ -360,11 +360,11 @@
             <f:textbox/>
           </f:entry>
           <f:entry field="timeout" title="Timeout" help="/plugin/fortify/help-timeout.html">
-            <f:textbox/>
+            <f:number/>
           </f:entry>
           <f:advanced title="Advanced settings">
             <f:entry field="pollingInterval" title="Polling interval" help="/plugin/fortify/help-pollingInterval.html">
-              <f:textbox/>
+              <f:number/>
             </f:entry>
           </f:advanced>
         </f:section>

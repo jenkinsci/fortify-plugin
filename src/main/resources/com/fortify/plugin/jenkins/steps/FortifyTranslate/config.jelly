@@ -25,7 +25,7 @@
     </f:entry>
 	<f:advanced align="left">    
   		<f:entry title="${%Maximum heap memory} (MB)" field="maxHeap" help="/plugin/fortify/help-maxHeap.html">
-	  		<f:textbox/>
+	  		<f:number/>
 		</f:entry>
 		<f:entry title="${%Additional JVM options}" field="addJVMOptions" help="/plugin/fortify/help-addJVMOptions.html">
 	  		<f:textbox/>

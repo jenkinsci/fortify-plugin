@@ -52,8 +52,12 @@
       <f:textbox field="failureCriteria" />
     </f:entry>
 
+    <f:entry title="${%Timeout}" field="timeout" help="/plugin/fortify/help-timeout.html">
+        <f:number/>
+    </f:entry>
+
     <f:entry title="Polling interval" field="pollingInterval" help="/plugin/fortify/help-pollingInterval.html">
-      <f:textbox field="pollingInterval" />
+      <f:number field="pollingInterval" />
     </f:entry>
 
 </j:jelly>

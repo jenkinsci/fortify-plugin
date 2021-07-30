@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.fortify.plugin.jenkins.steps;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -109,7 +108,7 @@ public class FortifyScan extends FortifySCAStep {
 		PrintStream log = listener.getLogger();
 		log.println("Fortify Jenkins plugin v " + VERSION);
 		log.println("Launching Fortify SCA scan command");
-		String projectRoot = workspace.getRemote() + File.separator + ".fortify";
+		String projectRoot = workspace.child(".fortify").getRemote();
 		String sourceanalyzer = null;
 
 		if (sourceanalyzer == null) {

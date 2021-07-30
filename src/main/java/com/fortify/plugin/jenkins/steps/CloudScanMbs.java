@@ -18,7 +18,6 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.*;
 
 import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -116,7 +115,7 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
         PrintStream log = taskListener.getLogger();
         log.println("Fortify Jenkins plugin v " + VERSION);
         log.println("Performing Fortify remote scan");
-        String projectRoot = filePath.getRemote() + File.separator + ".fortify";
+        String projectRoot = filePath.child(".fortify").getRemote();
         String cloudscanExec;
         try {
             cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener);

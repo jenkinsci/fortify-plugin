@@ -15,7 +15,6 @@
  *******************************************************************************/
 package com.fortify.plugin.jenkins.steps;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -235,7 +234,7 @@ public class FortifyTranslate extends FortifySCAStep {
 		PrintStream log = listener.getLogger();
 		log.println("Fortify Jenkins plugin v " + VERSION);
 		log.println("Launching Fortify SCA translate command");
-		String projectRoot = workspace.getRemote() + File.separator + ".fortify";
+		String projectRoot = workspace.child(".fortify").getRemote();
 		String sourceanalyzer = null;
 
 		if (sourceanalyzer == null) {
@@ -357,7 +356,7 @@ public class FortifyTranslate extends FortifySCAStep {
 			args.add(getMavenExecutable(build, workspace, launcher, listener));
 			option = getResolvedTranslationExcludeList(listener);
 			if (StringUtils.isNotEmpty(option)) {
-				addMavenExcludes(args, option);
+				addMavenExcludes(args, option, launcher.isUnix());
 			}
 			option = getResolvedMavenOptions((MavenScanType) projectScanType, listener);
 			if (StringUtils.isNotEmpty(option)) {
@@ -409,12 +408,12 @@ public class FortifyTranslate extends FortifySCAStep {
 
 	}
 
-	private void addMavenExcludes(List<String> args, String argsToAdd) {
+	private void addMavenExcludes(List<String> args, String argsToAdd, boolean isUnix) {
 		StringBuilder excludeParam = new StringBuilder();
 		for (Iterator<String> itr = Arrays.asList(Util.tokenize(argsToAdd)).iterator(); itr.hasNext();) {
 			excludeParam.append(itr.next());
 			if (itr.hasNext()) {
-				excludeParam.append(File.pathSeparator);
+				excludeParam.append(isUnix ? ":" : ";");
 			}
 		}
 		args.add("-Dfortify.sca.exclude=" + excludeParam.toString());

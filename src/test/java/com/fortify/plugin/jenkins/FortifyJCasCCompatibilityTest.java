@@ -47,6 +47,8 @@ public class FortifyJCasCCompatibilityTest extends RoundTripAbstractTest {
 				descriptor.getProxyConfig().getProxyUsername()), Secret.fromString("fakeuser"), descriptor.getProxyConfig().getProxyUsername());
 		assertEquals(String.format("Wrong proxy authentication. Username expected %s but received %s", "fakeuser",
 				descriptor.getProxyUsername()), "fakeuser", descriptor.getProxyUsername());
+		assertEquals(String.format("Local scan setting is incorrect. Expected %s but received %s", true, descriptor.isPreventLocalScans()),
+				true, descriptor.isPreventLocalScans());
 	}
 
 	@Override

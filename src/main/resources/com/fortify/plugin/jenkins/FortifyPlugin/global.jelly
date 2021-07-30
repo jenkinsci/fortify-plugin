@@ -80,7 +80,7 @@
     </f:section>
 
     <f:section title="Scan Settings">
-      <f:entry title="Prevent Local Scans" help="/plugin/fortify/help-preventLocalScans.html">
+      <f:entry title="Disable local scans" help="/plugin/fortify/help-preventLocalScans.html">
         <f:checkbox name="preventLocalScans" field="preventLocalScans" id="preventLocalScans"/>
       </f:entry>
     </f:section>

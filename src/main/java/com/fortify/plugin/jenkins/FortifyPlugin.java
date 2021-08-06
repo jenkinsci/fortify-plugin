@@ -1235,7 +1235,7 @@ public class FortifyPlugin extends Recorder {
 					@Override
 					public NoReturn runWith(FortifyClient client) throws Exception {
 						// as long as no exception, that's ok
-						client.getProjectList();
+						client.getProjectList(1);
 						return FortifyClient.NoReturn.INSTANCE;
 					}
 				});
@@ -1603,7 +1603,7 @@ public class FortifyPlugin extends Recorder {
 							new FortifyClient.Command<Map<String, Map<String, Long>>>() {
 								@Override
 								public Map<String, Map<String, Long>> runWith(FortifyClient client) throws Exception {
-									return client.getProjectListEx();
+									return client.getProjectListEx(50);
 								}
 							});
 					return map;

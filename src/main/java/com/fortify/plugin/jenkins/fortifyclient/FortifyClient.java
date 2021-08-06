@@ -75,10 +75,10 @@ public class FortifyClient {
 	 * @return Map<String, Long>
 	 * @throws ApiException
 	 */
-	public Map<String, Long> getProjectList() throws ApiException {
+	public Map<String, Long> getProjectList(int limit) throws ApiException {
 		Map<String, Long> projectList = new LinkedHashMap<String, Long>();
 
-		Map<String, Map<String, Long>> allProjects = getProjectListEx();
+		Map<String, Map<String, Long>> allProjects = getProjectListEx(limit);
 		for (Map.Entry<String, Map<String, Long>> prjEntry : allProjects.entrySet()) {
 			Map<String, Long> prjVersions = prjEntry.getValue();
 			for (Map.Entry<String, Long> prjVersion : prjVersions.entrySet()) {
@@ -95,8 +95,8 @@ public class FortifyClient {
 	 * @return Map<String, Map<String, Long>>
 	 * @throws ApiException
 	 */
-	public Map<String, Map<String, Long>> getProjectListEx() throws ApiException {
-		List<ProjectVersion> pversions = apiClientWrapper.getApplicationVersions();
+	public Map<String, Map<String, Long>> getProjectListEx(int limit) throws ApiException {
+		List<ProjectVersion> pversions = apiClientWrapper.getApplicationVersions(limit);
 		Map<String, Map<String, Long>> projectList = new LinkedHashMap<String, Map<String, Long>>();
 		for (ProjectVersion version : pversions) {
 			String projectName = version.getProject().getName();

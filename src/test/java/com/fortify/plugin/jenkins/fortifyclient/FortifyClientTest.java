@@ -184,7 +184,7 @@ public class FortifyClientTest {
 			return;
 
 		try {
-			projects = fortifyclient.getProjectList();
+			projects = fortifyclient.getProjectList(-1);
 			for (String s : projects.keySet()) {
 				System.out.println(s + " -> " + projects.get(s));
 			}

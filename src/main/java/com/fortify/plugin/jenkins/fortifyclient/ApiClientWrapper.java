@@ -101,11 +101,11 @@ public class ApiClientWrapper {
 	 * @return List<Project>
 	 * @throws ApiException
 	 */
-	public List<Project> getApplications() throws ApiException {
+	public List<Project> getApplications(int limit) throws ApiException {
 		List<Project> appList = new ArrayList<Project>();
 		ProjectControllerApi projectControllerApi = new ProjectControllerApi(apiClient);
 
-		ApiResultListProject apiResultListProject = projectControllerApi.listProject(null, 0, -1, null, false, null);
+		ApiResultListProject apiResultListProject = projectControllerApi.listProject(null, 0, limit, null, false, null);
 		for (Project app : apiResultListProject.getData()) {
 			appList.add(app);
 		}
@@ -119,12 +119,12 @@ public class ApiClientWrapper {
 	 * @return List<ProjectVersion>
 	 * @throws ApiException
 	 */
-	public List<ProjectVersion> getApplicationVersions() throws ApiException {
+	public List<ProjectVersion> getApplicationVersions(int limit) throws ApiException {
 		List<ProjectVersion> appVersionList = new ArrayList<ProjectVersion>();
 		ProjectVersionControllerApi projectVersionControllerApi = new ProjectVersionControllerApi(apiClient);
 
 		ApiResultListProjectVersion apiResultListProjectVersion = projectVersionControllerApi.listProjectVersion(null,
-				0, -1, null, false, null, false, false, null);
+				0, limit, null, false, null, false, false, null);
 		for (ProjectVersion appVersion : apiResultListProjectVersion.getData()) {
 			appVersionList.add(appVersion);
 		}
@@ -268,9 +268,9 @@ public class ApiClientWrapper {
 
 		ApiResultListProjectVersionIssue apiResultListProjectVersionIssue = issueSetOfProjectVersionControllerApi
 				// .listIssueOfProjectVersion(parentId, start, limit, q, qm, orderby, filterset, fields, 
-				// showhidden, showremoved, showsuppressed, showshortfilenames, filter, groupid, groupingtype)
+				// showhidden, showremoved, showsuppressed, showshortfilenames, filter, groupid, groupingtype, ids)
 		.listIssueOfProjectVersion(appVersionId, startPage, pageSize, null, null, "issueName", null, null, 
-				false, false, false, true, filter, groupId, groupingType);
+				false, false, false, true, filter, groupId, groupingType, null);
 		for (ProjectVersionIssue issue : apiResultListProjectVersionIssue.getData()) {
 			issues.add(issue);
 		}

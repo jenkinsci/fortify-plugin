@@ -86,7 +86,7 @@ public class DotnetSourceScanType extends ProjectScanType {
 		public FormValidation doCheckDotnetFrameworkVersion(@QueryParameter String value) {
 			FormValidation testEmpty = Validators.checkFieldNotEmpty(value);
 			if (testEmpty == FormValidation.ok()) {
-				return Validators.checkValidNumber(value);
+				return Validators.checkValidVersionNumber(value);
 			} else {
 				return testEmpty;
 			}

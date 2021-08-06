@@ -23,6 +23,8 @@ import hudson.util.FormValidation;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
+import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 public class Validators {
@@ -55,19 +57,21 @@ public class Validators {
 		return FormValidation.ok();
 	}
 
-	public static FormValidation checkValidNumber(String value) {
+	public static FormValidation checkValidVersionNumber(String value) {
 		if (StringUtils.isBlank(value)) {
 			return FormValidation.ok();
 		}
-
-		double testNum = 0;
-		try {
-			testNum = Double.parseDouble(value);
-		} catch (NumberFormatException e) {
-			return FormValidation.error(Messages.FortifySCAStep_Check_Number());
-		}
-		if (testNum < 1) {
-			return FormValidation.error(Messages.FortifySCAStep_Check_Number());
+		StringTokenizer tz = new StringTokenizer(value, ".");
+		int testNum = 0;
+		while (tz.hasMoreTokens()) {
+			try {
+				testNum = Integer.parseInt(tz.nextToken());
+			} catch (NumberFormatException e) {
+				return FormValidation.error(Messages.FortifySCAStep_Check_Version_Number());
+			}
+			if (testNum < 0 || testNum > 1000) {
+				return FormValidation.error(Messages.FortifySCAStep_Check_Version_Number());
+			}
 		}
 		return FormValidation.ok();
 	}

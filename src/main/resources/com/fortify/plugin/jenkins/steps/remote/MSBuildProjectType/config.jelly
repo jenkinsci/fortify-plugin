@@ -18,7 +18,7 @@
     <f:entry title="Solution or project file" field="dotnetProject" help="/plugin/fortify/help-dotNetMSBuildProjects.html">
         <f:textbox/>
     </f:entry>
-    <f:entry title="Exclude Disabled Projects" field="excludeDisabledProjects" help="/plugin/fortify/help-excludeDisabledProjects.html">
+    <f:entry title="Exclude disabled projects" field="excludeDisabledProjects" help="/plugin/fortify/help-excludeDisabledProjects.html">
         <f:checkbox/>
     </f:entry>
 </j:jelly>

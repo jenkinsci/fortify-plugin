@@ -104,6 +104,7 @@ public class FortifyPlugin extends Recorder {
 	private static Object syncObj = new Object();
 
 	public static final int DEFAULT_PAGE_SIZE = 50;
+	public static final int DEFAULT_DROPDOWN_LIMIT = 100;
 
 	private transient UploadSSCBlock uploadSSC;
 	private transient RunTranslationBlock runTranslation;
@@ -899,6 +900,9 @@ public class FortifyPlugin extends Recorder {
 		/** Number of issues to be displayed per page in breakdown table */
 		private Integer breakdownPageSize;
 
+		/** Number of application versions to display in dropdowns */
+		private Integer dropdownLimit;
+
 		/** SSC connection timeout */
 		private Integer connectTimeout;
 
@@ -1025,11 +1029,25 @@ public class FortifyPlugin extends Recorder {
 
 		@DataBoundSetter
 		public void setBreakdownPageSize(Integer breakdownPageSize) {
-			if (breakdownPageSize == null) {
+			if (breakdownPageSize == null || breakdownPageSize < 1) {
 				this.breakdownPageSize = DEFAULT_PAGE_SIZE;
 				LOGGER.log(Level.INFO, "Cannot restore 'Issue breakdown page size' property. Will use default (" + DEFAULT_PAGE_SIZE + ") value.");
 			} else {
 				this.breakdownPageSize = breakdownPageSize;
+			}
+		}
+
+		public Integer getDropdownLimit() {
+			return dropdownLimit;
+		}
+
+		@DataBoundSetter
+		public void setDropdownLimit(Integer dropdownLimit) {
+			if (dropdownLimit == null || dropdownLimit < 1) {
+				this.dropdownLimit = DEFAULT_DROPDOWN_LIMIT;
+				LOGGER.log(Level.INFO, "Cannot restore 'Application version dropdown limit' property. Will use default (" + DEFAULT_DROPDOWN_LIMIT + ") value.");
+			} else {
+				this.dropdownLimit = dropdownLimit;
 			}
 		}
 
@@ -1538,6 +1556,7 @@ public class FortifyPlugin extends Recorder {
 				token = null;
 				projectTemplate = null;
 				breakdownPageSize = DEFAULT_PAGE_SIZE;
+				dropdownLimit = DEFAULT_DROPDOWN_LIMIT;
 				readTimeout = null;
 				writeTimeout = null;
 				connectTimeout = null;
@@ -1603,7 +1622,7 @@ public class FortifyPlugin extends Recorder {
 							new FortifyClient.Command<Map<String, Map<String, Long>>>() {
 								@Override
 								public Map<String, Map<String, Long>> runWith(FortifyClient client) throws Exception {
-									return client.getProjectListEx(50);
+									return client.getProjectListEx(getDropdownLimit());
 								}
 							});
 					return map;

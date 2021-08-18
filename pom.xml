@@ -110,7 +110,7 @@
         <dependency>
             <groupId>com.fortify</groupId>
             <artifactId>ssc-restapi-client</artifactId>
-            <version>2.0</version>
+            <version>21.1</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -178,7 +178,7 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>1.5.15</version>
+            <version>1.5.17</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -207,20 +207,6 @@
             <groupId>io.gsonfire</groupId>
             <artifactId>gson-fire</artifactId>
             <version>1.8.0</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.threeten</groupId>
-            <artifactId>threetenbp</artifactId>
-            <version>1.3.5</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.9.3</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>

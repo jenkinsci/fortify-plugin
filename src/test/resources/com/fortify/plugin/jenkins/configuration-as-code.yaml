@@ -10,7 +10,7 @@ unclassified:
     readTimeout: "20"
     writeTimeout: "30"
     breakdownPageSize: "40"
-    dropdownLimit: "10"
+    dropdownLimit: "80"
     preventLocalScans: true
     ctrlUrl: "https://qa-cs-r-ctrl.prgqa.hpecorp.net:8443/scancentral-ctrl/"
     ctrlToken: "3ffd53a8-5932-4f10-9530-4af5d9950c7c"

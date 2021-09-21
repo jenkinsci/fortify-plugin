@@ -68,6 +68,8 @@ import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
 
 public class FortifyUpload extends FortifyStep {
 
@@ -271,9 +273,9 @@ public class FortifyUpload extends FortifyStep {
 		} else {
 			localFPR = new File(summary.getFprFile().toURI());
 		}
-		log.printf("Using FPR: %s%n", summary.getFprFile().toURI());
+		log.printf("Using analysis results file: %s%n", summary.getFprFile().toURI());
 		// if ( summary.getFprFile().isRemote() )
-		log.printf("Local FPR: %s%n", localFPR.getCanonicalFile());
+		//log.printf("Local analysis results file: %s%n", localFPR.getCanonicalFile());
 
 		// if the application ID is not null, then we need to upload the FPR to SSC
 		Long artifactId = null;
@@ -281,7 +283,7 @@ public class FortifyUpload extends FortifyStep {
 		if (!StringUtils.isBlank(getResolvedAppName(listener)) && !StringUtils.isBlank(getResolvedAppVersion(listener))
 				&& FortifyPlugin.DESCRIPTOR.canUploadToSsc()) {
 			// the FPR may be in remote slave, we need to call launcher to do this for me
-			log.printf("Uploading FPR to SSC at %s to application '%s' and application version '%s'%n",
+			log.printf("Uploading analysis results file to SSC at %s to application '%s' and application version '%s'%n",
 					FortifyPlugin.DESCRIPTOR.getUrl(), getResolvedAppName(listener), getResolvedAppVersion(listener));
 			try {
 				final Long projectId = createNewOrGetProject(listener);
@@ -293,13 +295,28 @@ public class FortifyUpload extends FortifyStep {
 								return client.uploadFPR(fpr, projectId);
 							}
 						});
-				log.printf("FPR uploaded successfully.  artifact id = %d%n", artifactId);
+				log.printf("Analysis results uploaded successfully. artifact id = %d%n", artifactId);
 				return artifactId;
 			} catch (Throwable t) {
 				log.println("Error uploading to SSC: " + FortifyPlugin.DESCRIPTOR.getUrl());
+				String message = t.getMessage();
+				if (t instanceof ApiException) {
+					if (message == null || message.trim().length() == 0) {
+						message = ((ApiException)t).getResponseBody();
+						try {
+							JSONObject obj = JSONObject.fromObject(message);
+							String body = obj.getString("message");
+							if (body != null && body.trim().length() != 0) {
+								message = body;
+							}
+						} catch (JSONException e) {
+							// ignore
+						}
+					}
+				}
+				log.println(message);
 				t.printStackTrace(log);
-				throw new AbortException(
-						"Error uploading to SSC: " + FortifyPlugin.DESCRIPTOR.getUrl() + "\t" + t.getMessage());
+				throw new AbortException("Error uploading to SSC: " + message);
 			} finally {
 				// if this is a remote FPR, I need to delete the local temp FPR after use
 				if (summary.getFprFile().isRemote()) {
@@ -307,7 +324,7 @@ public class FortifyUpload extends FortifyStep {
 						try {
 							boolean deleted = localFPR.delete();
 							if (!deleted)
-								log.printf("Can't delete local FPR file: %s%n", localFPR.getCanonicalFile());
+								log.printf("Can't delete local analysis results file: %s%n", localFPR.getCanonicalFile());
 						} catch (Exception e) {
 							e.printStackTrace(log);
 						}
@@ -316,10 +333,10 @@ public class FortifyUpload extends FortifyStep {
 			}
 		} else {
 			log.printf(
-					"FPR uploading was skipped. Some of the required settings are not specified: Application Name='%s', Application Version='%s', serverUrl='%s', authenticationToken='%s'%n",
+					"Analysis results file uploading was skipped. Some of the required settings are not specified: Application Name='%s', Application Version='%s', serverUrl='%s', authenticationToken='%s'%n",
 					getResolvedAppName(listener), getResolvedAppVersion(listener), FortifyPlugin.DESCRIPTOR.getUrl(),
 					FortifyPlugin.DESCRIPTOR.getToken());
-			throw new AbortException("FPR uploading was skipped. Some of the required settings are not specified.");
+			throw new AbortException("Analysis results uploading was skipped. Some of the required settings are not specified.");
 		}
 	}
 
@@ -583,13 +600,13 @@ public class FortifyUpload extends FortifyStep {
 	}
 
 	public List<IssueFolderBean> getFolders(final TaskListener taskListener) {
-		final TaskListener listener = taskListener != null ? taskListener
-				: new StreamBuildListener(System.out, Charset.defaultCharset());
+		final TaskListener listener = taskListener != null ? taskListener : new StreamBuildListener(System.out, Charset.defaultCharset());
 		accessToProject = true;
 		getResolvedAppVersion(listener);
 		if (FortifyPlugin.DESCRIPTOR.canUploadToSsc()) {
+			PrintStream logger = listener.getLogger();
 			try {
-				final Writer log = new OutputStreamWriter(listener.getLogger(), "UTF-8");
+				final Writer log = new OutputStreamWriter(logger, "UTF-8");
 				final Long versionId = createNewOrGetProject(listener);
 				Map<String, List<String>> map = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<Map<String, List<String>>>() {
@@ -610,24 +627,29 @@ public class FortifyUpload extends FortifyStep {
 
 				return list;
 			} catch (Throwable e) {
+				String message = e.getMessage();
 				if (e instanceof ApiException) {
-					if (e.getMessage().toLowerCase().contains(("access denied"))) {
+					if (message == null || message.trim().length() == 0) {
+						message = ((ApiException)e).getResponseBody();
+					}
+					if (message.toLowerCase().contains(("access denied"))) {
 						accessToProject = false;
 					}
 				}
-				e.printStackTrace();
+				logger.println(message);
+				e.printStackTrace(logger);
 			}
 		}
 		return Collections.emptyList();
 	}
 
 	public List<GroupingProfile> getGroupingProfiles(final TaskListener taskListener) {
-		final TaskListener listener = taskListener != null ? taskListener
-				: new StreamBuildListener(System.out, Charset.defaultCharset());
+		final TaskListener listener = taskListener != null ? taskListener : new StreamBuildListener(System.out, Charset.defaultCharset());
 		accessToProject = true;
 		if (FortifyPlugin.DESCRIPTOR.canUploadToSsc()) {
+			PrintStream logger = listener.getLogger();
 			try {
-				final Writer log = new OutputStreamWriter(listener.getLogger(), "UTF-8");
+				final Writer log = new OutputStreamWriter(logger, "UTF-8");
 				final Long versionId = createNewOrGetProject(listener);
 				List<GroupingProfile> groupingProfiles = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<List<GroupingProfile>>() {
@@ -639,12 +661,17 @@ public class FortifyUpload extends FortifyStep {
 						});
 				return groupingProfiles;
 			} catch (Throwable e) {
+				String message = e.getMessage();
 				if (e instanceof ApiException) {
-					if (e.getMessage().toLowerCase().contains(("access denied"))) {
+					if (message == null || message.trim().length() == 0) {
+						message = ((ApiException)e).getResponseBody();
+					}
+					if (message.toLowerCase().contains(("access denied"))) {
 						accessToProject = false;
 					}
 				}
-				e.printStackTrace();
+				logger.println(message);
+				e.printStackTrace(logger);
 			}
 		}
 		return Collections.emptyList();

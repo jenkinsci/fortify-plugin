@@ -61,21 +61,21 @@ public class RemoteService implements FilePath.FileCallable<FPRSummary> {
 			if (fpr.exists()) {
 				return fpr;
 			} else {
-				throw new RuntimeException("FPR file '" + fpr + "' doesn't exist!");
+				throw new RuntimeException("Analysis results file '" + fpr + "' doesn't exist!");
 			}
 		}
 		// If relative path, search in workspace
 		File fprInWorkspace = locateFPRInWorkspace(workspace, fprPath);
 		if (null == fprInWorkspace) {
 			throw new RuntimeException(
-					"Can't locate FPR file '" + fpr + "' under workspace: " + workspace.getAbsolutePath());
+					"Can't locate analysis results file '" + fpr + "' under workspace: " + workspace.getAbsolutePath());
 		}
 		return fprInWorkspace;
 	}
 
 	@SuppressWarnings("unchecked")
 	private static File locateFPRInWorkspace(File path, String preferredFileName) {
-		String ext[] = { "fpr" };
+		String ext[] = { "fpr", "zip" }; //adding zip extension to support third-party results upload
 		Iterator<File> iterator = FileUtils.iterateFiles(path, ext, true);
 
 		long latestTime = 0;

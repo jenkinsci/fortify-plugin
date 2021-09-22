@@ -54,8 +54,8 @@
       <f:entry title="Maximum issues per page" help="/plugin/fortify/help-breakdownPageSize.html">
         <f:number field="breakdownPageSize" id="breakdownPageSize" />
       </f:entry>
-      <f:entry title="Dropdown limit for application versions" help="/plugin/fortify/help-dropdownLimit.html">
-        <f:number field="dropdownLimit" id="dropdownLimit" />
+      <f:entry title="Maximum application versions per list" help="/plugin/fortify/help-appVersionListLimit.html">
+        <f:number field="appVersionListLimit" id="appVersionListLimit" />
       </f:entry>
       <f:entry title="Connection timeout" help="/plugin/fortify/help-connectionTimeout.html">
         <f:number field="connectTimeout" id="connectTimeout" />

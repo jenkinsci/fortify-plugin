@@ -42,8 +42,8 @@ public class FortifyJCasCCompatibilityTest extends RoundTripAbstractTest {
 				descriptor.getConnectTimeout()), Integer.valueOf(10), descriptor.getConnectTimeout());
 		assertEquals(String.format("Wrong page size. Expected %s but received %s", Integer.valueOf(40), descriptor.getBreakdownPageSize()),
 				Integer.valueOf(40), descriptor.getBreakdownPageSize());
-		assertEquals(String.format("Wrong dropdown limit. Expected %s but received %s", Integer.valueOf(80), descriptor.getDropdownLimit()),
-				Integer.valueOf(80), descriptor.getDropdownLimit());
+		assertEquals(String.format("Wrong app version list limit. Expected %s but received %s", Integer.valueOf(80), descriptor.getAppVersionListLimit()),
+				Integer.valueOf(80), descriptor.getAppVersionListLimit());
 		assertTrue("Proxy should be used", descriptor.getUseProxy());
 		assertEquals(String.format("Wrong proxy authentication. Username expected %s but received %s", Secret.fromString("fakeuser"),
 				descriptor.getProxyConfig().getProxyUsername()), Secret.fromString("fakeuser"), descriptor.getProxyConfig().getProxyUsername());

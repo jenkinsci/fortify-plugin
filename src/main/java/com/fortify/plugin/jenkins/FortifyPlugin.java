@@ -104,7 +104,7 @@ public class FortifyPlugin extends Recorder {
 	private static Object syncObj = new Object();
 
 	public static final int DEFAULT_PAGE_SIZE = 50;
-	public static final int DEFAULT_DROPDOWN_LIMIT = 100;
+	public static final int DEFAULT_APP_VERSION_LIST_LIMIT = 100;
 
 	private transient UploadSSCBlock uploadSSC;
 	private transient RunTranslationBlock runTranslation;
@@ -860,6 +860,21 @@ public class FortifyPlugin extends Recorder {
 					}
 				}
 				return cmd.runWith(client);
+			} catch (ApiException e) {
+				String message = e.getMessage();
+				if (message == null || message.trim().length() == 0) {
+					message = ((ApiException)e).getResponseBody();
+					try {
+						JSONObject obj = JSONObject.fromObject(message);
+						String body = obj.getString("message");
+						if (body != null && body.trim().length() != 0) {
+							message = body;
+						}
+					} catch (JSONException je) {
+						// ignore
+					}
+				}
+				throw new ApiException(message, e, e.getCode(), e.getResponseHeaders());
 			} finally {
 				if (contextClassLoader != null) {
 					Thread.currentThread().setContextClassLoader(contextClassLoader);
@@ -900,8 +915,8 @@ public class FortifyPlugin extends Recorder {
 		/** Number of issues to be displayed per page in breakdown table */
 		private Integer breakdownPageSize;
 
-		/** Number of application versions to display in dropdowns */
-		private Integer dropdownLimit;
+		/** Number of application versions to display in dropdown lists */
+		private Integer appVersionListLimit;
 
 		/** SSC connection timeout */
 		private Integer connectTimeout;
@@ -1037,17 +1052,17 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public Integer getDropdownLimit() {
-			return dropdownLimit;
+		public Integer getAppVersionListLimit() {
+			return appVersionListLimit;
 		}
 
 		@DataBoundSetter
-		public void setDropdownLimit(Integer dropdownLimit) {
-			if (dropdownLimit == null || dropdownLimit < 1) {
-				this.dropdownLimit = DEFAULT_DROPDOWN_LIMIT;
-				LOGGER.log(Level.INFO, "Cannot restore 'Application version dropdown limit' property. Will use default (" + DEFAULT_DROPDOWN_LIMIT + ") value.");
+		public void setAppVersionListLimit(Integer appVersionListLimit) {
+			if (appVersionListLimit == null || appVersionListLimit < 1) {
+				this.appVersionListLimit = DEFAULT_APP_VERSION_LIST_LIMIT;
+				LOGGER.log(Level.INFO, "Cannot restore 'Application version list limit' property. Will use default (" + DEFAULT_APP_VERSION_LIST_LIMIT + ") value.");
 			} else {
-				this.dropdownLimit = dropdownLimit;
+				this.appVersionListLimit = appVersionListLimit;
 			}
 		}
 
@@ -1259,10 +1274,11 @@ public class FortifyPlugin extends Recorder {
 				});
 				return FormValidation.okWithMarkup("<font color=\"blue\">Connection successful!</font>");
 			} catch (Throwable t) {
-				if (t.getMessage().contains("Access Denied")) {
+				String message = t.getMessage();
+				if (message.contains("Access Denied")) {
 					return FormValidation.error(t, "Invalid token");
 				}
-				return FormValidation.error(t, "Cannot connect to SSC server");
+				return FormValidation.error(t, "Cannot connect to SSC server. " + message);
 			} finally {
 				this.url = orig_url;
 				this.token = orig_token;
@@ -1556,7 +1572,7 @@ public class FortifyPlugin extends Recorder {
 				token = null;
 				projectTemplate = null;
 				breakdownPageSize = DEFAULT_PAGE_SIZE;
-				dropdownLimit = DEFAULT_DROPDOWN_LIMIT;
+				appVersionListLimit = DEFAULT_APP_VERSION_LIST_LIMIT;
 				readTimeout = null;
 				writeTimeout = null;
 				connectTimeout = null;
@@ -1622,7 +1638,7 @@ public class FortifyPlugin extends Recorder {
 							new FortifyClient.Command<Map<String, Map<String, Long>>>() {
 								@Override
 								public Map<String, Map<String, Long>> runWith(FortifyClient client) throws Exception {
-									return client.getProjectListEx(getDropdownLimit());
+									return client.getProjectListEx(getAppVersionListLimit());
 								}
 							});
 					return map;

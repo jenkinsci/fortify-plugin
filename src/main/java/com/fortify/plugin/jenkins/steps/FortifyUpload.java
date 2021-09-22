@@ -300,20 +300,6 @@ public class FortifyUpload extends FortifyStep {
 			} catch (Throwable t) {
 				log.println("Error uploading to SSC: " + FortifyPlugin.DESCRIPTOR.getUrl());
 				String message = t.getMessage();
-				if (t instanceof ApiException) {
-					if (message == null || message.trim().length() == 0) {
-						message = ((ApiException)t).getResponseBody();
-						try {
-							JSONObject obj = JSONObject.fromObject(message);
-							String body = obj.getString("message");
-							if (body != null && body.trim().length() != 0) {
-								message = body;
-							}
-						} catch (JSONException e) {
-							// ignore
-						}
-					}
-				}
 				log.println(message);
 				t.printStackTrace(log);
 				throw new AbortException("Error uploading to SSC: " + message);
@@ -392,9 +378,10 @@ public class FortifyUpload extends FortifyStep {
 					break;
 				}
 			} catch (Throwable t) {
-				log.println("Error checking artifact status.");
+				String message = t.getMessage();
+				log.println("Error checking artifact status. " + message);
 				t.printStackTrace(log);
-				throw new AbortException("Failed to retrieve artifact statistics from SSC");
+				throw new AbortException("Failed to retrieve artifact statistics from SSC. " + message);
 			}
 
 			if (timeoutInMinutes != 0) {
@@ -566,8 +553,9 @@ public class FortifyUpload extends FortifyStep {
 		final TaskListener listener = taskListener != null ? taskListener
 				: new StreamBuildListener(System.out, Charset.defaultCharset());
 		if (FortifyPlugin.DESCRIPTOR.canUploadToSsc()) {
+			PrintStream logger = listener.getLogger();
 			try {
-				final Writer log = new OutputStreamWriter(listener.getLogger(), "UTF-8");
+				final Writer log = new OutputStreamWriter(logger, "UTF-8");
 				Map<String, List<String>> map = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<Map<String, List<String>>>() {
 							@Override
@@ -593,7 +581,8 @@ public class FortifyUpload extends FortifyStep {
 
 				return list;
 			} catch (Throwable e) {
-				e.printStackTrace();
+				logger.println(e.getMessage());
+				e.printStackTrace(logger);
 			}
 		}
 		return Collections.emptyList();
@@ -628,13 +617,8 @@ public class FortifyUpload extends FortifyStep {
 				return list;
 			} catch (Throwable e) {
 				String message = e.getMessage();
-				if (e instanceof ApiException) {
-					if (message == null || message.trim().length() == 0) {
-						message = ((ApiException)e).getResponseBody();
-					}
-					if (message.toLowerCase().contains(("access denied"))) {
-						accessToProject = false;
-					}
+				if (message.toLowerCase().contains(("access denied"))) {
+					accessToProject = false;
 				}
 				logger.println(message);
 				e.printStackTrace(logger);
@@ -662,13 +646,8 @@ public class FortifyUpload extends FortifyStep {
 				return groupingProfiles;
 			} catch (Throwable e) {
 				String message = e.getMessage();
-				if (e instanceof ApiException) {
-					if (message == null || message.trim().length() == 0) {
-						message = ((ApiException)e).getResponseBody();
-					}
-					if (message.toLowerCase().contains(("access denied"))) {
-						accessToProject = false;
-					}
+				if (message.toLowerCase().contains(("access denied"))) {
+					accessToProject = false;
 				}
 				logger.println(message);
 				e.printStackTrace(logger);
@@ -701,10 +680,11 @@ public class FortifyUpload extends FortifyStep {
 			final TableAction.SortOrder sortOrder, final boolean downNotUp, final boolean showingAllNotNew,
 			final String selectedGrouping, final TaskListener taskListener) {
 		if (FortifyPlugin.DESCRIPTOR.canUploadToSsc()) {
+			final TaskListener listener = taskListener != null ? taskListener
+					: new StreamBuildListener(System.out, Charset.defaultCharset());
+			PrintStream logger = listener.getLogger();
 			try {
-				final TaskListener listener = taskListener != null ? taskListener
-						: new StreamBuildListener(System.out, Charset.defaultCharset());
-				final Writer log = new OutputStreamWriter(listener.getLogger(), "UTF-8");
+				final Writer log = new OutputStreamWriter(logger, "UTF-8");
 				final Long versionId = createNewOrGetProject(listener);
 
 				Map<String, IssueBean> map = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
@@ -730,7 +710,8 @@ public class FortifyUpload extends FortifyStep {
 				List<IssueBean> results = list;
 				return results;
 			} catch (Throwable e) {
-				e.printStackTrace();
+				logger.println(e.getMessage());
+				e.printStackTrace(logger);
 			}
 		}
 		return Collections.emptyList();
@@ -876,6 +857,21 @@ public class FortifyUpload extends FortifyStep {
 					}*/
 				}
 				return cmd.runWith(client);
+			} catch (ApiException ae) {
+				String message = ae.getMessage();
+				if (message == null || message.trim().length() == 0) {
+					message = ae.getResponseBody();
+					try {
+						JSONObject obj = JSONObject.fromObject(message);
+						String body = obj.getString("message");
+						if (body != null && body.trim().length() != 0) {
+							message = body;
+						}
+					} catch (JSONException je) {
+						// ignore
+					}
+				}
+				throw new ApiException(message, ae, ae.getCode(), ae.getResponseHeaders());
 			} finally {
 				if (contextClassLoader != null) {
 					Thread.currentThread().setContextClassLoader(contextClassLoader);

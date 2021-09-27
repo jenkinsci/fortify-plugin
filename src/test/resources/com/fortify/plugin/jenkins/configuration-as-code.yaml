@@ -11,6 +11,6 @@ unclassified:
     writeTimeout: "30"
     breakdownPageSize: "40"
     appVersionListLimit: "80"
-    preventLocalScans: true
+    disableLocalScans: true
     ctrlUrl: "https://qa-cs-r-ctrl.prgqa.hpecorp.net:8443/scancentral-ctrl/"
     ctrlToken: "3ffd53a8-5932-4f10-9530-4af5d9950c7c"

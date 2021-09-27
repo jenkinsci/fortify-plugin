@@ -18,6 +18,9 @@
 	<f:block>
 		<f:checkbox title="${%Use Gradle Wrapper}" field="useWrapper" value="true"/>
 	</f:block>
+	<f:block>
+		<f:checkbox title="${%Skip build}" field="skipBuild" value="false" help="/plugin/fortify/help-gradleSkipBuild.html"/>
+	</f:block>
 	<f:entry title="${%Gradle tasks}" field="gradleTasks" help="/plugin/fortify/help-gradleTasks.html">
 		<f:textbox/>
 	</f:entry>

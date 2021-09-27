@@ -25,6 +25,7 @@ import hudson.Extension;
 
 public class MavenScanType extends ProjectScanType {
 	private String mavenOptions;
+	private boolean skipBuild;
 
 	@DataBoundConstructor
 	public MavenScanType() {
@@ -34,9 +35,18 @@ public class MavenScanType extends ProjectScanType {
 		return mavenOptions;
 	}
 
+	public boolean getSkipBuild() {
+		return skipBuild;
+	}
+
 	@DataBoundSetter
 	public void setMavenOptions(String mavenOptions) {
 		this.mavenOptions = mavenOptions;
+	}
+
+	@DataBoundSetter
+	public void setSkipBuild(boolean skipBuild) {
+		this.skipBuild = skipBuild;
 	}
 
 	@Extension @Symbol("fortifyMaven3")

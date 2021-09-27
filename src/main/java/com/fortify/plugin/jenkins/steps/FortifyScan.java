@@ -206,7 +206,7 @@ public class FortifyScan extends FortifySCAStep {
 
 		@Override
 		protected Void run() throws Exception {
-			if (FortifyPlugin.DESCRIPTOR.isPreventLocalScans()) {
+			if (FortifyPlugin.DESCRIPTOR.isDisableLocalScans()) {
 				throw new AbortException(Messages.FortifyScan_Local_NotSupported());
 			}
 			getContext().get(TaskListener.class).getLogger().println("Running FortifyScan step");

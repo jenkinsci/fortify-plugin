@@ -32,5 +32,13 @@ target/
 # Jenkins work dir
 work/
 
+# saved jenkins plugin files for testing
+*.hpi
+*.hpi.*
+
+# dev build files
+*.bat
+*.sh
+
 # maven-release-plugin files
 release.properties

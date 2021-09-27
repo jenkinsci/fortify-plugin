@@ -206,7 +206,7 @@
           </local:blockWrapper>
         </f:block>
       </f:radioBlock>
-      <j:if test="${not descriptor.preventLocalScans}">
+      <j:if test="${not descriptor.disableLocalScans}">
       <f:radioBlock title="Local translation &amp; local scan" value="local" name="analysisRunType"
                     checked="${instance.isLocal()}" help="/plugin/fortify/help-localTranslationAndScan.html">
         <f:block>

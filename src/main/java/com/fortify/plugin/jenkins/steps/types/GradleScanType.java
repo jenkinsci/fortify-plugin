@@ -28,6 +28,7 @@ import hudson.util.FormValidation;
 
 public class GradleScanType extends ProjectScanType {
 	private boolean useWrapper;
+	private boolean skipBuild;
 	private String gradleTasks;
 	private String gradleOptions;
 
@@ -37,6 +38,10 @@ public class GradleScanType extends ProjectScanType {
 
 	public boolean getUseWrapper() {
 		return useWrapper;
+	}
+
+	public boolean getSkipBuild() {
+		return skipBuild;
 	}
 
 	public String getGradleTasks() {
@@ -50,6 +55,11 @@ public class GradleScanType extends ProjectScanType {
 	@DataBoundSetter
 	public void setUseWrapper(boolean useWrapper) {
 		this.useWrapper = useWrapper;
+	}
+
+	@DataBoundSetter
+	public void setSkipBuild(boolean skipBuild) {
+		this.skipBuild = skipBuild;
 	}
 
 	@DataBoundSetter

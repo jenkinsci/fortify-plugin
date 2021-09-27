@@ -173,11 +173,13 @@ public class FortifyPlugin extends Recorder {
 			if (runTranslation.isBasicMaven3TranslationType()) {
 				scanType = new MavenScanType();
 				((MavenScanType)scanType).setMavenOptions(runTranslation.getMaven3Options());
+				((MavenScanType)scanType).setSkipBuild(runTranslation.getMaven3SkipBuild());
 			}
 
 			if (runTranslation.isBasicGradleTranslationType()) {
 				scanType = new GradleScanType();
 				((GradleScanType)scanType).setUseWrapper(runTranslation.getGradleUseWrapper());
+				((GradleScanType)scanType).setSkipBuild(runTranslation.getGradleSkipBuild());
 				((GradleScanType)scanType).setGradleTasks(runTranslation.getGradleTasks());
 				((GradleScanType)scanType).setGradleOptions(runTranslation.getGradleOptions());
 			}
@@ -707,7 +709,7 @@ public class FortifyPlugin extends Recorder {
 		performLocalTranslation(build, launcher, listener);
 
 		if (getRunScan()) {
-			if (FortifyPlugin.DESCRIPTOR.isPreventLocalScans()) {
+			if (FortifyPlugin.DESCRIPTOR.isDisableLocalScans()) {
 				throw new AbortException(Messages.FortifyScan_Local_NotSupported());
 			}
 			FortifyScan fs = new FortifyScan(getBuildId());
@@ -787,8 +789,10 @@ public class FortifyPlugin extends Recorder {
 				ft.setDotnetSrcFiles(((DotnetSourceScanType) projectScanType).getDotnetSrcFiles());
 			} else if (projectScanType instanceof MavenScanType) {
 				ft.setMavenOptions(((MavenScanType) projectScanType).getMavenOptions());
+				ft.setMavenSkipBuild(((MavenScanType) projectScanType).getSkipBuild());
 			} else if (projectScanType instanceof GradleScanType) {
 				ft.setUseWrapper(((GradleScanType) projectScanType).getUseWrapper());
+				ft.setGradleSkipBuild(((GradleScanType) projectScanType).getSkipBuild());
 				ft.setGradleTasks(((GradleScanType) projectScanType).getGradleTasks());
 				ft.setGradleOptions(((GradleScanType) projectScanType).getGradleOptions());
 			} else if (projectScanType instanceof OtherScanType) {
@@ -943,7 +947,7 @@ public class FortifyPlugin extends Recorder {
 		private Secret ctrlToken;
 
 		/** Scan Settings */
-		private boolean preventLocalScans;
+		private boolean disableLocalScans;
 
 		public DescriptorImpl() {
 			super(FortifyPlugin.class);
@@ -1113,13 +1117,13 @@ public class FortifyPlugin extends Recorder {
 			this.ctrlToken = ctrlToken == null || ctrlToken.trim().isEmpty() ? null : Secret.fromString(ctrlToken.trim());
 		}
 
-		public boolean isPreventLocalScans() {
-			return preventLocalScans;
+		public boolean isDisableLocalScans() {
+			return disableLocalScans;
 		}
 
 		@DataBoundSetter
-		public void setPreventLocalScans(boolean preventLocalScans) {
-			this.preventLocalScans = preventLocalScans;
+		public void setDisableLocalScans(boolean disableLocalScans) {
+			this.disableLocalScans = disableLocalScans;
 		}
 
 		public FormValidation doCheckBreakdownPageSize(@QueryParameter String value) {
@@ -1578,7 +1582,7 @@ public class FortifyPlugin extends Recorder {
 				connectTimeout = null;
 				ctrlUrl = null;
 				ctrlToken = null;
-				preventLocalScans = false;
+				disableLocalScans = false;
 				req.bindJSON(this, jsonObject);
 				b.commit();
 			} catch (JSONException e) {
@@ -2032,6 +2036,14 @@ public class FortifyPlugin extends Recorder {
 			return isBasicMaven3TranslationType() ? getBasicMaven3TranslationAppTypeBlock().getOptions() : "";
 		}
 
+		public boolean getMaven3SkipBuild() {
+			return isBasicMaven3TranslationType() && getBasicMaven3TranslationAppTypeBlock().getSkipBuild();
+		}
+
+		public boolean getGradleSkipBuild() {
+			return isBasicGradleTranslationType() && getBasicGradleTranslationAppTypeBlock().getSkipBuild();
+		}
+
 		public boolean getGradleUseWrapper() {
 			return isBasicGradleTranslationType() && getBasicGradleTranslationAppTypeBlock().getUseWrapper();
 		}
@@ -2330,28 +2342,39 @@ public class FortifyPlugin extends Recorder {
 	@Deprecated
 	public static class BasicMaven3TranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private String options;
+		private boolean skipBuild;
 
 		@DataBoundConstructor
-		public BasicMaven3TranslationAppTypeBlock(String maven3Options) {
+		public BasicMaven3TranslationAppTypeBlock(String maven3Options, boolean skipBuild) {
 			options = maven3Options;
 		}
 
 		public String getOptions() {
 			return options;
 		}
+
+		public boolean getSkipBuild() {
+			return skipBuild;
+		}
 	}
 
 	@Deprecated
 	public static class BasicGradleTranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private boolean useWrapper;
+		private boolean skipBuild;
 		private String tasks;
 		private String options;
 
 		@DataBoundConstructor
-		public BasicGradleTranslationAppTypeBlock(boolean gradleUseWrapper, String gradleTasks, String gradleOptions) {
+		public BasicGradleTranslationAppTypeBlock(boolean gradleUseWrapper, boolean gradleSkipBuild, String gradleTasks, String gradleOptions) {
 			useWrapper = gradleUseWrapper;
+			skipBuild = gradleSkipBuild;
 			tasks = gradleTasks;
 			options = gradleOptions;
+		}
+
+		public boolean getSkipBuild() {
+			return skipBuild;
 		}
 
 		public boolean getUseWrapper() {

@@ -18,13 +18,19 @@ package com.fortify.plugin.jenkins.steps;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import hudson.EnvVars;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import hudson.DescriptorExtensionList;
+import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.Node;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.tasks.Maven.MavenInstallation;
+import hudson.tools.ToolDescriptor;
+import hudson.tools.ToolInstallation;
 
 public abstract class FortifySCAStep extends FortifyStep {
 
@@ -90,16 +96,42 @@ public abstract class FortifySCAStep extends FortifyStep {
 			listener, "FORTIFY_HOME");
 	}
 
-	protected String getMavenExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
+	protected String getMavenExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String mavenInstallationName)
 			throws InterruptedException, IOException {
+		String result = "";
 		final EnvVars envVars = build.getEnvironment(listener);
-		if (envVars.containsKey("MAVEN_HOME")) {
-			return getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", "MAVEN_HOME");
+		DescriptorExtensionList<ToolInstallation, ToolDescriptor<?>> tools = ToolInstallation.all();
+		ToolDescriptor<?> ti = tools.find(MavenInstallation.class);
+		if (ti != null) {
+			for (ToolInstallation inst : ti.getInstallations()) {
+				String instName = inst.getName();
+				if (((instName == null && mavenInstallationName == null) || (instName != null && instName.equalsIgnoreCase(mavenInstallationName))) && build instanceof AbstractBuild) {
+					MavenInstallation mvn = (MavenInstallation)inst;
+					Node node = ((AbstractBuild)build).getBuiltOn();
+					if (node != null) {
+						mvn = mvn.forNode(node, listener);
+					}
+					mvn = mvn.forEnvironment(envVars);
+					mvn.buildEnvVars(envVars);
+					result = mvn.getExecutable(launcher);
+					if (result != null && !result.isEmpty()) {
+						break;
+					}
+				}
+			}
 		}
-		if (envVars.containsKey("M2_HOME")) {
-			return getExecutableForEnvVar(build, workspace, launcher, listener, ".cmd", ".bat", "M2_HOME");
+		if (result == null || result.isEmpty()) { //fallback to the previous logic
+			if (envVars.containsKey("MAVEN_HOME")) {
+				result = getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", "MAVEN_HOME");
+			} else if (envVars.containsKey("M2_HOME")) {
+				result = getExecutableForEnvVar(build, workspace, launcher, listener, ".cmd", ".bat", "M2_HOME");
+			}
+			if (result == null || result.isEmpty()) {
+				result = getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", "PATH");//was null instead of Path
+			}
 		}
-		return getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", null);
+		listener.getLogger().println("Using Maven executable " + result);
+		return result;
 	}
 
 	private String getExecutableForEnvVar(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String ext1, String ext2,

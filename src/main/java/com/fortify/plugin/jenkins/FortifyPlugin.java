@@ -174,6 +174,7 @@ public class FortifyPlugin extends Recorder {
 				scanType = new MavenScanType();
 				((MavenScanType)scanType).setMavenOptions(runTranslation.getMaven3Options());
 				((MavenScanType)scanType).setSkipBuild(runTranslation.getMaven3SkipBuild());
+				((MavenScanType)scanType).setMavenInstallationName(runTranslation.getMaven3Name());
 			}
 
 			if (runTranslation.isBasicGradleTranslationType()) {
@@ -790,6 +791,7 @@ public class FortifyPlugin extends Recorder {
 			} else if (projectScanType instanceof MavenScanType) {
 				ft.setMavenOptions(((MavenScanType) projectScanType).getMavenOptions());
 				ft.setMavenSkipBuild(((MavenScanType) projectScanType).getSkipBuild());
+				ft.setMavenName(((MavenScanType) projectScanType).getMavenInstallationName());
 			} else if (projectScanType instanceof GradleScanType) {
 				ft.setUseWrapper(((GradleScanType) projectScanType).getUseWrapper());
 				ft.setGradleSkipBuild(((GradleScanType) projectScanType).getSkipBuild());
@@ -2040,6 +2042,10 @@ public class FortifyPlugin extends Recorder {
 			return isBasicMaven3TranslationType() && getBasicMaven3TranslationAppTypeBlock().getSkipBuild();
 		}
 
+		public String getMaven3Name() {
+			return isBasicMaven3TranslationType() ? getBasicMaven3TranslationAppTypeBlock().getMavenName() : null;
+		}
+
 		public boolean getGradleSkipBuild() {
 			return isBasicGradleTranslationType() && getBasicGradleTranslationAppTypeBlock().getSkipBuild();
 		}
@@ -2343,10 +2349,13 @@ public class FortifyPlugin extends Recorder {
 	public static class BasicMaven3TranslationAppTypeBlock implements BasicTranslationAppTypeBlock {
 		private String options;
 		private boolean skipBuild;
+		private String mavenName;
 
 		@DataBoundConstructor
-		public BasicMaven3TranslationAppTypeBlock(String maven3Options, boolean skipBuild) {
+		public BasicMaven3TranslationAppTypeBlock(String maven3Options, boolean skipBuild, String mavenName) {
 			options = maven3Options;
+			this.skipBuild = skipBuild;
+			this.mavenName = mavenName;
 		}
 
 		public String getOptions() {
@@ -2355,6 +2364,10 @@ public class FortifyPlugin extends Recorder {
 
 		public boolean getSkipBuild() {
 			return skipBuild;
+		}
+
+		public String getMavenName() {
+			return mavenName;
 		}
 	}
 

@@ -124,6 +124,10 @@ public class FortifyTranslate extends FortifySCAStep {
 		((MavenScanType) projectScanType).setSkipBuild(skipBuild);
 	}
 
+	public void setMavenName(String mName) {
+		((MavenScanType) projectScanType).setMavenInstallationName(mName);
+	}
+
 	public void setUseWrapper(boolean useWrapper) {
 		((GradleScanType) projectScanType).setUseWrapper(useWrapper);
 	}
@@ -361,7 +365,8 @@ public class FortifyTranslate extends FortifySCAStep {
 			}
 		} else if (projectScanType instanceof MavenScanType) {
 			log.println("Running Maven 3 translation");
-			args.add(getMavenExecutable(build, workspace, launcher, listener));
+			String mavenInstallationName = ((MavenScanType) projectScanType).getMavenInstallationName();
+			args.add(getMavenExecutable(build, workspace, launcher, listener, mavenInstallationName));
 			if (((MavenScanType) projectScanType).getSkipBuild()) {
 				args.add("-skipBuild");
 			}

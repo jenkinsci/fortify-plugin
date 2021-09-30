@@ -383,12 +383,12 @@ public class FortifyTranslate extends FortifySCAStep {
 			if (getVerbose()) {
 				args.add("-gradle");
 			}
+			String gradleInstallationName = ((GradleScanType) projectScanType).getGradleInstallationName();
 			option = getResolvedTranslationExcludeList(listener);
 			if (StringUtils.isNotEmpty(option)) {
 				addAllArguments(args, option, "-exclude");
 			}
-			args.add(getGradleExecutable(((GradleScanType) projectScanType).getUseWrapper(), build, workspace, launcher,
-					listener));
+			args.add(getGradleExecutable(((GradleScanType) projectScanType).getUseWrapper(), build, workspace, launcher, listener, gradleInstallationName));
 			if (((GradleScanType) projectScanType).getSkipBuild()) {
 				args.add("-skipBuild");
 			}

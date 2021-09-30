@@ -15,6 +15,11 @@
     limitations under the License.
  -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+	<j:if test="${!empty(descriptor.installations)}">
+		<f:entry title="${%Gradle Version}" field="gradleInstallationName" help="/plugin/fortify/help-gradleVersion.html">
+			<f:select />
+		</f:entry>
+	</j:if>
 	<f:block>
 		<f:checkbox title="${%Use Gradle Wrapper}" field="useWrapper" value="true"/>
 	</f:block>

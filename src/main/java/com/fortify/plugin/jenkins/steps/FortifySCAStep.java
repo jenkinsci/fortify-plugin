@@ -28,6 +28,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Node;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.plugins.gradle.GradleInstallation;
 import hudson.tasks.Maven.MavenInstallation;
 import hudson.tools.ToolDescriptor;
 import hudson.tools.ToolInstallation;
@@ -146,10 +147,34 @@ public abstract class FortifySCAStep extends FortifyStep {
 		}
 	}
 
-	protected String getGradleExecutable(boolean useWrapper, Run<?, ?> build, FilePath workspace, Launcher launcher,
-			TaskListener listener) throws InterruptedException, IOException {
-		return getExecutable("gradle" + (useWrapper ? "w" : "") + (launcher.isUnix() ? "" : ".bat"), build, workspace,
-			listener, "GRADLE_HOME");
+	protected String getGradleExecutable(boolean useWrapper, Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String gradleInstallationName) throws InterruptedException, IOException {
+		String result = "";
+		final EnvVars envVars = build.getEnvironment(listener);
+		DescriptorExtensionList<ToolInstallation, ToolDescriptor<?>> tools = ToolInstallation.all();
+		ToolDescriptor<?> ti = tools.find(GradleInstallation.class);
+		if (ti != null) {
+			for (ToolInstallation inst : ti.getInstallations()) {
+				String instName = inst.getName();
+				if (((instName == null && gradleInstallationName == null) || (instName != null && instName.equalsIgnoreCase(gradleInstallationName))) && build instanceof AbstractBuild) {
+					GradleInstallation gradle = (GradleInstallation)inst;
+					Node node = ((AbstractBuild)build).getBuiltOn();
+					if (node != null) {
+						gradle = gradle.forNode(node, listener);
+					}
+					gradle = gradle.forEnvironment(envVars);
+					gradle.buildEnvVars(envVars);
+					result = gradle.getExecutable(launcher);
+					if (result != null && !result.isEmpty()) {
+						break;
+					}
+				}
+			}
+		}
+		if (result == null || result.isEmpty()) { //fallback to the previous logic
+			result = getExecutable("gradle" + (useWrapper ? "w" : "") + (launcher.isUnix() ? "" : ".bat"), build, workspace, listener, "GRADLE_HOME");
+		}
+		listener.getLogger().println("Using Gradle executable " + result);
+		return result;
 	}
 
 	protected String getDevenvExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)

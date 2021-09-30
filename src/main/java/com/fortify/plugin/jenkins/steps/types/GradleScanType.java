@@ -15,6 +15,9 @@
  *******************************************************************************/
 package com.fortify.plugin.jenkins.steps.types;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -24,13 +27,18 @@ import com.fortify.plugin.jenkins.Messages;
 import com.fortify.plugin.jenkins.steps.Validators;
 
 import hudson.Extension;
+import hudson.plugins.gradle.GradleInstallation;
+import hudson.tools.ToolDescriptor;
+import hudson.tools.ToolInstallation;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 
 public class GradleScanType extends ProjectScanType {
 	private boolean useWrapper;
 	private boolean skipBuild;
 	private String gradleTasks;
 	private String gradleOptions;
+	private String gradleInstallationName;
 
 	@DataBoundConstructor
 	public GradleScanType() {
@@ -50,6 +58,10 @@ public class GradleScanType extends ProjectScanType {
 
 	public String getGradleOptions() {
 		return gradleOptions;
+	}
+
+	public String getGradleInstallationName() {
+		return gradleInstallationName;
 	}
 
 	@DataBoundSetter
@@ -72,6 +84,11 @@ public class GradleScanType extends ProjectScanType {
 		this.gradleOptions = gradleOptions;
 	}
 
+	@DataBoundSetter
+	public void setGradleInstallationName(String gradleInstallationName) {
+		this.gradleInstallationName = gradleInstallationName;
+	}
+
 	@Extension @Symbol("fortifyGradle")
 	public static final class DescriptorImpl extends ProjectScanTypeDescriptor {
 		public DescriptorImpl() {
@@ -85,6 +102,31 @@ public class GradleScanType extends ProjectScanType {
 
 		public FormValidation doCheckGradleTasks(@QueryParameter String value) {
 			return Validators.checkFieldNotEmpty(value);
+		}
+
+		public ListBoxModel doFillGradleInstallationNameItems(String value) {
+			GradleInstallation[] installations = getInstallations();
+			ListBoxModel result = new ListBoxModel();
+			result.add("<Default>");
+			for (GradleInstallation nextGradle : installations) {
+				String nextName = nextGradle.getName();
+				result.add(nextName);
+			}
+			return result;
+		}
+
+		public GradleInstallation[] getInstallations() {
+			List<GradleInstallation> r = new ArrayList<GradleInstallation>();
+			for (ToolDescriptor<?> desc : ToolInstallation.all()) {
+				for (ToolInstallation inst : desc.getInstallations()) {
+					if (inst instanceof GradleInstallation) {
+						GradleInstallation nextGradle = (GradleInstallation) inst;
+						// we can't test for version compatibility here because we don't know which node it's going to be invoked on
+						r.add(nextGradle);
+					}
+				}
+			}
+			return r.toArray(new GradleInstallation[r.size()]);
 		}
 	}
 }

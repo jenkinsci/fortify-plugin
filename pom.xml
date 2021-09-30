@@ -122,6 +122,13 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- for Gradle Global Tool Configuration support -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>gradle</artifactId>
+            <version>1.37.1</version>
+        </dependency>
+
         <!-- for local testing -->
         <dependency>
             <groupId>io.jenkins.configuration-as-code</groupId>

@@ -107,7 +107,7 @@ public class GradleScanType extends ProjectScanType {
 		public ListBoxModel doFillGradleInstallationNameItems(String value) {
 			GradleInstallation[] installations = getInstallations();
 			ListBoxModel result = new ListBoxModel();
-			result.add("<Default>");
+			result.add("(Default)");
 			for (GradleInstallation nextGradle : installations) {
 				String nextName = nextGradle.getName();
 				result.add(nextName);

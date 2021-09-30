@@ -80,7 +80,7 @@ public class MavenScanType extends ProjectScanType {
 		public ListBoxModel doFillMavenInstallationNameItems(String value) {
 			MavenInstallation[] installations = getInstallations();
 			ListBoxModel result = new ListBoxModel();
-			result.add("<Default>");
+			result.add("(Default)");
 			for (MavenInstallation nextMvn : installations) {
 				String nextName = nextMvn.getName();
 				result.add(nextName);

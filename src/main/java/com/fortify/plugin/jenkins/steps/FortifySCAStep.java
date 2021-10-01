@@ -36,7 +36,7 @@ import hudson.tools.ToolInstallation;
 public abstract class FortifySCAStep extends FortifyStep {
 
 	protected String buildID;
-	protected Integer maxHeap;
+	protected String maxHeap;
 	protected String addJVMOptions;
 	protected boolean debug;
 	protected boolean verbose;
@@ -46,12 +46,12 @@ public abstract class FortifySCAStep extends FortifyStep {
 		return buildID;
 	}
 
-	public Integer getMaxHeap() {
+	public String getMaxHeap() {
 		return maxHeap;
 	}
 
 	@DataBoundSetter
-	public void setMaxHeap(Integer maxHeap) {
+	public void setMaxHeap(String maxHeap) {
 		this.maxHeap = maxHeap;
 	}
 

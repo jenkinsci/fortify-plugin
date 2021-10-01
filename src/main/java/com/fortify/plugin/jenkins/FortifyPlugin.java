@@ -113,7 +113,7 @@ public class FortifyPlugin extends Recorder {
 	private transient boolean runSCAClean;
 	private transient String buildId;
 	private transient String scanFile;
-	private transient Integer maxHeap;
+	private transient String maxHeap;
 	private transient String addJVMOptions;
 
 	private AnalysisRunType analysisRunType;
@@ -124,7 +124,7 @@ public class FortifyPlugin extends Recorder {
 	}
 
 	@Deprecated
-	public FortifyPlugin(String buildId, String scanFile, Integer maxHeap, String addJVMOptions,
+	public FortifyPlugin(String buildId, String scanFile, String maxHeap, String addJVMOptions,
 			UpdateContentBlock updateContent, boolean runSCAClean, RunTranslationBlock runTranslation,
 			RunScanBlock runScan, UploadSSCBlock uploadSSC) {
 		this.buildId = buildId;
@@ -266,8 +266,8 @@ public class FortifyPlugin extends Recorder {
 		return getAnalysisRunType() ? analysisRunType.getScanFile() : "";
 	}
 
-	public Integer getMaxHeap() {
-		return getAnalysisRunType() ? analysisRunType.getMaxHeap() : null;
+	public String getMaxHeap() {
+		return getAnalysisRunType() ? analysisRunType.getMaxHeap() : "";
 	}
 
 	public String getAddJVMOptions() {
@@ -537,16 +537,16 @@ public class FortifyPlugin extends Recorder {
 	public String getAppVersion() { return getUploadSSC() ? analysisRunType.getUploadSSC().getAppVersion() : ""; }
 
 	@Deprecated
-	public Integer getUploadWaitTime() {
+	public String getUploadWaitTime() {
 		return uploadSSC == null ? null : uploadSSC.getPollingInterval();
 	}
 
-	public Integer getTimeout() {
-		return getUploadSSC() ? analysisRunType.getUploadSSC().getTimeout() : null;
+	public String getTimeout() {
+		return getUploadSSC() ? analysisRunType.getUploadSSC().getTimeout() : "";
 	}
 
-	public Integer getPollingInterval() {
-		return getUploadSSC() ? analysisRunType.getUploadSSC().getPollingInterval() : null;
+	public String getPollingInterval() {
+		return getUploadSSC() ? analysisRunType.getUploadSSC().getPollingInterval() : "";
 	}
 
 	public boolean getRemoteOptionalConfig() {
@@ -1783,8 +1783,8 @@ public class FortifyPlugin extends Recorder {
 		private String appVersion;
 		private String filterSet;
 		private String searchCondition;
-		private Integer timeout;
-		private Integer pollingInterval;
+		private String timeout;
+		private String pollingInterval;
 
 		@DataBoundConstructor
 		public UploadSSCBlock(String appName, String appVersion) {
@@ -1794,13 +1794,13 @@ public class FortifyPlugin extends Recorder {
 
 		@Deprecated
 		public UploadSSCBlock(String projectName, String projectVersion, String filterSet, String searchCondition,
-							  Integer timeout, Integer pollingInterval) {
+							  String timeout, String pollingInterval) {
 			this.projectName = projectName != null ? projectName.trim() : "";
 			this.projectVersion = projectName != null ? projectVersion.trim() : "";
 			this.filterSet = filterSet != null ? filterSet.trim() : "";
 			this.searchCondition = searchCondition != null ? searchCondition.trim() : "";
-			this.timeout = timeout;
-			this.pollingInterval = pollingInterval;
+			this.timeout = timeout != null ? timeout.trim() : "";
+			this.pollingInterval = pollingInterval != null ? pollingInterval.trim() : "";
 		}
 
 		/* for backwards compatibility */
@@ -1844,21 +1844,21 @@ public class FortifyPlugin extends Recorder {
 		@DataBoundSetter
 		public void setSearchCondition(String searchCondition) { this.searchCondition = searchCondition; }
 
-		public Integer getTimeout() {
+		public String getTimeout() {
 			return timeout;
 		}
 
 		@DataBoundSetter
-		public void setTimeout(Integer timeout) {
+		public void setTimeout(String timeout) {
 			this.timeout = timeout;
 		}
 
-		public Integer getPollingInterval() {
+		public String getPollingInterval() {
 			return pollingInterval;
 		}
 
 		@DataBoundSetter
-		public void setPollingInterval(Integer pollingInterval) {
+		public void setPollingInterval(String pollingInterval) {
 			this.pollingInterval = pollingInterval;
 		}
 	}
@@ -2561,7 +2561,7 @@ public class FortifyPlugin extends Recorder {
 		private UpdateContentBlock updateContent;
 		private String buildId;
 		private String scanFile;
-		private Integer maxHeap;
+		private String maxHeap;
 		private String addJVMOptions;
 		private String translationExcludeList;
 		private boolean translationDebug;
@@ -2611,9 +2611,9 @@ public class FortifyPlugin extends Recorder {
 		@DataBoundSetter
 		public void setScanFile(String scanFile) { this.scanFile = scanFile; }
 
-		public Integer getMaxHeap() { return maxHeap; }
+		public String getMaxHeap() { return maxHeap; }
 		@DataBoundSetter
-		public void setMaxHeap(Integer maxHeap) { this.maxHeap = maxHeap; }
+		public void setMaxHeap(String maxHeap) { this.maxHeap = maxHeap; }
 
 		public String getAddJVMOptions() { return addJVMOptions; }
 		@DataBoundSetter

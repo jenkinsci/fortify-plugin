@@ -45,19 +45,19 @@
     </f:entry>
 
     <f:entry title="${%Filter set}" field="filterSet" help="/plugin/fortify/help-filterSet.html">
-      <f:textbox field="filterSet" />
+      <f:textbox/>
     </f:entry>
 
     <f:entry title="${%Build failure criteria}" field="failureCriteria" help="/plugin/fortify/help-search.html">
-      <f:textbox field="failureCriteria" />
+      <f:textbox/>
     </f:entry>
 
     <f:entry title="${%Timeout}" field="timeout" help="/plugin/fortify/help-timeout.html">
-        <f:number/>
+        <f:textbox/>
     </f:entry>
 
     <f:entry title="Polling interval" field="pollingInterval" help="/plugin/fortify/help-pollingInterval.html">
-      <f:number field="pollingInterval" />
+      <f:textbox/>
     </f:entry>
 
 </j:jelly>

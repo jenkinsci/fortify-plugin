@@ -83,8 +83,8 @@ public class FortifyUpload extends FortifyStep {
 	private String failureCriteria;
 	private String appName;
 	private String appVersion;
-	private Integer timeout;
-	private Integer pollingInterval;
+	private String timeout;
+	private String pollingInterval;
 
 	public FortifyUpload(boolean isPipeline, String appName, String appVersion) {
 		this(appName, appVersion);
@@ -133,21 +133,21 @@ public class FortifyUpload extends FortifyStep {
 		return failureCriteria;
 	}
 
-	public Integer getTimeout() {
+	public String getTimeout() {
 		return timeout;
 	}
 
 	@DataBoundSetter
-	public void setTimeout(Integer timeout) {
+	public void setTimeout(String timeout) {
 		this.timeout = timeout;
 	}
 
 	@DataBoundSetter
-	public void setPollingInterval(Integer pollingInterval) {
+	public void setPollingInterval(String pollingInterval) {
 		this.pollingInterval = pollingInterval;
 	}
 
-	public Integer getPollingInterval() {
+	public String getPollingInterval() {
 		return pollingInterval;
 	}
 

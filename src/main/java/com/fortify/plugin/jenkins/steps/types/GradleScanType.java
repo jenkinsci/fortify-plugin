@@ -17,6 +17,7 @@ package com.fortify.plugin.jenkins.steps.types;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -127,6 +128,10 @@ public class GradleScanType extends ProjectScanType {
 				}
 			}
 			return r.toArray(new GradleInstallation[r.size()]);
+		}
+
+		public String generateId() {
+			return UUID.randomUUID().toString();
 		}
 	}
 }

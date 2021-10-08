@@ -16,13 +16,13 @@
 package com.fortify.plugin.jenkins;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.ServletException;
 
@@ -70,7 +70,7 @@ public class TableAction implements Action {
 						if (first.getFilePath().equals(second.getFilePath())) {
 							return Integer.parseInt(first.getLineNumber()) - (Integer.parseInt(second.getLineNumber()));
 						} else {
-							return first.getFilePath().toLowerCase().compareTo(second.getFilePath().toLowerCase());
+							return first.getFilePath().toLowerCase(Locale.ENGLISH).compareTo(second.getFilePath().toLowerCase(Locale.ENGLISH));
 						}
 					}
 				};
@@ -509,7 +509,8 @@ public class TableAction implements Action {
 		return null;
 	}
 
-	public static class View implements Comparable {
+	public static class View implements Comparable, Serializable {
+		private static final long serialVersionUID = 2272994600618007658L;
 		private final FortifyUpload manager;
 		private IssueFolderBean folder;
 		private int page;

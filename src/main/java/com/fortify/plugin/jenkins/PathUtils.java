@@ -17,6 +17,7 @@ package com.fortify.plugin.jenkins;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -124,12 +125,12 @@ public class PathUtils {
 		if (StringUtils.isNotEmpty(s)) {
 			boolean extentionFound = false;
 			for (String nextExtention : allowedExtentions) {
-				if (s.toLowerCase().endsWith(nextExtention)) {
+				if (s.toLowerCase(Locale.ENGLISH).endsWith(nextExtention)) {
 					extentionFound = true;
 					break;
 				}
 			}
-			if (!extentionFound && !s.toLowerCase().endsWith(defaultExtention)) {
+			if (!extentionFound && !s.toLowerCase(Locale.ENGLISH).endsWith(defaultExtention)) {
 				s += defaultExtention;
 			}
 		}

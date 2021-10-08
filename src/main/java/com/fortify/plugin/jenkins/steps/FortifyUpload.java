@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -60,6 +59,7 @@ import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
@@ -806,10 +806,7 @@ public class FortifyUpload extends FortifyStep {
 	}
 
 	private File copyToLocalTmp(FilePath file) throws IOException, InterruptedException {
-		UUID uuid = UUID.randomUUID();
-		String tmp = System.getProperty("java.io.tmpdir");
-		String s = System.getProperty("file.separator");
-		File tmpFile = new File(tmp + s + uuid + s + file.getName());
+		File tmpFile = new File(Util.createTempDir(), file.getName());
 		FilePath tmpFP = new FilePath(tmpFile);
 		file.copyTo(tmpFP);
 		return tmpFile;

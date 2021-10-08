@@ -120,20 +120,12 @@ public class FortifyTranslate extends FortifySCAStep {
 		((MavenScanType) projectScanType).setMavenOptions(mavenOptions);
 	}
 
-	public void setMavenSkipBuild(boolean skipBuild) {
-		((MavenScanType) projectScanType).setSkipBuild(skipBuild);
-	}
-
 	public void setMavenName(String mName) {
 		((MavenScanType) projectScanType).setMavenInstallationName(mName);
 	}
 
 	public void setUseWrapper(boolean useWrapper) {
 		((GradleScanType) projectScanType).setUseWrapper(useWrapper);
-	}
-
-	public void setGradleSkipBuild(boolean skipBuild) {
-		((GradleScanType) projectScanType).setSkipBuild(skipBuild);
 	}
 
 	public void setGradleTasks(String gradleTasks) {
@@ -367,9 +359,6 @@ public class FortifyTranslate extends FortifySCAStep {
 			log.println("Running Maven 3 translation");
 			String mavenInstallationName = ((MavenScanType) projectScanType).getMavenInstallationName();
 			args.add(getMavenExecutable(build, workspace, launcher, listener, mavenInstallationName));
-			if (((MavenScanType) projectScanType).getSkipBuild()) {
-				args.add("-skipBuild");
-			}
 			option = getResolvedTranslationExcludeList(listener);
 			if (StringUtils.isNotEmpty(option)) {
 				addMavenExcludes(args, option, launcher.isUnix());
@@ -389,9 +378,6 @@ public class FortifyTranslate extends FortifySCAStep {
 				addAllArguments(args, option, "-exclude");
 			}
 			args.add(getGradleExecutable(((GradleScanType) projectScanType).getUseWrapper(), build, workspace, launcher, listener, gradleInstallationName));
-			if (((GradleScanType) projectScanType).getSkipBuild()) {
-				args.add("-skipBuild");
-			}
 			option = getResolvedGradleOptions((GradleScanType) projectScanType, listener);
 			if (StringUtils.isNotEmpty(option)) {
 				addAllArguments(args, option);

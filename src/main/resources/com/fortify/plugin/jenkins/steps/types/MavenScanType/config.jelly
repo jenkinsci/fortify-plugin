@@ -15,17 +15,12 @@
     limitations under the License.
  -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-
 	<j:if test="${!empty(descriptor.installations)}">
 		<f:entry title="${%Maven Version}" field="mavenInstallationName" help="/plugin/fortify/help-mavenVersion.html">
 			<f:select />
 		</f:entry>
 	</j:if>
-
 	<f:entry title="${%Maven options}" field="mavenOptions" help="/plugin/fortify/help-maven3Options.html">
 		<f:textbox/>
 	</f:entry>
-	<f:block>
-		<f:checkbox title="${%Skip build}" field="skipBuild" value="false" help="/plugin/fortify/help-mavenSkipBuild.html"/>
-	</f:block>
 </j:jelly>

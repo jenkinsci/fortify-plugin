@@ -25,10 +25,6 @@
 		</j:if>
 	</f:radioBlock>
 	<f:radioBlock inline="true" name="${uid}.useWrapper" checked="${instance.useWrapper}" value="true" title="${%Use Gradle Wrapper}" />
-
-	<f:block>
-		<f:checkbox title="${%Skip build}" field="skipBuild" value="false" help="/plugin/fortify/help-gradleSkipBuild.html"/>
-	</f:block>
 	<f:entry title="${%Gradle tasks}" field="gradleTasks" help="/plugin/fortify/help-gradleTasks.html">
 		<f:textbox/>
 	</f:entry>

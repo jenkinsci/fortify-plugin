@@ -96,6 +96,15 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         return false;
     }
 
+    public boolean isSkipBuild() {
+        if (getRemoteAnalysisProjectType() instanceof GradleProjectType) {
+            return ((GradleProjectType)remoteAnalysisProjectType).getSkipBuild();
+        } else if (getRemoteAnalysisProjectType() instanceof MavenProjectType) {
+            return ((MavenProjectType)remoteAnalysisProjectType).getSkipBuild();
+        }
+        return false;
+    }
+
     public String getSensorPoolName() {
         return getRemoteOptionalConfig() == null ? "" : getRemoteOptionalConfig().getSensorPoolUUID();
     }
@@ -252,6 +261,9 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
                 }
                 if (isExcludeDisabledProjects()) {
                     args.add("-exclude-disabled-projects");
+                }
+                if (isSkipBuild()) {
+                    args.add("-skipBuild");
                 }
             }
         } else {

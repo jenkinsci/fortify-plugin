@@ -75,39 +75,54 @@ public class FortifyClient {
 	 * @return Map<String, Long>
 	 * @throws ApiException
 	 */
-	public Map<String, Long> getProjectList(int limit) throws ApiException {
-		Map<String, Long> projectList = new LinkedHashMap<String, Long>();
-
-		Map<String, Map<String, Long>> allProjects = getProjectListEx(limit);
-		for (Map.Entry<String, Map<String, Long>> prjEntry : allProjects.entrySet()) {
-			Map<String, Long> prjVersions = prjEntry.getValue();
-			for (Map.Entry<String, Long> prjVersion : prjVersions.entrySet()) {
-				Long versionId = prjVersion.getValue();
-				projectList.put(prjEntry.getKey() + " (" + prjVersion.getKey() + ")", versionId);
+	public Map<String, Map<String, Long>> getAllVersionListEx(String query, Integer limit) throws ApiException {
+		Map<String, Map<String, Long>> appVersionList = new LinkedHashMap<String, Map<String, Long>>();
+		List<ProjectVersion> versions = apiClientWrapper.getAllApplicationVersions(query, limit);
+		String appName = null;
+		Map<String, Long> versionsFor = new LinkedHashMap<String, Long>();
+		for (ProjectVersion prjEntry : versions) {
+			Project project = prjEntry.getProject();
+			String nextAppName = project == null ? "" : project.getName();
+			if (!nextAppName.equals(appName) && (appName != null)) {
+				appVersionList.put(appName, versionsFor);
+				versionsFor = new LinkedHashMap<String, Long>();
 			}
+			appName = nextAppName;
+			versionsFor.put(prjEntry.getName(), prjEntry.getId());
 		}
-		return projectList;
+		return appVersionList;
 	}
 
 	/**
-	 * Retrieve the application version list from SSC
+	 * Retrieve the application version list for the @appId from SSC
+	 * @param appId
 	 *
 	 * @return Map<String, Map<String, Long>>
 	 * @throws ApiException
 	 */
-	public Map<String, Map<String, Long>> getProjectListEx(int limit) throws ApiException {
-		List<ProjectVersion> pversions = apiClientWrapper.getApplicationVersions(limit);
-		Map<String, Map<String, Long>> projectList = new LinkedHashMap<String, Map<String, Long>>();
-		for (ProjectVersion version : pversions) {
-			String projectName = version.getProject().getName();
-			Map<String, Long> mapVersions = projectList.get(projectName);
-			if (null == mapVersions) {
-				mapVersions = new LinkedHashMap<String, Long>();
-				projectList.put(projectName, mapVersions);
+	public Map<String, Long> getVersionListEx(Long appId, String query, int limit) throws ApiException {
+		Map<String, Long> versions = new LinkedHashMap<String, Long>();
+		if (appId != null) {
+			List<ProjectVersion> versionsFor = apiClientWrapper.getApplicationVersionsFor(appId, query, limit);
+			for (ProjectVersion version : versionsFor) {
+				versions.put(version.getName(), version.getId());
 			}
-			mapVersions.put(version.getName(), version.getId());
 		}
+		return versions;
+	}
 
+	/**
+	 * Retrieve the application list from SSC
+	 *
+	 * @return Map<String, Long>
+	 * @throws ApiException
+	 */
+	public Map<String, Long> getProjectList(String query, int limit) throws ApiException {
+		Map<String, Long> projectList = new LinkedHashMap<String, Long>();
+		List<Project> apps = apiClientWrapper.getApplications(query, limit);
+		for (Project prjEntry : apps) {
+			projectList.put(prjEntry.getName(), prjEntry.getId());
+		}
 		return projectList;
 	}
 
@@ -410,4 +425,5 @@ public class FortifyClient {
 
 		return groupByGuid;
 	}
+
 }

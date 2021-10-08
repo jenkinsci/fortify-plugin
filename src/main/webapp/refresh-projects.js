@@ -16,7 +16,7 @@
 // to refresh the SSC applications list
 function refreshProjectNames(url, elm)
 {
-    var parameters = {};
+    var typedText = elm.parentNode.previousSibling.querySelector("input.project-name").value;
 
     //var spinner = document.getElementById('refreshSpinner');
     var spinner = elm.parentNode.nextSibling;
@@ -31,8 +31,9 @@ function refreshProjectNames(url, elm)
         buttonVer = buttonVer.nextSibling.nextSibling;
     }
     buttonVer = buttonVer.querySelector("input.project-version");
-
     buttonVer.disabled=true;
+
+    var parameters = { typedText };
 
     new Ajax.Request(url, {
         parameters: parameters,
@@ -51,7 +52,7 @@ function refreshProjectNames(url, elm)
                 // add new values
                 for(var i=0; i<jsr.list.length; i++) {
                     var item = jsr.list[i];
-                    items.push(item.name);
+                    items.push(DOMPurify.sanitize(item.name));
                     if (oldSelect==item.name) {
                         selectedIndex = items.length-1;
                     }
@@ -83,7 +84,19 @@ function tryParseJSON(jsonString){
 //to refresh the SSC application version list
 function refreshProjectVersions(url, elm)
 {
-    var parameters = {};
+    //var spinner = document.getElementById('refreshSpinner');
+    var spinner = elm.parentNode.nextSibling;
+    spinner.style.display="block";
+
+    var selectedPrj = elm.parentNode.parentNode.parentNode.previousSibling;
+    if (selectedPrj.classList.contains("help-area")) {
+        selectedPrj = selectedPrj.previousSibling.previousSibling;
+    }
+    selectedPrj = selectedPrj.querySelector("input.project-name").value;
+
+    var typedText = elm.parentNode.previousSibling.querySelector("input.project-version").value;
+
+    var parameters = { selectedPrj, typedText };
 
     //var buttonVer = document.getElementById('refreshPrjVerButton');
     var buttonVer = elm;
@@ -92,7 +105,8 @@ function refreshProjectVersions(url, elm)
     new Ajax.Request(url, {
         parameters: parameters,
         onComplete: function(rsp) {
-            //spinner.style.display="none";
+            spinner.style.display="none";
+            buttonVer.disabled=false;
 
             var jsr = tryParseJSON(rsp.responseText);
             if (!jsr) {
@@ -113,8 +127,8 @@ function refreshProjectVersions(url, elm)
                 // add new values
                 for(var i=0; i<jsr.list.length; i++) {
                     var item = jsr.list[i];
-                    if (item.prj==selectedPrj) {
-                        items.push(item.name);
+                    if (item.prj == selectedPrj || selectedPrj === "") {
+                        items.push(DOMPurify.sanitize(item.name));
                         if (oldSelect==item.name) {
                             selectedIndex = items.length-1;
                         }
@@ -122,9 +136,6 @@ function refreshProjectVersions(url, elm)
                 }
                 updateComboBox(select.comboBox, items, selectedIndex);
             }
-
-            //buttonName.disabled=false;
-            buttonVer.disabled=false;
         }
     });
 }

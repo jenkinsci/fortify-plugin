@@ -43,6 +43,7 @@
         }
   </style>
 
+  <script type="text/javascript" src="${rootURL}/plugin/fortify/purify.min.js"/>
   <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
 
   <f:block>
@@ -102,6 +103,9 @@
             </div>
             <div style="float:left">
               <input value="▼" type="button" id="refreshPrjVerButton1" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
+            </div>
+            <div style="display:none;" id="refreshSpinnerVer" >
+              <img src="${imagesURL}/spinner.gif" />
             </div>
             <div style="clear:both" />
           </f:entry>

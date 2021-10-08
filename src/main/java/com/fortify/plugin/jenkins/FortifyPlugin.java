@@ -15,34 +15,47 @@
  *******************************************************************************/
 package com.fortify.plugin.jenkins;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.CheckForNull;
 
-import com.fortify.plugin.jenkins.bean.SensorPoolBean;
-import com.fortify.plugin.jenkins.steps.*;
-import com.fortify.plugin.jenkins.steps.remote.GradleProjectType;
-import com.fortify.plugin.jenkins.steps.remote.MavenProjectType;
-import com.fortify.plugin.jenkins.steps.remote.RemoteAnalysisProjectType;
-import com.squareup.okhttp.*;
-import hudson.*;
-import hudson.model.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.*;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.verb.POST;
 
 import com.fortify.plugin.jenkins.bean.ProjectTemplateBean;
+import com.fortify.plugin.jenkins.bean.SensorPoolBean;
 import com.fortify.plugin.jenkins.fortifyclient.FortifyClient;
 import com.fortify.plugin.jenkins.fortifyclient.FortifyClient.NoReturn;
+import com.fortify.plugin.jenkins.steps.CloudScanArguments;
+import com.fortify.plugin.jenkins.steps.CloudScanMbs;
+import com.fortify.plugin.jenkins.steps.CloudScanStart;
+import com.fortify.plugin.jenkins.steps.FortifyClean;
+import com.fortify.plugin.jenkins.steps.FortifyScan;
+import com.fortify.plugin.jenkins.steps.FortifyTranslate;
+import com.fortify.plugin.jenkins.steps.FortifyUpdate;
+import com.fortify.plugin.jenkins.steps.FortifyUpload;
+import com.fortify.plugin.jenkins.steps.remote.GradleProjectType;
+import com.fortify.plugin.jenkins.steps.remote.MavenProjectType;
+import com.fortify.plugin.jenkins.steps.remote.RemoteAnalysisProjectType;
 import com.fortify.plugin.jenkins.steps.types.AdvancedScanType;
 import com.fortify.plugin.jenkins.steps.types.DevenvScanType;
 import com.fortify.plugin.jenkins.steps.types.DotnetSourceScanType;
@@ -53,7 +66,20 @@ import com.fortify.plugin.jenkins.steps.types.MsbuildScanType;
 import com.fortify.plugin.jenkins.steps.types.OtherScanType;
 import com.fortify.plugin.jenkins.steps.types.ProjectScanType;
 import com.fortify.ssc.restclient.ApiException;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
+import hudson.AbortException;
+import hudson.BulkChange;
+import hudson.Extension;
+import hudson.Launcher;
+import hudson.Plugin;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.AutoCompletionCandidates;
+import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -173,14 +199,12 @@ public class FortifyPlugin extends Recorder {
 			if (runTranslation.isBasicMaven3TranslationType()) {
 				scanType = new MavenScanType();
 				((MavenScanType)scanType).setMavenOptions(runTranslation.getMaven3Options());
-				((MavenScanType)scanType).setSkipBuild(runTranslation.getMaven3SkipBuild());
 				((MavenScanType)scanType).setMavenInstallationName(runTranslation.getMaven3Name());
 			}
 
 			if (runTranslation.isBasicGradleTranslationType()) {
 				scanType = new GradleScanType();
 				((GradleScanType)scanType).setUseWrapper(runTranslation.getGradleUseWrapper());
-				((GradleScanType)scanType).setSkipBuild(runTranslation.getGradleSkipBuild());
 				((GradleScanType)scanType).setGradleTasks(runTranslation.getGradleTasks());
 				((GradleScanType)scanType).setGradleOptions(runTranslation.getGradleOptions());
 			}
@@ -512,8 +536,7 @@ public class FortifyPlugin extends Recorder {
 		return getRunScan() ? analysisRunType.getRunScan().getScanLogFile() : "";
 	}
 
-	// these are the original fields for uploading to ssc - don't feel like renaming
-	// them...
+	// these are the original fields for uploading to ssc - don't feel like renaming them...
 	public String getFilterSet() {
 		return getUploadSSC() ? analysisRunType.getUploadSSC().getFilterSet() : "";
 	}
@@ -605,6 +628,17 @@ public class FortifyPlugin extends Recorder {
 				return ((GradleProjectType) getRemoteAnalysisProjectType()).getIncludeTests();
 			} else if (getRemoteAnalysisProjectType() instanceof MavenProjectType) {
 				return ((MavenProjectType) getRemoteAnalysisProjectType()).getIncludeTests();
+			}
+		}
+		return false;
+	}
+
+	public boolean getSkipBuild() {
+		if (getAnalysisRunType()) {
+			if (getRemoteAnalysisProjectType() instanceof GradleProjectType) {
+				return ((GradleProjectType) getRemoteAnalysisProjectType()).getSkipBuild();
+			} else if (getRemoteAnalysisProjectType() instanceof MavenProjectType) {
+				return ((MavenProjectType) getRemoteAnalysisProjectType()).getSkipBuild();
 			}
 		}
 		return false;
@@ -790,11 +824,9 @@ public class FortifyPlugin extends Recorder {
 				ft.setDotnetSrcFiles(((DotnetSourceScanType) projectScanType).getDotnetSrcFiles());
 			} else if (projectScanType instanceof MavenScanType) {
 				ft.setMavenOptions(((MavenScanType) projectScanType).getMavenOptions());
-				ft.setMavenSkipBuild(((MavenScanType) projectScanType).getSkipBuild());
 				ft.setMavenName(((MavenScanType) projectScanType).getMavenInstallationName());
 			} else if (projectScanType instanceof GradleScanType) {
 				ft.setUseWrapper(((GradleScanType) projectScanType).getUseWrapper());
-				ft.setGradleSkipBuild(((GradleScanType) projectScanType).getSkipBuild());
 				ft.setGradleTasks(((GradleScanType) projectScanType).getGradleTasks());
 				ft.setGradleOptions(((GradleScanType) projectScanType).getGradleOptions());
 			} else if (projectScanType instanceof OtherScanType) {
@@ -805,35 +837,6 @@ public class FortifyPlugin extends Recorder {
 			}
 
 			ft.perform(build, launcher, listener);
-		}
-	}
-
-	/**
-	 * Determines the {@link ProjectScanType} based on the configuration.
-	 */
-	private ProjectScanType calculateProjectScanType() {
-		if (getIsAdvancedTranslationType()) {
-			return new AdvancedScanType();
-		} else {
-			if (getIsBasicJavaTranslationType()) {
-				return new JavaScanType();
-			} else if (getIsBasicDotNetTranslationType()) {
-				if (getIsBasicDotNetProjectSolutionScanType()) {
-					if (getIsBasicDotNetMSBuildBuildType()) {
-						return new MsbuildScanType();
-					} else {
-						return new DevenvScanType();
-					}
-				} else {
-					return new DotnetSourceScanType();
-				}
-			} else if (getIsBasicMaven3TranslationType()) {
-				return new MavenScanType();
-			} else if (getIsBasicGradleTranslationType()) {
-				return new GradleScanType();
-			} else {
-				return new OtherScanType();
-			}
 		}
 	}
 
@@ -936,8 +939,11 @@ public class FortifyPlugin extends Recorder {
 		/** List of Issue Templates obtained from SSC */
 		private List<ProjectTemplateBean> projTemplateList = Collections.emptyList();
 
-		/** List of all Projects (including versions info) obtained from SSC */
-		private Map<String, Map<String, Long>> allProjects = Collections.emptyMap();
+		/** List of all application names obtained from SSC */
+		private Map<String, Long> allProjects = Collections.emptyMap();
+
+		/** List of all Applications (including versions info) obtained from SSC */
+		private Map<String, Map<String, Long>> allVersions = Collections.emptyMap();
 
 		/** List of all CloudScan Sensor pools obtained from SSC */
 		private List<SensorPoolBean> sensorPoolList = Collections.emptyList();
@@ -1274,7 +1280,7 @@ public class FortifyPlugin extends Recorder {
 					@Override
 					public NoReturn runWith(FortifyClient client) throws Exception {
 						// as long as no exception, that's ok
-						client.getProjectList(1);
+						client.getProjectList(null, 1);
 						return FortifyClient.NoReturn.INSTANCE;
 					}
 				});
@@ -1380,11 +1386,11 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public void doRefreshProjects(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
-				throws Exception {
+		public void doRefreshProjects(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
 			try {
+				String typedText = sanitizeUnicodeControls(req.getParameter("typedText"));
 				// always retrieve data from SSC
-				allProjects = getAllProjectsNoCache();
+				allProjects = refreshAllProjects(typedText);
 				// and then convert it to JSON
 				StringBuilder buf = new StringBuilder();
 				List<String> projects = new ArrayList<String>(allProjects.keySet());
@@ -1397,8 +1403,8 @@ public class FortifyPlugin extends Recorder {
 				}
 				buf.insert(0, "{ \"list\" : [\n");
 				buf.append("]}");
-				// send HTML data directly
-				rsp.setContentType("text/html;charset=UTF-8");
+				rsp.setContentType("application/json;charset=utf-8");
+				// we are using DOMPurify to sanitize the input on the javascript side to prevent XSS, see refresh-projects.js
 				rsp.getWriter().print(buf.toString());
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -1406,32 +1412,51 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public void doRefreshVersions(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
-				throws Exception {
+		public void doRefreshVersions(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
 			try {
-				// always retrieve data from SSC
-				allProjects = getAllProjects();
-				// and then convert it to JSON
+				String selectedApp = sanitizeUnicodeControls(req.getParameter("selectedPrj"));
+				String typedText = sanitizeUnicodeControls(req.getParameter("typedText"));
 				StringBuilder buf = new StringBuilder();
-				for (Map.Entry<String, Map<String, Long>> prj : allProjects.entrySet()) {
-					List<String> versions = new ArrayList<String>(prj.getValue().keySet());
-					Collections.sort(versions, String.CASE_INSENSITIVE_ORDER);
-					for (String prjVersion : versions) {
-						if (buf.length() > 0) {
-							buf.append(",");
-						}
-						buf.append("{ \"name\": \"" + escapeJsonValue(prjVersion) + "\", \"prj\": \"" + escapeJsonValue(prj.getKey()) + "\" }\n");
-					}
-				}
+				Long appId = getAllProjects(null).get(selectedApp);
+				// always retrieve data from SSC
+				Map<String, Long> appVersions = refreshVersionsFor(appId, typedText);
+				// and then convert it to JSON
+				buf.append(appVersionToJson(selectedApp, appVersions));
 				buf.insert(0, "{ \"list\" : [\n");
 				buf.append("]}");
-				// send HTML data directly
-				rsp.setContentType("text/html;charset=UTF-8");
+				rsp.setContentType("application/json;charset=utf-8");
+				// we are also using DOMPurify to sanitize the input on the javascript side to prevent XSS, see refresh-projects.js
 				rsp.getWriter().print(buf.toString());
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw e;
 			}
+		}
+
+		/*
+		 * Some simple sanitization to help with XSS attack prevention
+		 */
+		private String sanitizeUnicodeControls(String unsafeInput) {
+			if (unsafeInput == null) {
+				return "";
+			}
+			String trimmed = unsafeInput.trim();
+			// we are limited with validation by the chars SSC supports for their application and version names
+			String withoutUnicodeControls = trimmed.replaceAll("[\\0\\p{C}&&\\p{Cntrl}]", "?");
+			return withoutUnicodeControls;
+		}
+
+		private StringBuilder appVersionToJson(String appName, Map<String, Long> appVersions) {
+			StringBuilder buf = new StringBuilder();
+			List<String> sortedVersions = new ArrayList<String>(appVersions.keySet());
+			Collections.sort(sortedVersions, String.CASE_INSENSITIVE_ORDER);
+			for (String nextVersion : sortedVersions) {
+				if (buf.length() > 0) {
+					buf.append(",");
+				}
+				buf.append("{ \"name\": \"" + escapeJsonValue(nextVersion) + "\", \"prj\": \"" + escapeJsonValue(appName) + "\" }\n");
+			}
+			return buf;
 		}
 
 		private String escapeJsonValue(String stringValue) {
@@ -1610,7 +1635,7 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		public ComboBoxModel doFillAppNameItems() {
-			Map<String, Map<String, Long>> allPrj = getAllProjects();
+			Map<String, Long> allPrj = getAllProjects(null);
 			return new ComboBoxModel(allPrj.keySet());
 		}
 
@@ -1619,7 +1644,7 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		public ComboBoxModel doFillAppVersionItems(@QueryParameter String appName) {
-			Map<String, Long> allPrjVersions = getAllProjects().get(appName);
+			Map<String, Long> allPrjVersions = getVersionsFor(appName);
 			if (null == allPrjVersions) {
 				return new ComboBoxModel(Collections.<String>emptyList());
 			}
@@ -1630,21 +1655,21 @@ public class FortifyPlugin extends Recorder {
 			return doFillAppVersionItems(appName);
 		}
 
-		private Map<String, Map<String, Long>> getAllProjects() {
+		private Map<String, Long> getAllProjects(String query) {
 			if (allProjects.isEmpty()) {
-				allProjects = getAllProjectsNoCache();
+				allProjects = refreshAllProjects(query);
 			}
 			return allProjects;
 		}
 
-		private Map<String, Map<String, Long>> getAllProjectsNoCache() {
+		private Map<String, Long> refreshAllProjects(final String query) {
 			if (canUploadToSsc()) {
 				try {
-					Map<String, Map<String, Long>> map = runWithFortifyClient(getToken(),
-							new FortifyClient.Command<Map<String, Map<String, Long>>>() {
+					Map<String, Long> map = runWithFortifyClient(getToken(),
+							new FortifyClient.Command<Map<String, Long>>() {
 								@Override
-								public Map<String, Map<String, Long>> runWith(FortifyClient client) throws Exception {
-									return client.getProjectListEx(getAppVersionListLimit());
+								public Map<String, Long> runWith(FortifyClient client) throws Exception {
+									return client.getProjectList(query, getAppVersionListLimit());
 								}
 							});
 					return map;
@@ -1656,6 +1681,47 @@ public class FortifyPlugin extends Recorder {
 			} else {
 				return Collections.emptyMap();
 			}
+		}
+
+		private Map<String, Long> getVersionsFor(String appName) {
+			Map<String, Long> versions = allVersions.get(appName);
+			if (versions == null || versions.isEmpty()) {
+				Long appId = getAllProjects(null).get(appName);
+				versions = refreshVersionsFor(appId, null);
+				allVersions.put(appName, versions);
+			}
+			return versions;
+		}
+
+		private Map<String, Long> refreshVersionsFor(final Long appId, final String query) {
+			if (canUploadToSsc()) {
+				try {
+					Map<String, Long> map = runWithFortifyClient(getToken(),
+							new FortifyClient.Command<Map<String, Long>>() {
+								@Override
+								public Map<String, Long> runWith(FortifyClient client) throws Exception {
+									return client.getVersionListEx(appId, query, getAppVersionListLimit());
+								}
+							});
+					return map;
+					// many strange thing can happen.... need to catch throwable
+				} catch (Throwable e) {
+					e.printStackTrace();
+					return Collections.emptyMap();
+				}
+			} else {
+				return Collections.emptyMap();
+			}
+		}
+
+		public AutoCompletionCandidates doAutoCompleteAppName(@QueryParameter String value) {
+			AutoCompletionCandidates c = new AutoCompletionCandidates();
+			for (String nextApp : getAllProjects(value).keySet()) {
+				if (nextApp.toLowerCase(Locale.ENGLISH).startsWith(value.toLowerCase(Locale.ENGLISH))) {
+					c.add(nextApp);
+				}
+			}
+			return c;
 		}
 
 		/**

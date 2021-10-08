@@ -59,4 +59,8 @@
 		<l:description>Joda-Time provides a quality replacement for the Java date and time classes</l:description>
 		<l:license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt'/>
 	</l:dependency>
+	<l:dependency name='DOMPurify' groupId='dompurify' artifactId='purify.min.js' version='2.2.9' url='https://github.com/cure53/DOMPurify'>
+		<l:description>DOMPurify is a DOM-only, super-fast, uber-tolerant XSS sanitizer for HTML, MathML and SVG</l:description>
+		<l:license name='The Apache Software License, Version 2.0' url='http://www.apache.org/licenses/LICENSE-2.0.txt'/>
+	</l:dependency>
 </l:dependencies>

@@ -101,13 +101,28 @@ public class ApiClientWrapper {
 	 * @return List<Project>
 	 * @throws ApiException
 	 */
-	public List<Project> getApplications(int limit) throws ApiException {
+	public List<Project> getApplications(String query, int limit) throws ApiException {
 		List<Project> appList = new ArrayList<Project>();
 		ProjectControllerApi projectControllerApi = new ProjectControllerApi(apiClient);
 
-		ApiResultListProject apiResultListProject = projectControllerApi.listProject(null, 0, limit, null, false, null);
+		ApiResultListProject apiResultListProject = projectControllerApi.listProject("name,id", Integer.valueOf(0), Integer.valueOf(limit), null, false, "name");
+		boolean hasQuery = !StringUtils.isEmpty(query);
+		boolean found = false;
 		for (Project app : apiResultListProject.getData()) {
 			appList.add(app);
+			if (hasQuery) {
+				if (query.equals(app.getName())) {
+					found = true;
+				}
+			}
+		}
+		if (hasQuery && !found) {
+			appList.clear();
+			String partialQuery = "name:\"*" + query + "*\"";
+			apiResultListProject = projectControllerApi.listProject("name,id", Integer.valueOf(0), Integer.valueOf(limit), partialQuery, false, "name");
+			for (Project app : apiResultListProject.getData()) {
+				appList.add(app);
+			}
 		}
 		return appList;
 	}
@@ -119,12 +134,45 @@ public class ApiClientWrapper {
 	 * @return List<ProjectVersion>
 	 * @throws ApiException
 	 */
-	public List<ProjectVersion> getApplicationVersions(int limit) throws ApiException {
+	public List<ProjectVersion> getAllApplicationVersions(String query, int limit) throws ApiException {
 		List<ProjectVersion> appVersionList = new ArrayList<ProjectVersion>();
 		ProjectVersionControllerApi projectVersionControllerApi = new ProjectVersionControllerApi(apiClient);
 
-		ApiResultListProjectVersion apiResultListProjectVersion = projectVersionControllerApi.listProjectVersion(null,
-				0, limit, null, false, null, false, false, null);
+		ApiResultListProjectVersion apiResultListProjectVersion = projectVersionControllerApi.listProjectVersion("name,id,project",
+				Integer.valueOf(0), Integer.valueOf(limit), null, false, "name", false, false, false);
+		boolean hasQuery = !StringUtils.isEmpty(query);
+		boolean found = false;
+		for (ProjectVersion appVersion : apiResultListProjectVersion.getData()) {
+			appVersionList.add(appVersion);
+			if (hasQuery) {
+				if (query.equals(appVersion.getName())) {
+					found = true;
+				}
+			}
+		}
+		if (hasQuery && !found) {
+			appVersionList.clear();
+			String partialQuery = "name:\"*" + query + "*\"";
+			apiResultListProjectVersion = projectVersionControllerApi.listProjectVersion("name,id,project",
+					Integer.valueOf(0), Integer.valueOf(limit), partialQuery, false, "name", false, false, false);
+			for (ProjectVersion appVersion : apiResultListProjectVersion.getData()) {
+				appVersionList.add(appVersion);
+			}
+		}
+		return appVersionList;
+	}
+
+	/**
+	 * Returns list of Application Versions for a particular Application in SSC.
+	 *
+	 * @return List<ProjectVersion>
+	 * @throws ApiException
+	 */
+	public List<ProjectVersion> getApplicationVersionsFor(long applicationId, String query, int limit) throws ApiException {
+		List<ProjectVersion> appVersionList = new ArrayList<ProjectVersion>();
+		ProjectVersionOfProjectControllerApi appVerApi = new ProjectVersionOfProjectControllerApi(apiClient);
+		ApiResultListProjectVersion apiResultListProjectVersion = appVerApi.listProjectVersionOfProject(applicationId, 
+				"name,id", Integer.valueOf(0), Integer.valueOf(limit), null, false, "name", false, false);
 		for (ProjectVersion appVersion : apiResultListProjectVersion.getData()) {
 			appVersionList.add(appVersion);
 		}

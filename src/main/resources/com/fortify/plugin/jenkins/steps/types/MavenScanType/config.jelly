@@ -16,7 +16,7 @@
  -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 	<j:if test="${!empty(descriptor.installations)}">
-		<f:entry title="${%Maven Version}" field="mavenInstallationName" help="/plugin/fortify/help-mavenVersion.html">
+		<f:entry title="${%Maven version}" field="mavenInstallationName" help="/plugin/fortify/help-mavenVersion.html">
 			<f:select />
 		</f:entry>
 	</j:if>

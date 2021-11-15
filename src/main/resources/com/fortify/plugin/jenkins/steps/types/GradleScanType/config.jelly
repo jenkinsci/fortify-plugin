@@ -19,7 +19,7 @@
 	<j:set var="uid" value="${descriptor.generateId()}"/>
 	<f:radioBlock inline="true" name="${uid}.useWrapper" checked="${!instance.useWrapper}" value="false" title="${%Invoke Gradle}">
 		<j:if test="${!empty(descriptor.installations)}">
-			<f:entry title="${%Gradle Version}" field="gradleInstallationName" help="/plugin/fortify/help-gradleVersion.html">
+			<f:entry title="${%Gradle version}" field="gradleInstallationName" help="/plugin/fortify/help-gradleVersion.html">
 				<f:select />
 			</f:entry>
 		</j:if>

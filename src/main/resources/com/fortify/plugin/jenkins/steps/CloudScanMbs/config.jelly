@@ -73,7 +73,7 @@
                                             clazz="setting-input project-name read-only" items="${descriptor.appNameItems}"/>
                     </div>
                     <div style="float:left">
-                        <input value="▼" type="button" id="refreshPrjButton"
+                        <input value="&#x1F50E;&#xFE0E;" type="button" id="refreshPrjButton"
                                onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)"/>
                     </div>
                     <div style="display:none;" id="refreshSpinner">
@@ -88,7 +88,7 @@
                                             items="${descriptor.appVersionItems(appName)}"/>
                     </div>
                     <div style="float:left">
-                        <input value="▼" type="button" id="refreshPrjVerButton"
+                        <input value="&#x1F50E;&#xFE0E;" type="button" id="refreshPrjVerButton"
                                onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)"/>
                     </div>
                     <div style="clear:both" />

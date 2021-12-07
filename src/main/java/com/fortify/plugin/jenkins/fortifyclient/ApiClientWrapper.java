@@ -105,24 +105,10 @@ public class ApiClientWrapper {
 		List<Project> appList = new ArrayList<Project>();
 		ProjectControllerApi projectControllerApi = new ProjectControllerApi(apiClient);
 
-		ApiResultListProject apiResultListProject = projectControllerApi.listProject("name,id", Integer.valueOf(0), Integer.valueOf(limit), null, false, "name");
-		boolean hasQuery = !StringUtils.isEmpty(query);
-		boolean found = false;
+		String partialQuery = StringUtils.isEmpty(query) ? null : "name:\"*" + query + "*\"";
+		ApiResultListProject apiResultListProject = projectControllerApi.listProject("name,id", Integer.valueOf(0), Integer.valueOf(limit), partialQuery, false, "name");
 		for (Project app : apiResultListProject.getData()) {
 			appList.add(app);
-			if (hasQuery) {
-				if (query.equals(app.getName())) {
-					found = true;
-				}
-			}
-		}
-		if (hasQuery && !found) {
-			appList.clear();
-			String partialQuery = "name:\"*" + query + "*\"";
-			apiResultListProject = projectControllerApi.listProject("name,id", Integer.valueOf(0), Integer.valueOf(limit), partialQuery, false, "name");
-			for (Project app : apiResultListProject.getData()) {
-				appList.add(app);
-			}
 		}
 		return appList;
 	}
@@ -138,26 +124,11 @@ public class ApiClientWrapper {
 		List<ProjectVersion> appVersionList = new ArrayList<ProjectVersion>();
 		ProjectVersionControllerApi projectVersionControllerApi = new ProjectVersionControllerApi(apiClient);
 
+		String partialQuery = StringUtils.isEmpty(query) ? null : "name:\"*" + query + "*\"";
 		ApiResultListProjectVersion apiResultListProjectVersion = projectVersionControllerApi.listProjectVersion("name,id,project",
-				Integer.valueOf(0), Integer.valueOf(limit), null, false, "name", false, false, false);
-		boolean hasQuery = !StringUtils.isEmpty(query);
-		boolean found = false;
+				Integer.valueOf(0), Integer.valueOf(limit), partialQuery, false, "name", false, false, false);
 		for (ProjectVersion appVersion : apiResultListProjectVersion.getData()) {
 			appVersionList.add(appVersion);
-			if (hasQuery) {
-				if (query.equals(appVersion.getName())) {
-					found = true;
-				}
-			}
-		}
-		if (hasQuery && !found) {
-			appVersionList.clear();
-			String partialQuery = "name:\"*" + query + "*\"";
-			apiResultListProjectVersion = projectVersionControllerApi.listProjectVersion("name,id,project",
-					Integer.valueOf(0), Integer.valueOf(limit), partialQuery, false, "name", false, false, false);
-			for (ProjectVersion appVersion : apiResultListProjectVersion.getData()) {
-				appVersionList.add(appVersion);
-			}
 		}
 		return appVersionList;
 	}
@@ -171,8 +142,10 @@ public class ApiClientWrapper {
 	public List<ProjectVersion> getApplicationVersionsFor(long applicationId, String query, int limit) throws ApiException {
 		List<ProjectVersion> appVersionList = new ArrayList<ProjectVersion>();
 		ProjectVersionOfProjectControllerApi appVerApi = new ProjectVersionOfProjectControllerApi(apiClient);
+
+		String partialQuery = StringUtils.isEmpty(query) ? null : "name:\"*" + query + "*\"";
 		ApiResultListProjectVersion apiResultListProjectVersion = appVerApi.listProjectVersionOfProject(applicationId, 
-				"name,id", Integer.valueOf(0), Integer.valueOf(limit), null, false, "name", false, false);
+				"name,id", Integer.valueOf(0), Integer.valueOf(limit), partialQuery, false, "name", false, false);
 		for (ProjectVersion appVersion : apiResultListProjectVersion.getData()) {
 			appVersionList.add(appVersion);
 		}

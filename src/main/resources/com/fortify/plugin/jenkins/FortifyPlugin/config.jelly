@@ -90,7 +90,7 @@
               <f:editableComboBox id="projectName1" field="appName" clazz="setting-input project-name read-only" items="${descriptor.appNameItems}" />
             </div>
             <div style="float:left">
-              <input value="▼" type="button" id="refreshPrjButton1" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)" />
+              <input value="&#x1F50E;&#xFE0E;" type="button" id="refreshPrjButton1" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)" />
             </div>
             <div style="display:none;" id="refreshSpinner" >
               <img src="${imagesURL}/spinner.gif" /> ${progress}
@@ -102,7 +102,7 @@
               <f:editableComboBox id="projectVersion1" field="appVersion" clazz="setting-input project-version read-only" items="${descriptor.appVersionItems(appName)}" />
             </div>
             <div style="float:left">
-              <input value="▼" type="button" id="refreshPrjVerButton1" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
+              <input value="&#x1F50E;&#xFE0E;" type="button" id="refreshPrjVerButton1" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
             </div>
             <div style="display:none;" id="refreshSpinnerVer" >
               <img src="${imagesURL}/spinner.gif" />
@@ -190,7 +190,7 @@
               <f:editableComboBox id="projectName2" field="appName" clazz="setting-input project-name read-only" items="${descriptor.appNameItems}" />
             </div>
             <div style="float:left">
-              <input value="▼" type="button" id="refreshPrjButton2" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)" />
+              <input value="&#x1F50E;&#xFE0E;" type="button" id="refreshPrjButton2" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)" />
             </div>
             <div style="display:none;" id="refreshSpinner" >
               <img src="${imagesURL}/spinner.gif" /> ${progress}
@@ -202,7 +202,7 @@
               <f:editableComboBox id="projectVersion2" field="appVersion" clazz="setting-input project-version read-only" items="${descriptor.appVersionItems(appName)}" />
             </div>
             <div style="float:left">
-              <input value="▼" type="button" id="refreshPrjVerButton2" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
+              <input value="&#x1F50E;&#xFE0E;" type="button" id="refreshPrjVerButton2" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
             </div>
             <div style="clear:both" />
           </f:entry>
@@ -294,7 +294,7 @@
               <f:editableComboBox id="projectName3" field="appName" clazz="setting-input project-name" items="${descriptor.appNameItems}" />
             </div>
             <div style="float:left">
-              <input value="▼" type="button" id="refreshPrjButton3" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)" />
+              <input value="&#x1F50E;&#xFE0E;" type="button" id="refreshPrjButton3" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)" />
             </div>
             <div style="display:none;" id="refreshSpinner" >
               <img src="${imagesURL}/spinner.gif" /> ${progress}
@@ -306,7 +306,7 @@
               <f:editableComboBox id="projectVersion3" field="appVersion" clazz="setting-input project-version" items="${descriptor.appVersionItems(appName)}" />
             </div>
             <div style="float:left">
-              <input value="▼" type="button" id="refreshPrjVerButton3" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
+              <input value="&#x1F50E;&#xFE0E;" type="button" id="refreshPrjVerButton3" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
             </div>
             <div style="clear:both" />
           </f:entry>
@@ -343,7 +343,7 @@
               <f:editableComboBox id="projectName4" field="appName" clazz="setting-input project-name" items="${descriptor.appNameItems}" />
             </div>
             <div style="float:left">
-              <input value="▼" type="button" id="refreshPrjButton4" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)" />
+              <input value="&#x1F50E;&#xFE0E;" type="button" id="refreshPrjButton4" onclick="refreshProjectNames('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjects', this)" />
             </div>
             <div style="display:none;" >
               <img src="${imagesURL}/spinner.gif" /> ${progress}
@@ -355,7 +355,7 @@
               <f:editableComboBox id="projectVersion4" field="appVersion" clazz="setting-input project-version" items="${descriptor.appVersionItems(appName)}" />
             </div>
             <div style="float:left;">
-              <input value="▼" type="button" id="refreshPrjVerButton4" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
+              <input value="&#x1F50E;&#xFE0E;" type="button" id="refreshPrjVerButton4" onclick="refreshProjectVersions('${rootURL}/descriptor/${descriptor.clazz.name}/refreshVersions', this)" />
             </div>
             <div style="clear:both" />
           </f:entry>

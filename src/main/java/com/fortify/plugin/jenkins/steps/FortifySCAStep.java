@@ -24,7 +24,6 @@ import hudson.DescriptorExtensionList;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
 import hudson.model.Node;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -97,7 +96,7 @@ public abstract class FortifySCAStep extends FortifyStep {
 			listener, "FORTIFY_HOME");
 	}
 
-	protected String getMavenExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String mavenInstallationName)
+	protected String getMavenExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String mavenInstallationName, Node currentNode)
 			throws InterruptedException, IOException {
 		String result = "";
 		final EnvVars envVars = build.getEnvironment(listener);
@@ -106,11 +105,10 @@ public abstract class FortifySCAStep extends FortifyStep {
 		if (ti != null) {
 			for (ToolInstallation inst : ti.getInstallations()) {
 				String instName = inst.getName();
-				if (((instName == null && mavenInstallationName == null) || (instName != null && instName.equalsIgnoreCase(mavenInstallationName))) && build instanceof AbstractBuild) {
+				if (((instName == null && mavenInstallationName == null) || (instName != null && instName.equalsIgnoreCase(mavenInstallationName)))) {
 					MavenInstallation mvn = (MavenInstallation)inst;
-					Node node = ((AbstractBuild)build).getBuiltOn();
-					if (node != null) {
-						mvn = mvn.forNode(node, listener);
+					if (currentNode != null) {
+						mvn = mvn.forNode(currentNode, listener);
 					}
 					mvn = mvn.forEnvironment(envVars);
 					mvn.buildEnvVars(envVars);
@@ -147,7 +145,7 @@ public abstract class FortifySCAStep extends FortifyStep {
 		}
 	}
 
-	protected String getGradleExecutable(boolean useWrapper, Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String gradleInstallationName) throws InterruptedException, IOException {
+	protected String getGradleExecutable(boolean useWrapper, Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String gradleInstallationName, Node currentNode) throws InterruptedException, IOException {
 		String result = "";
 		final EnvVars envVars = build.getEnvironment(listener);
 		DescriptorExtensionList<ToolInstallation, ToolDescriptor<?>> tools = ToolInstallation.all();
@@ -155,11 +153,10 @@ public abstract class FortifySCAStep extends FortifyStep {
 		if (ti != null) {
 			for (ToolInstallation inst : ti.getInstallations()) {
 				String instName = inst.getName();
-				if (((instName == null && gradleInstallationName == null) || (instName != null && instName.equalsIgnoreCase(gradleInstallationName))) && build instanceof AbstractBuild) {
+				if (((instName == null && gradleInstallationName == null) || (instName != null && instName.equalsIgnoreCase(gradleInstallationName)))) {
 					GradleInstallation gradle = (GradleInstallation)inst;
-					Node node = ((AbstractBuild)build).getBuiltOn();
-					if (node != null) {
-						gradle = gradle.forNode(node, listener);
+					if (currentNode != null) {
+						gradle = gradle.forNode(currentNode, listener);
 					}
 					gradle = gradle.forEnvironment(envVars);
 					gradle.buildEnvVars(envVars);

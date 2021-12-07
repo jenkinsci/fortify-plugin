@@ -51,6 +51,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Launcher.ProcStarter;
 import hudson.Util;
+import hudson.model.Node;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -59,11 +60,17 @@ import hudson.util.FormValidation;
 public class FortifyTranslate extends FortifySCAStep {
 	private ProjectScanType projectScanType;
 	private String excludeList;
+	private Node currentNode;
 
 	@DataBoundConstructor
 	public FortifyTranslate(String buildID, ProjectScanType projectScanType) {
 		this.buildID = buildID;
 		this.projectScanType = projectScanType;
+	}
+
+	// this is required for GlobalTooling accessing the node during the build
+	public void setCurrentNode(Node node) {
+		this.currentNode = node;
 	}
 
 	public ProjectScanType getProjectScanType() {
@@ -358,7 +365,7 @@ public class FortifyTranslate extends FortifySCAStep {
 		} else if (projectScanType instanceof MavenScanType) {
 			log.println("Running Maven 3 translation");
 			String mavenInstallationName = ((MavenScanType) projectScanType).getMavenInstallationName();
-			args.add(getMavenExecutable(build, workspace, launcher, listener, mavenInstallationName));
+			args.add(getMavenExecutable(build, workspace, launcher, listener, mavenInstallationName, currentNode));
 			option = getResolvedTranslationExcludeList(listener);
 			if (StringUtils.isNotEmpty(option)) {
 				addMavenExcludes(args, option, launcher.isUnix());
@@ -377,7 +384,7 @@ public class FortifyTranslate extends FortifySCAStep {
 			if (StringUtils.isNotEmpty(option)) {
 				addAllArguments(args, option, "-exclude");
 			}
-			args.add(getGradleExecutable(((GradleScanType) projectScanType).getUseWrapper(), build, workspace, launcher, listener, gradleInstallationName));
+			args.add(getGradleExecutable(((GradleScanType) projectScanType).getUseWrapper(), build, workspace, launcher, listener, gradleInstallationName, currentNode));
 			option = getResolvedGradleOptions((GradleScanType) projectScanType, listener);
 			if (StringUtils.isNotEmpty(option)) {
 				addAllArguments(args, option);
@@ -466,12 +473,16 @@ public class FortifyTranslate extends FortifySCAStep {
 
 		@Override
 		protected Void run() throws Exception {
-			getContext().get(TaskListener.class).getLogger().println("Running FortifyTranslate step");
-			if (!getContext().get(FilePath.class).exists()) {
-				getContext().get(FilePath.class).mkdirs();
+			StepContext context = getContext();
+			TaskListener taskListener = context.get(TaskListener.class);
+			taskListener.getLogger().println("Running FortifyTranslate step");
+			FilePath workspace = context.get(FilePath.class);
+			if (!workspace.exists()) {
+				workspace.mkdirs();
 			}
-			ft.perform(getContext().get(Run.class), getContext().get(FilePath.class), getContext().get(Launcher.class),
-					getContext().get(TaskListener.class));
+
+			ft.setCurrentNode(context.get(Node.class));
+			ft.perform(context.get(Run.class), workspace, context.get(Launcher.class), taskListener);
 
 			return null;
 		}

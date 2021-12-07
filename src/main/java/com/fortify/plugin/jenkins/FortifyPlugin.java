@@ -836,6 +836,7 @@ public class FortifyPlugin extends Recorder {
 				ft.setAdvOptions(((AdvancedScanType) projectScanType).getAdvOptions());
 			}
 
+			ft.setCurrentNode(build.getBuiltOn());
 			ft.perform(build, launcher, listener);
 		}
 	}
@@ -1442,8 +1443,9 @@ public class FortifyPlugin extends Recorder {
 			}
 			String trimmed = unsafeInput.trim();
 			// we are limited with validation by the chars SSC supports for their application and version names
-			String withoutUnicodeControls = trimmed.replaceAll("[\\0\\p{C}&&\\p{Cntrl}]", "?");
-			return withoutUnicodeControls;
+			//String withoutUnicodeControls = trimmed.replaceAll("[\\p{C}&&\\p{Cntrl}]", "?");
+			//return withoutUnicodeControls;
+			return trimmed;
 		}
 
 		private StringBuilder appVersionToJson(String appName, Map<String, Long> appVersions) {

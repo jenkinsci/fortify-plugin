@@ -1443,9 +1443,8 @@ public class FortifyPlugin extends Recorder {
 			}
 			String trimmed = unsafeInput.trim();
 			// we are limited with validation by the chars SSC supports for their application and version names
-			//String withoutUnicodeControls = trimmed.replaceAll("[\\p{C}&&\\p{Cntrl}]", "?");
-			//return withoutUnicodeControls;
-			return trimmed;
+			String withoutUnicodeControls = trimmed.replaceAll("[\\p{C}&&\\p{Cntrl}]", "?");
+			return withoutUnicodeControls;
 		}
 
 		private StringBuilder appVersionToJson(String appName, Map<String, Long> appVersions) {

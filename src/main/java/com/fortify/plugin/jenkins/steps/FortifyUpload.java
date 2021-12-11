@@ -17,9 +17,11 @@ package com.fortify.plugin.jenkins.steps;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -71,7 +73,8 @@ import hudson.util.FormValidation;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
-public class FortifyUpload extends FortifyStep {
+public class FortifyUpload extends FortifyStep implements Serializable {
+	private static final long serialVersionUID = -8308672776705963290L;
 
 	private boolean accessToProject = true;
 	private int pageSize = 0;
@@ -879,7 +882,7 @@ public class FortifyUpload extends FortifyStep {
 	}
 
 	private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
-		private transient FortifyUpload upload;
+		private FortifyUpload upload;
 
 		protected Execution(FortifyUpload upload, StepContext context) {
 			super(context);
@@ -896,6 +899,5 @@ public class FortifyUpload extends FortifyStep {
 		}
 
 		private static final long serialVersionUID = 1L;
-
 	}
 }

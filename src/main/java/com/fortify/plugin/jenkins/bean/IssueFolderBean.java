@@ -15,13 +15,16 @@
  *******************************************************************************/
 package com.fortify.plugin.jenkins.bean;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
 import com.fortify.plugin.jenkins.FortifyPlugin;
 
-public class IssueFolderBean implements Comparable {
+public class IssueFolderBean implements Comparable, Serializable {
+	private static final long serialVersionUID = 9056328734887354382L;
+
 	public static final String ATTRIBUTE_VALUE_ALL = "All";
 
 	public static final String NAME_CRITICAL = "Critical";

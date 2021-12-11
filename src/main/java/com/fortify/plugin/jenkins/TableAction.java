@@ -16,6 +16,7 @@
 package com.fortify.plugin.jenkins;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -516,11 +517,12 @@ public class TableAction implements Action {
 		private int page;
 		private SortOrder sortOrder;
 		private boolean sortDownNotUp;
-		private List<IssueBean> issuesByFolder;
-		private Boolean needsUpdate;
 		private int pageSize;
 		private boolean showingAllNotNew;
-		private String SelectedGrouping;
+		private String selectedGrouping;
+
+		private transient List<IssueBean> issuesByFolder = null;
+		private transient Boolean needsUpdate = null;
 
 		public View(IssueFolderBean descriptor, FortifyUpload manager, int pageNum) {
 			this.folder = descriptor;
@@ -530,13 +532,19 @@ public class TableAction implements Action {
 			sortOrder = SortOrder.location;
 			pageSize = manager.getIssuePageSize();
 			showingAllNotNew = true;
-			SelectedGrouping = "Category";
+			selectedGrouping = "Category";
 			scheduleUpdate();
+		}
+
+		private void readObject(ObjectInputStream aInputStream) throws ClassNotFoundException, IOException {
+			needsUpdate = null;
+			issuesByFolder = null;
+			aInputStream.defaultReadObject();
 		}
 
 		@JavaScriptMethod
 		public String getSelectedGrouping() {
-			return SelectedGrouping;
+			return selectedGrouping;
 		}
 
 		@JavaScriptMethod

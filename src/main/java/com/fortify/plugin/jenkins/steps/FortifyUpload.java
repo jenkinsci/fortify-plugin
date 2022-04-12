@@ -88,6 +88,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 	private String appVersion;
 	private String timeout;
 	private String pollingInterval;
+	private boolean throwOnUnstable = false;
 
 	public FortifyUpload(boolean isPipeline, String appName, String appVersion) {
 		this(appName, appVersion);
@@ -152,6 +153,15 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 
 	public String getPollingInterval() {
 		return pollingInterval;
+	}
+
+	@DataBoundSetter
+	public void setThrowOnUnstable(boolean throwOnUnstable) {
+		this.throwOnUnstable = throwOnUnstable;
+	}
+
+	public boolean getThrowOnUnstable() {
+		return throwOnUnstable;
 	}
 
 	public boolean isPipeline() {
@@ -234,11 +244,17 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 		}
 
 		// now check if the fail count
+		log.println("testms " + getThrowOnUnstable());
 		if (summary.getFailedCount() > 0) {
-			log.printf(
+			String msg = String.format(
 					"FortifyJenkins plugin: this build is considered unstable because Fail Condition met %d vulnerabilities%n",
 					summary.getFailedCount());
-			run.setResult(Result.UNSTABLE);
+			log.printf(msg);
+			if (getThrowOnUnstable()) {
+				throw new StatusException(msg);
+			} else {
+				run.setResult(Result.UNSTABLE);
+			}
 		}
 
 		String appName = getResolvedAppName(listener);
@@ -896,6 +912,15 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 					getContext().get(Launcher.class), getContext().get(TaskListener.class));
 
 			return null;
+		}
+
+		private static final long serialVersionUID = 1L;
+	}
+
+	public static class StatusException extends RuntimeException {
+
+		public StatusException(String message) {
+			super(message);
 		}
 
 		private static final long serialVersionUID = 1L;

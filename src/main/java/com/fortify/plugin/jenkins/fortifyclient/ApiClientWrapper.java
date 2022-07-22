@@ -16,6 +16,7 @@
 package com.fortify.plugin.jenkins.fortifyclient;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -32,10 +33,11 @@ import org.apache.commons.lang.StringUtils;
 
 import com.fortify.ssc.restclient.ApiClient;
 import com.fortify.ssc.restclient.ApiException;
-import com.squareup.okhttp.Authenticator;
-import com.squareup.okhttp.Credentials;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Route;
 
 public class ApiClientWrapper {
 	private static final String AUTH_HEADER_TOKEN = "FortifyToken";
@@ -69,18 +71,12 @@ public class ApiClientWrapper {
 
 	public void setProxy(String proxyHost, int proxyPort, final String proxyUsername, final String proxyPassword) {
 		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-		apiClient.getHttpClient().setProxy(proxy);
+		apiClient.setHttpClient(apiClient.getHttpClient().newBuilder().proxy(proxy).build());
 		if (!(StringUtils.isEmpty(proxyUsername) && StringUtils.isEmpty(proxyPassword))) {
-			Authenticator authenticator = new Authenticator() {
+			Authenticator proxyAuthenticator = new Authenticator() {
 				boolean proxyAuthAttempted = false;
-
 				@Override
-				public Request authenticate(Proxy proxy, Response response) {
-					return response.request();
-				}
-
-				@Override
-				public Request authenticateProxy(Proxy proxy, Response response) {
+				public Request authenticate(Route route, Response response) throws IOException {
 					if (proxyAuthAttempted) {
 						return null;
 					} else {
@@ -90,7 +86,7 @@ public class ApiClientWrapper {
 					return response.request().newBuilder().header("Proxy-Authorization", credential).build();
 				}
 			};
-			apiClient.getHttpClient().setAuthenticator(authenticator);
+			apiClient.setHttpClient(apiClient.getHttpClient().newBuilder().proxyAuthenticator(proxyAuthenticator).build());
 		}
 	}
 
@@ -268,7 +264,7 @@ public class ApiClientWrapper {
 
 		if (filterSetList != null) {
 			for (FilterSet filterSet : filterSetList) {
-				if (filterSet.isDefaultFilterSet()) {
+				if (filterSet.getDefaultFilterSet()) {
 					defaultFilterSet = filterSet;
 					break;
 				}
@@ -289,9 +285,9 @@ public class ApiClientWrapper {
 
 		ApiResultListProjectVersionIssue apiResultListProjectVersionIssue = issueSetOfProjectVersionControllerApi
 				// .listIssueOfProjectVersion(parentId, start, limit, q, qm, orderby, filterset, fields, 
-				// showhidden, showremoved, showsuppressed, showshortfilenames, filter, groupid, groupingtype, ids)
+				// showhidden, showremoved, showsuppressed, showshortfilenames, embed, filter, groupid, groupingtype, ids)
 		.listIssueOfProjectVersion(appVersionId, startPage, pageSize, null, null, "issueName", null, null, 
-				false, false, false, true, filter, groupId, groupingType, null);
+				false, false, false, true, null, filter, groupId, groupingType, null);
 		for (ProjectVersionIssue issue : apiResultListProjectVersionIssue.getData()) {
 			issues.add(issue);
 		}
@@ -377,7 +373,7 @@ public class ApiClientWrapper {
 		List<IssueTemplate> issueTemplates = getIssueTemplates();
 		if (issueTemplates != null) {
 			for (IssueTemplate template : issueTemplates) {
-				if (template != null && template.isDefaultTemplate()) {
+				if (template != null && template.getDefaultTemplate()) {
 					issueTemplate = template;
 					break;
 				}
@@ -468,7 +464,7 @@ public class ApiClientWrapper {
 					.listAttributeDefinition(null, 0, 0, required, null);
 
 			for (AttributeDefinition def : apiResultListAttributeDefinition.getData()) {
-				if (!def.isHasDefault()) {
+				if (!def.getHasDefault()) {
 					if ("URL".equals(def.getName())) {
 						break;
 					}

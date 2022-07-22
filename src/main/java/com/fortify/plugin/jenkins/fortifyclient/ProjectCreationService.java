@@ -233,7 +233,7 @@ public class ProjectCreationService {
 		IssueTemplate issueTemplate = null;
 		if (issueTemplates != null) {
 			for (IssueTemplate it : issueTemplates) {
-				Boolean isDefault = it.isDefaultTemplate();
+				Boolean isDefault = it.getDefaultTemplate();
 				if (isDefault != null && isDefault.booleanValue()) {
 					issueTemplate = it;
 					break;
@@ -318,11 +318,11 @@ public class ProjectCreationService {
 
 	private MetaDataDefinition convertAttributeDefinitionToMetaDataDefinition(AttributeDefinition attributeDefinition) {
 		MetaDataDefinition metaDataDefinition = new MetaDataDefinition();
-		metaDataDefinition.setRequired(attributeDefinition.isRequired());
+		metaDataDefinition.setRequired(attributeDefinition.getRequired());
 		metaDataDefinition.setName(attributeDefinition.getName());
 		metaDataDefinition.setAppEntityType(attributeDefinition.getAppEntityType().name());
 		metaDataDefinition.setId(String.valueOf(attributeDefinition.getGuid()));
-		metaDataDefinition.setHidden(attributeDefinition.isHidden());
+		metaDataDefinition.setHidden(attributeDefinition.getHidden());
 		metaDataDefinition.setType(ProjectMetaDataCategory.fromValue(attributeDefinition.getCategory().name()));
 		metaDataDefinition.setSystemUsage(SystemUsageType.fromValue(attributeDefinition.getSystemUsage().name()));
 		metaDataDefinition.setDescription(attributeDefinition.getDescription());

@@ -66,10 +66,10 @@ import com.fortify.plugin.jenkins.steps.types.MsbuildScanType;
 import com.fortify.plugin.jenkins.steps.types.OtherScanType;
 import com.fortify.plugin.jenkins.steps.types.ProjectScanType;
 import com.fortify.ssc.restclient.ApiException;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import hudson.AbortException;
 import hudson.BulkChange;
 import hudson.Extension;
@@ -883,6 +883,10 @@ public class FortifyPlugin extends Recorder {
 					} catch (JSONException je) {
 						// ignore
 					}
+					if (message!= null && message.contains("<body>") && message.contains("</body>")) {
+						message = message.substring(message.indexOf("<body>") + 6, message.indexOf("</body>"));
+					}
+
 				}
 				throw new ApiException(message, e, e.getCode(), e.getResponseHeaders());
 			} finally {
@@ -1289,9 +1293,9 @@ public class FortifyPlugin extends Recorder {
 			} catch (Throwable t) {
 				String message = t.getMessage();
 				if (message.contains("Access Denied")) {
-					return FormValidation.error(t, "Invalid token");
+					return FormValidation.errorWithMarkup("Invalid token. (" + message + ")");
 				}
-				return FormValidation.error(t, "Cannot connect to SSC server. " + message);
+				return FormValidation.errorWithMarkup("Cannot connect to SSC server. " + message);
 			} finally {
 				this.url = orig_url;
 				this.token = orig_token;
@@ -1315,21 +1319,22 @@ public class FortifyPlugin extends Recorder {
 
 			Request request = new Request.Builder().url(controllerUrl).build();
 			Response response = null;
+			ResponseBody body = null;
 			try {
 				response = client.newCall(request).execute();
-				if (response.isSuccessful() && (response.body().string().contains("Fortify ScanCentral Controller") ||
-						response.body().string().contains("Fortify CloudScan Controller"))) {
-					return FormValidation.okWithMarkup("<font color=\"blue\">Connection successful!</font>");
-				} else {
-					return FormValidation.error("Connection failed. Check the Controller URL.");
+				if (response != null) {
+					body = response.body();
+					if (response.isSuccessful() && (body != null) && (body.string().contains("Fortify ScanCentral Controller") || body.string().contains("Fortify CloudScan Controller"))) {
+						return FormValidation.okWithMarkup("<font color=\"blue\">Connection successful!</font>");
+					}
 				}
+				return FormValidation.error("Connection failed. Check the Controller URL.");
 			} catch (Throwable t) {
 				return FormValidation.error(t, "Cannot connect to Controller");
 			} finally {
 				this.ctrlUrl = orig_url;
-
-				if (response != null && response.body() != null) {
-					response.body().close();
+				if (body != null) {
+					body.close();
 				}
 			}
 		}

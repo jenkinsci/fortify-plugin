@@ -16,6 +16,7 @@
 package com.fortify.plugin.jenkins;
 
 public class FortifyException extends RuntimeException {
+	private static final long serialVersionUID = 3038297165891293730L;
 	protected Throwable cause;
 	protected Message message;
 

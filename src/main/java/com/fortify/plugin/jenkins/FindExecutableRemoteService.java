@@ -24,6 +24,7 @@ import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 
 public class FindExecutableRemoteService implements FilePath.FileCallable<String> {
+	private static final long serialVersionUID = 8612556540389930237L;
 	private final String filename;
 	private String home;
 	private String path;

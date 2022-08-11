@@ -36,6 +36,8 @@ public class FortifyJCasCCompatibilityTest extends RoundTripAbstractTest {
 				"https://qa-plg-ssc3.prgqa.hpecorp.net:8443/ssc", descriptor.getUrl());
 		assertEquals(String.format("Wrong SSC token. Expected %s but received %s", "3ab8c774-0850-483b-8be6-2907722a81d8",
 				descriptor.getToken()), "3ab8c774-0850-483b-8be6-2907722a81d8", descriptor.getToken());
+		assertEquals(String.format("Wrong SSC token credentials. Expected %s but received %s", "fortify_api_token",
+				descriptor.getSscTokenCredentialsId()), "fortify_api_token", descriptor.getSscTokenCredentialsId());
 		assertEquals(String.format("Wrong Application Template. Expected %s but received %s", "Prioritized High Risk Issue Template",
 				descriptor.getProjectTemplate()), "Prioritized High Risk Issue Template", descriptor.getProjectTemplate());
 		assertEquals(String.format("Wrong Connect timeout. Expected %s but received %s", Integer.valueOf(10),
@@ -45,10 +47,10 @@ public class FortifyJCasCCompatibilityTest extends RoundTripAbstractTest {
 		assertEquals(String.format("Wrong app version list limit. Expected %s but received %s", Integer.valueOf(80), descriptor.getAppVersionListLimit()),
 				Integer.valueOf(80), descriptor.getAppVersionListLimit());
 		assertTrue("Proxy should be used", descriptor.getUseProxy());
-		assertEquals(String.format("Wrong proxy authentication. Username expected %s but received %s", Secret.fromString("fakeuser"),
-				descriptor.getProxyConfig().getProxyUsername()), Secret.fromString("fakeuser"), descriptor.getProxyConfig().getProxyUsername());
 		assertEquals(String.format("Wrong proxy authentication. Username expected %s but received %s", "fakeuser",
 				descriptor.getProxyUsername()), "fakeuser", descriptor.getProxyUsername());
+		assertEquals(String.format("Wrong proxy credentials id. Username expected %s but received %s", "fortify-proxy-id",
+				descriptor.getProxyConfig().getProxyCredentialsId()), "fortify-proxy-id", descriptor.getProxyConfig().getProxyCredentialsId());
 		assertEquals(String.format("Local scan setting is incorrect. Expected %s but received %s", true, descriptor.isDisableLocalScans()),
 				true, descriptor.isDisableLocalScans());
 	}

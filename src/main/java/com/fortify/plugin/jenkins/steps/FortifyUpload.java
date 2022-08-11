@@ -17,7 +17,6 @@ package com.fortify.plugin.jenkins.steps;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -53,7 +52,6 @@ import com.fortify.plugin.jenkins.bean.GroupingValueBean;
 import com.fortify.plugin.jenkins.bean.IssueBean;
 import com.fortify.plugin.jenkins.bean.IssueFolderBean;
 import com.fortify.plugin.jenkins.fortifyclient.FortifyClient;
-import com.fortify.ssc.restclient.ApiException;
 import com.fortify.ssc.restclient.model.Artifact;
 import com.google.common.collect.ImmutableSet;
 
@@ -70,8 +68,6 @@ import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
 
 public class FortifyUpload extends FortifyStep implements Serializable {
 	private static final long serialVersionUID = -8308672776705963290L;
@@ -259,8 +255,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	private Long uploadToSSC(FPRSummary summary, FilePath workspace, TaskListener listener)
-			throws InterruptedException, IOException {
+	private Long uploadToSSC(FPRSummary summary, FilePath workspace, TaskListener listener) throws InterruptedException, IOException {
 		PrintStream log = listener.getLogger();
 		log.println("Fortify Jenkins plugin v " + VERSION);
 		log.println("Performing Fortify upload process");
@@ -291,7 +286,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 			try {
 				final Long projectId = createNewOrGetProject(listener);
 				final File fpr = localFPR;
-				artifactId = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
+				artifactId = FortifyPlugin.runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<Long>() {
 							@Override
 							public Long runWith(FortifyClient client) throws Exception {
@@ -355,7 +350,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 			}
 			try {
 				final Long artifactIdFinal = artifactId;
-				Artifact.StatusEnum status = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
+				Artifact.StatusEnum status = FortifyPlugin.runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<Artifact.StatusEnum>() {
 							@Override
 							public Artifact.StatusEnum runWith(FortifyClient client) throws Exception {
@@ -410,7 +405,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 	private long getProjectVersionId(PrintStream log) throws AbortException {
 		long projectVersionId;
 		try {
-			projectVersionId = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
+			projectVersionId = FortifyPlugin.runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 					new FortifyClient.Command<Long>() {
 						@Override
 						public Long runWith(FortifyClient client) throws Exception {
@@ -559,7 +554,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 			PrintStream logger = listener.getLogger();
 			try {
 				final Writer log = new OutputStreamWriter(logger, "UTF-8");
-				Map<String, List<String>> map = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
+				Map<String, List<String>> map = FortifyPlugin.runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<Map<String, List<String>>>() {
 							@Override
 							public Map<String, List<String>> runWith(FortifyClient client) throws Exception {
@@ -600,7 +595,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 			try {
 				final Writer log = new OutputStreamWriter(logger, "UTF-8");
 				final Long versionId = createNewOrGetProject(listener);
-				Map<String, List<String>> map = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
+				Map<String, List<String>> map = FortifyPlugin.runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<Map<String, List<String>>>() {
 							@Override
 							public Map<String, List<String>> runWith(FortifyClient client) throws Exception {
@@ -638,7 +633,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 			try {
 				final Writer log = new OutputStreamWriter(logger, "UTF-8");
 				final Long versionId = createNewOrGetProject(listener);
-				List<GroupingProfile> groupingProfiles = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
+				List<GroupingProfile> groupingProfiles = FortifyPlugin.runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<List<GroupingProfile>>() {
 							@Override
 							public List<GroupingProfile> runWith(FortifyClient client) throws Exception {
@@ -690,7 +685,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 				final Writer log = new OutputStreamWriter(logger, "UTF-8");
 				final Long versionId = createNewOrGetProject(listener);
 
-				Map<String, IssueBean> map = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
+				Map<String, IssueBean> map = FortifyPlugin.runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(),
 						new FortifyClient.Command<Map<String, IssueBean>>() {
 							@Override
 							public Map<String, IssueBean> runWith(FortifyClient client) throws Exception {
@@ -725,7 +720,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 				? new StreamBuildListener(System.out, Charset.defaultCharset())
 				: taskListener;
 		final Writer log = new OutputStreamWriter(listener.getLogger(), "UTF-8");
-		Long versionId = runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(), new FortifyClient.Command<Long>() {
+		Long versionId = FortifyPlugin.runWithFortifyClient(FortifyPlugin.DESCRIPTOR.getToken(), new FortifyClient.Command<Long>() {
 			@Override
 			public Long runWith(FortifyClient client) throws Exception {
 				return client.createProject(getResolvedAppName(listener), getResolvedAppVersion(listener),
@@ -813,72 +808,6 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 		FilePath tmpFP = new FilePath(tmpFile);
 		file.copyTo(tmpFP);
 		return tmpFile;
-	}
-
-	private <T> T runWithFortifyClient(String token, FortifyClient.Command<T> cmd) throws Exception {
-		if (cmd != null) {
-			String url = FortifyPlugin.DESCRIPTOR.getUrl();
-			ClassLoader contextClassLoader = null;
-			try {
-				FortifyClient client = null;
-				synchronized (this) {
-					contextClassLoader = Thread.currentThread().getContextClassLoader();
-					Thread.currentThread().setContextClassLoader(FortifyPlugin.class.getClassLoader());
-					client = new FortifyClient();
-					boolean useProxy = FortifyPlugin.DESCRIPTOR.getUseProxy();
-					String proxyUrl = FortifyPlugin.DESCRIPTOR.getProxyUrl();
-					if (!useProxy || StringUtils.isEmpty(proxyUrl)) {
-						client.init(url, token, FortifyPlugin.DESCRIPTOR.getConnectTimeout(),
-								FortifyPlugin.DESCRIPTOR.getReadTimeout(), FortifyPlugin.DESCRIPTOR.getWriteTimeout());
-					} else {
-						String[] proxyUrlSplit = proxyUrl.split(":");
-						String proxyHost = proxyUrlSplit[0];
-						int proxyPort = 80;
-						if (proxyUrlSplit.length > 1) {
-							try {
-								proxyPort = Integer.parseInt(proxyUrlSplit[1]);
-							} catch (NumberFormatException nfe) {
-							}
-						}
-						client.init(url, token, proxyHost, proxyPort,
-								FortifyPlugin.DESCRIPTOR.getProxyUsername(), FortifyPlugin.DESCRIPTOR.getProxyPassword(),
-								FortifyPlugin.DESCRIPTOR.getConnectTimeout(), FortifyPlugin.DESCRIPTOR.getReadTimeout(),
-								FortifyPlugin.DESCRIPTOR.getWriteTimeout());
-					}
-					/*boolean useProxy = Jenkins.get().proxy != null;
-					if (!useProxy) {
-						client.init(url, token);
-					} else {
-						String proxyHost = Jenkins.get().proxy.name;
-						int proxyPort = Jenkins.get().proxy.port;
-						String proxyUsername = Jenkins.get().proxy.getUserName();
-						String proxyPassword = Jenkins.get().proxy.getPassword();
-						client.init(url, token, proxyHost, proxyPort, proxyUsername, proxyPassword);
-					}*/
-				}
-				return cmd.runWith(client);
-			} catch (ApiException ae) {
-				String message = ae.getMessage();
-				if (message == null || message.trim().length() == 0) {
-					message = ae.getResponseBody();
-					try {
-						JSONObject obj = JSONObject.fromObject(message);
-						String body = obj.getString("message");
-						if (body != null && body.trim().length() != 0) {
-							message = body;
-						}
-					} catch (JSONException je) {
-						// ignore
-					}
-				}
-				throw new ApiException(message, ae, ae.getCode(), ae.getResponseHeaders());
-			} finally {
-				if (contextClassLoader != null) {
-					Thread.currentThread().setContextClassLoader(contextClassLoader);
-				}
-			}
-		}
-		return null;
 	}
 
 	private static class Execution extends SynchronousNonBlockingStepExecution<Void> {

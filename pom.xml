@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.19</version>
+        <version>4.44</version>
     </parent>
 
     <artifactId>fortify</artifactId>
@@ -28,11 +28,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jenkins.version>2.222.4</jenkins.version>
-        <bom>2.222.x</bom>
-        <bom.version>28</bom.version>
-        <java.level>8</java.level>
-        <jenkins-test-harness.version>2.47</jenkins-test-harness.version>
+        <jenkins.version>2.346.1</jenkins.version>
+        <bom>2.346.x</bom>
+        <bom.version>1556.vfc6a_f216e3c6</bom.version>
+        <jenkins-test-harness.version>1816.v8138d8056949</jenkins-test-harness.version>
         <disabledTestInjection>true</disabledTestInjection>
     </properties>
 
@@ -100,18 +99,19 @@
 
     <dependencies>
 
-        <!-- for Jenkins Pipelines -->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-step-api</artifactId>
-        </dependency>
-
         <!-- Fortify REST API client published on mavencentral -->
         <dependency>
             <groupId>com.fortify</groupId>
             <artifactId>ssc-restapi-client</artifactId>
             <version>22.1</version>
             <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- for Jenkins Pipelines -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
             <scope>compile</scope>
         </dependency>
 
@@ -127,6 +127,23 @@
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>gradle</artifactId>
             <version>1.37.1</version>
+        </dependency>
+
+        <!-- for Credentials support -->
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>plain-credentials</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials-binding</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <!-- for local testing -->
@@ -158,6 +175,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps-global-lib</artifactId>
+            <!--artifactId>pipeline-groovy-lib</artifactId-->
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -181,6 +199,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- compile time dependencies -->
+        <dependency>
+           <groupId>jakarta.mail</groupId>
+           <artifactId>jakarta.mail-api</artifactId>
+           <version>1.6.7</version>
+            <scope>compile</scope>
+       </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -193,6 +218,11 @@
            <version>31.1-jre</version>
             <scope>compile</scope>
        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+        </dependency>
 
         <!-- these are swagger generated REST API dependencies -->
         <dependency>

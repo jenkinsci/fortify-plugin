@@ -240,19 +240,13 @@ public class FortifyTranslate extends FortifySCAStep {
 	}
 
 	@Override
-	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
+	public void perform(Run<?, ?> build, FilePath workspace, EnvVars vars, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
 		setLastBuild(build);
 		PrintStream log = listener.getLogger();
 		log.println("Fortify Jenkins plugin v " + VERSION);
 		log.println("Launching Fortify SCA translate command");
 		String projectRoot = workspace.child(".fortify").getRemote();
-		String sourceanalyzer = null;
-
-		if (sourceanalyzer == null) {
-			sourceanalyzer = getSourceAnalyzerExecutable(build, workspace, launcher, listener);
-		}
-
-		EnvVars vars = build.getEnvironment(listener);
+		String sourceanalyzer = getSourceAnalyzerExecutable(build, workspace, launcher, listener, vars);
 		ArrayList<String> args = new ArrayList<String>();
 		args.add(sourceanalyzer);
 		args.add("-Dcom.fortify.sca.ProjectRoot=" + projectRoot);
@@ -314,7 +308,7 @@ public class FortifyTranslate extends FortifySCAStep {
 			if (StringUtils.isNotEmpty(option)) {
 				addAllArguments(args, option, "-exclude");
 			}
-			args.add(getDevenvExecutable(build, workspace, launcher, listener));
+			args.add(getDevenvExecutable(build, workspace, launcher, listener, vars));
 			option = getResolvedDotnetProjects(projectScanType, listener);
 			if (StringUtils.isNotEmpty(option)) {
 				args.add(option);
@@ -329,7 +323,7 @@ public class FortifyTranslate extends FortifySCAStep {
 			if (StringUtils.isNotEmpty(option)) {
 				addAllArguments(args, option, "-exclude");
 			}
-			args.add(getMSBuildExecutable(build, workspace, launcher, listener));
+			args.add(getMSBuildExecutable(build, workspace, launcher, listener, vars));
 			option = getResolvedDotnetProjects(projectScanType, listener);
 			if (StringUtils.isNotEmpty(option)) {
 				args.add(option);
@@ -365,7 +359,7 @@ public class FortifyTranslate extends FortifySCAStep {
 		} else if (projectScanType instanceof MavenScanType) {
 			log.println("Running Maven 3 translation");
 			String mavenInstallationName = ((MavenScanType) projectScanType).getMavenInstallationName();
-			args.add(getMavenExecutable(build, workspace, launcher, listener, mavenInstallationName, currentNode));
+			args.add(getMavenExecutable(build, workspace, launcher, listener, mavenInstallationName, currentNode, vars));
 			option = getResolvedTranslationExcludeList(listener);
 			if (StringUtils.isNotEmpty(option)) {
 				addMavenExcludes(args, option, launcher.isUnix());
@@ -384,7 +378,7 @@ public class FortifyTranslate extends FortifySCAStep {
 			if (StringUtils.isNotEmpty(option)) {
 				addAllArguments(args, option, "-exclude");
 			}
-			args.add(getGradleExecutable(((GradleScanType) projectScanType).getUseWrapper(), build, workspace, launcher, listener, gradleInstallationName, currentNode));
+			args.add(getGradleExecutable(((GradleScanType) projectScanType).getUseWrapper(), build, workspace, launcher, listener, gradleInstallationName, currentNode, vars));
 			option = getResolvedGradleOptions((GradleScanType) projectScanType, listener);
 			if (StringUtils.isNotEmpty(option)) {
 				addAllArguments(args, option);
@@ -480,10 +474,8 @@ public class FortifyTranslate extends FortifySCAStep {
 			if (!workspace.exists()) {
 				workspace.mkdirs();
 			}
-
 			ft.setCurrentNode(context.get(Node.class));
-			ft.perform(context.get(Run.class), workspace, context.get(Launcher.class), taskListener);
-
+			ft.perform(context.get(Run.class), workspace, context.get(EnvVars.class), context.get(Launcher.class), taskListener);
 			return null;
 		}
 

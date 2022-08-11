@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * (c) Copyright 2022 Micro Focus or one of its affiliates. 
+ * 
+ * Licensed under the MIT License (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * https://opensource.org/licenses/MIT
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package com.fortify.plugin.jenkins.steps;
 
 import com.google.common.collect.ImmutableSet;
@@ -13,7 +28,6 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.*;
 
-import javax.annotation.Nonnull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -45,24 +59,23 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener taskListener) throws InterruptedException, IOException {
+    public void perform(Run<?, ?> run, FilePath filePath, EnvVars vars, Launcher launcher, TaskListener taskListener) throws InterruptedException, IOException {
         setLastBuild(run);
         PrintStream log = taskListener.getLogger();
         log.println("Fortify Jenkins plugin v " + VERSION);
         log.println("Launching Fortify scancentral arguments command");
         String cloudscanExec;
         try {
-            cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener);
+            cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener, vars);
         } catch (FileNotFoundException ex) {
             log.println("WARNING: Cannot find scancentral executable");
             try {
-                cloudscanExec = getCloudScanExecutable(run, filePath, launcher, taskListener);
+                cloudscanExec = getCloudScanExecutable(run, filePath, launcher, taskListener, vars);
             } catch (FileNotFoundException exception) {
                 throw new RuntimeException("Cannot find cloudscan executable");
             }
         }
 
-        EnvVars vars = run.getEnvironment(taskListener);
         ArrayList<String> args = new ArrayList<String>(2);
         args.add(cloudscanExec);
         args.add("arguments");
@@ -123,14 +136,13 @@ public class CloudScanArguments extends FortifyCloudScanStep implements SimpleBu
 
         @Override
         protected Void run() throws Exception {
-            getContext().get(TaskListener.class).getLogger().println("Running ScanCentral arguments step");
-            if (!getContext().get(FilePath.class).exists()) {
-                getContext().get(FilePath.class).mkdirs();
+            StepContext context = getContext();
+            context.get(TaskListener.class).getLogger().println("Running ScanCentral arguments step");
+            if (!context.get(FilePath.class).exists()) {
+                context.get(FilePath.class).mkdirs();
             }
-
-            csArguments.perform(getContext().get(Run.class), getContext().get(FilePath.class), getContext().get(Launcher.class),
-                    getContext().get(TaskListener.class));
-
+            csArguments.perform(context.get(Run.class), context.get(FilePath.class), context.get(EnvVars.class), 
+                    context.get(Launcher.class), context.get(TaskListener.class));
             return null;
         }
 

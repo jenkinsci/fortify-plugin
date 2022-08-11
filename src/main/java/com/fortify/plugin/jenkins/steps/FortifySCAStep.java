@@ -90,16 +90,13 @@ public abstract class FortifySCAStep extends FortifyStep {
 		this.logFile = logFile;
 	}
 
-	protected String getSourceAnalyzerExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,
-			TaskListener listener) throws InterruptedException, IOException {
-		return getExecutable("sourceanalyzer" + (launcher.isUnix() ? "" : ".exe"), build, workspace,
-			listener, "FORTIFY_HOME");
+	protected String getSourceAnalyzerExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, EnvVars vars) throws InterruptedException, IOException {
+		return getExecutable("sourceanalyzer" + (launcher.isUnix() ? "" : ".exe"), build, workspace, listener, "FORTIFY_HOME", vars);
 	}
 
-	protected String getMavenExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String mavenInstallationName, Node currentNode)
+	protected String getMavenExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String mavenInstallationName, Node currentNode, EnvVars envVars)
 			throws InterruptedException, IOException {
 		String result = "";
-		final EnvVars envVars = build.getEnvironment(listener);
 		DescriptorExtensionList<ToolInstallation, ToolDescriptor<?>> tools = ToolInstallation.all();
 		ToolDescriptor<?> ti = tools.find(MavenInstallation.class);
 		if (ti != null) {
@@ -121,12 +118,12 @@ public abstract class FortifySCAStep extends FortifyStep {
 		}
 		if (result == null || result.isEmpty()) { //fallback to the previous logic
 			if (envVars.containsKey("MAVEN_HOME")) {
-				result = getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", "MAVEN_HOME");
+				result = getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", "MAVEN_HOME", envVars);
 			} else if (envVars.containsKey("M2_HOME")) {
-				result = getExecutableForEnvVar(build, workspace, launcher, listener, ".cmd", ".bat", "M2_HOME");
+				result = getExecutableForEnvVar(build, workspace, launcher, listener, ".cmd", ".bat", "M2_HOME", envVars);
 			}
 			if (result == null || result.isEmpty()) {
-				result = getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", "PATH");//was null instead of Path
+				result = getExecutableForEnvVar(build, workspace, launcher, listener, ".bat", ".cmd", "PATH", envVars);//was null instead of Path
 			}
 		}
 		listener.getLogger().println("Using Maven executable " + result);
@@ -134,20 +131,19 @@ public abstract class FortifySCAStep extends FortifyStep {
 	}
 
 	private String getExecutableForEnvVar(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String ext1, String ext2,
-										  String targetEnvVarName) throws InterruptedException, IOException {
+										  String targetEnvVarName, EnvVars vars) throws InterruptedException, IOException {
 		if (launcher.isUnix()) {
-			return getExecutable("mvn", build, workspace, listener, targetEnvVarName);
+			return getExecutable("mvn", build, workspace, listener, targetEnvVarName, vars);
 		}
 		try {
-			return getExecutable("mvn" + ext1, build, workspace, listener, targetEnvVarName);
+			return getExecutable("mvn" + ext1, build, workspace, listener, targetEnvVarName, vars);
 		} catch (FileNotFoundException ex) {
-			return getExecutable("mvn" + ext2, build, workspace, listener, targetEnvVarName);
+			return getExecutable("mvn" + ext2, build, workspace, listener, targetEnvVarName, vars);
 		}
 	}
 
-	protected String getGradleExecutable(boolean useWrapper, Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String gradleInstallationName, Node currentNode) throws InterruptedException, IOException {
+	protected String getGradleExecutable(boolean useWrapper, Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, String gradleInstallationName, Node currentNode, EnvVars envVars) throws InterruptedException, IOException {
 		String result = "";
-		final EnvVars envVars = build.getEnvironment(listener);
 		DescriptorExtensionList<ToolInstallation, ToolDescriptor<?>> tools = ToolInstallation.all();
 		ToolDescriptor<?> ti = tools.find(GradleInstallation.class);
 		if (ti != null) {
@@ -168,26 +164,24 @@ public abstract class FortifySCAStep extends FortifyStep {
 			}
 		}
 		if (result == null || result.isEmpty()) { //fallback to the previous logic
-			result = getExecutable("gradle" + (useWrapper ? "w" : "") + (launcher.isUnix() ? "" : ".bat"), build, workspace, listener, "GRADLE_HOME");
+			result = getExecutable("gradle" + (useWrapper ? "w" : "") + (launcher.isUnix() ? "" : ".bat"), build, workspace, listener, "GRADLE_HOME", envVars);
 		}
 		listener.getLogger().println("Using Gradle executable " + result);
 		return result;
 	}
 
-	protected String getDevenvExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
-			throws InterruptedException, IOException {
+	protected String getDevenvExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, EnvVars envVars) throws InterruptedException, IOException {
 		if (launcher.isUnix()) {
 			throw new RuntimeException("Sorry, devenv is not supported on Unix platform.");
 		}
-		return getExecutable("devenv.exe", build, workspace, listener, null);
+		return getExecutable("devenv.exe", build, workspace, listener, null, envVars);
 	}
 
-	protected String getMSBuildExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
-			throws InterruptedException, IOException {
+	protected String getMSBuildExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener, EnvVars envVars) throws InterruptedException, IOException {
 		if (launcher.isUnix()) {
 			throw new RuntimeException("Sorry, msbuild is not supported on Unix platform.");
 		}
-		return getExecutable("msbuild.exe", build, workspace, listener, null);
+		return getExecutable("msbuild.exe", build, workspace, listener, null, envVars);
 	}
 
 	public Integer getResolvedMaxHeap(TaskListener listener) {

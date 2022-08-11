@@ -56,19 +56,16 @@ public class FortifyClean extends FortifySCAStep implements SimpleBuildStep {
 	}
 
 	@Override
-	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
+	public void perform(Run<?, ?> build, FilePath workspace, EnvVars vars, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
 		setLastBuild(build);
 		PrintStream log = listener.getLogger();
 		log.println("Fortify Jenkins plugin v " + VERSION);
 		log.println("Launching Fortify SCA clean command");
 		String projectRoot = workspace.child(".fortify").getRemote();
 		String sourceanalyzer = null;
-
 		if (sourceanalyzer == null) {
-			sourceanalyzer = getSourceAnalyzerExecutable(build, workspace, launcher, listener);
+			sourceanalyzer = getSourceAnalyzerExecutable(build, workspace, launcher, listener, vars);
 		}
-
-		EnvVars vars = build.getEnvironment(listener);
 		ArrayList<String> args = new ArrayList<String>(2);
 		args.add(sourceanalyzer);
 		args.add("-Dcom.fortify.sca.ProjectRoot=" + projectRoot);
@@ -144,13 +141,13 @@ public class FortifyClean extends FortifySCAStep implements SimpleBuildStep {
 
 		@Override
 		protected Void run() throws Exception {
-			getContext().get(TaskListener.class).getLogger().println("Running FortifyClean step");
-			if (!getContext().get(FilePath.class).exists()) {
-				getContext().get(FilePath.class).mkdirs();
+			StepContext context = getContext();
+			context.get(TaskListener.class).getLogger().println("Running FortifyClean step");
+			if (!context.get(FilePath.class).exists()) {
+				context.get(FilePath.class).mkdirs();
 			}
-			fc.perform(getContext().get(Run.class), getContext().get(FilePath.class), getContext().get(Launcher.class),
-					getContext().get(TaskListener.class));
-
+			fc.perform(context.get(Run.class), context.get(FilePath.class), context.get(EnvVars.class),
+					context.get(Launcher.class), context.get(TaskListener.class));
 			return null;
 		}
 

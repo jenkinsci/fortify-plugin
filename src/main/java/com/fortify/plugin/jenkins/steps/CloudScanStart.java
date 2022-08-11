@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * (c) Copyright 2022 Micro Focus or one of its affiliates. 
+ * 
+ * Licensed under the MIT License (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * https://opensource.org/licenses/MIT
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package com.fortify.plugin.jenkins.steps;
 
 import com.fortify.plugin.jenkins.FortifyPlugin;
@@ -17,7 +32,6 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.*;
 
-import javax.annotation.Nonnull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -194,7 +208,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath filePath, @Nonnull Launcher launcher, @Nonnull TaskListener taskListener) throws InterruptedException, IOException {
+    public void perform(Run<?, ?> run, FilePath filePath, EnvVars vars, Launcher launcher, TaskListener taskListener) throws InterruptedException, IOException {
         setLastBuild(run);
         PrintStream log = taskListener.getLogger();
         log.println("Fortify Jenkins plugin v " + VERSION);
@@ -202,29 +216,28 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
         String projectRoot = filePath.child(".fortify").getRemote();
         String cloudscanExec;
         try {
-            cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener);
+            cloudscanExec = getScancentralExecutable(run, filePath, launcher, taskListener, vars);
         } catch (FileNotFoundException ex) {
             log.println("WARNING: Cannot find scancentral executable");
             try {
-                cloudscanExec = getCloudScanExecutable(run, filePath, launcher, taskListener);
+                cloudscanExec = getCloudScanExecutable(run, filePath, launcher, taskListener, vars);
             } catch (FileNotFoundException exception) {
                 throw new RuntimeException("Cannot find cloudscan executable");
             }
         }
 
-        EnvVars vars = run.getEnvironment(taskListener);
         ArrayList<String> args = new ArrayList<String>(2);
         args.add(cloudscanExec);
 
         /*
             if SSC is configured, use SSC's configuration to find the Controller
          */
-        if (FortifyPlugin.DESCRIPTOR.getUrl() != null) {
+        if (StringUtils.isNotBlank(FortifyPlugin.DESCRIPTOR.getUrl())) {
             args.add("-sscurl");
             args.add(FortifyPlugin.DESCRIPTOR.getUrl());
             args.add("-ssctoken");
             args.add(FortifyPlugin.DESCRIPTOR.getToken());
-        } else if (FortifyPlugin.DESCRIPTOR.getCtrlUrl() != null) {
+        } else if (StringUtils.isNotBlank(FortifyPlugin.DESCRIPTOR.getCtrlUrl())) {
             args.add("-url");
             args.add(FortifyPlugin.DESCRIPTOR.getCtrlUrl());
         } else {
@@ -334,7 +347,7 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
-            return ImmutableSet.of(Run.class, FilePath.class, Launcher.class, TaskListener.class);
+            return ImmutableSet.of(Run.class, FilePath.class, EnvVars.class, Launcher.class, TaskListener.class);
         }
 
         public void doRefreshProjects(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
@@ -371,14 +384,13 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
 
         @Override
         protected Void run() throws Exception {
-            getContext().get(TaskListener.class).getLogger().println("Running Fortify remote analysis step");
-            if (!getContext().get(FilePath.class).exists()) {
-                getContext().get(FilePath.class).mkdirs();
+            StepContext context = getContext();
+            context.get(TaskListener.class).getLogger().println("Running Fortify remote analysis step");
+            if (!context.get(FilePath.class).exists()) {
+                context.get(FilePath.class).mkdirs();
             }
-
-            csStart.perform(getContext().get(Run.class), getContext().get(FilePath.class), getContext().get(Launcher.class),
-                    getContext().get(TaskListener.class));
-
+            csStart.perform(context.get(Run.class), context.get(FilePath.class), context.get(EnvVars.class),
+                    context.get(Launcher.class), context.get(TaskListener.class));
             return null;
         }
 

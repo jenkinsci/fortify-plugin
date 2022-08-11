@@ -102,19 +102,16 @@ public class FortifyScan extends FortifySCAStep {
 	}
 
 	@Override
-	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
-			throws InterruptedException, IOException {
+	public void perform(Run<?, ?> build, FilePath workspace, EnvVars vars, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
 		setLastBuild(build);
 		PrintStream log = listener.getLogger();
 		log.println("Fortify Jenkins plugin v " + VERSION);
 		log.println("Launching Fortify SCA scan command");
 		String projectRoot = workspace.child(".fortify").getRemote();
 		String sourceanalyzer = null;
-
 		if (sourceanalyzer == null) {
-			sourceanalyzer = getSourceAnalyzerExecutable(build, workspace, launcher, listener);
+			sourceanalyzer = getSourceAnalyzerExecutable(build, workspace, launcher, listener, vars);
 		}
-		EnvVars vars = build.getEnvironment(listener);
 		ArrayList<String> args = new ArrayList<String>();
 		args.add(sourceanalyzer);
 		args.add("-Dcom.fortify.sca.ProjectRoot=" + projectRoot);
@@ -209,13 +206,13 @@ public class FortifyScan extends FortifySCAStep {
 			if (FortifyPlugin.DESCRIPTOR.isDisableLocalScans()) {
 				throw new AbortException(Messages.FortifyScan_Local_NotSupported());
 			}
-			getContext().get(TaskListener.class).getLogger().println("Running FortifyScan step");
-			if (!getContext().get(FilePath.class).exists()) {
-				getContext().get(FilePath.class).mkdirs();
+			StepContext context = getContext();
+			context.get(TaskListener.class).getLogger().println("Running FortifyScan step");
+			if (!context.get(FilePath.class).exists()) {
+				context.get(FilePath.class).mkdirs();
 			}
-			fs.perform(getContext().get(Run.class), getContext().get(FilePath.class), getContext().get(Launcher.class),
-					getContext().get(TaskListener.class));
-
+			fs.perform(context.get(Run.class), context.get(FilePath.class), context.get(EnvVars.class),
+					context.get(Launcher.class), context.get(TaskListener.class));
 			return null;
 		}
 

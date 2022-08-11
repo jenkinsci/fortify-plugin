@@ -151,12 +151,12 @@ public class FortifyUpdate extends FortifyStep {
 	}
 
 	@Override
-	public void perform(Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
+	public void perform(Run<?, ?> build, FilePath workspace, EnvVars vars, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
 		PrintStream log = listener.getLogger();
 		log.println("Fortify Jenkins plugin v " + VERSION);
 		log.println("Launching fortifyupdate command");
 		ArrayList<String> args = new ArrayList<String>();
-		String fortifyUpdate = getFortifyUpdateExecutable(build, workspace, launcher, listener);
+		String fortifyUpdate = getFortifyUpdateExecutable(build, workspace, launcher, listener, vars);
 		args.add(fortifyUpdate);
 		String updateServerUrl = getResolvedUpdateServerURL(listener);
 		if (!"".equals(updateServerUrl)) {
@@ -178,8 +178,6 @@ public class FortifyUpdate extends FortifyStep {
 			args.add("-locale");
 			args.add(localeStr);
 		}
-
-		EnvVars vars = build.getEnvironment(listener);
 		ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(workspace).cmds(args).envs(vars)
 				.stdout(listener.getLogger()).stderr(listener.getLogger());
 		int exitcode = ps.join();
@@ -192,9 +190,9 @@ public class FortifyUpdate extends FortifyStep {
 	}
 
 	private String getFortifyUpdateExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,
-			TaskListener listener) throws InterruptedException, IOException {
+			TaskListener listener, EnvVars vars) throws InterruptedException, IOException {
 		return getExecutable("fortifyupdate" + (launcher.isUnix() ? "" : ".cmd"), build, workspace,
-				listener, "FORTIFY_HOME");
+				listener, "FORTIFY_HOME", vars);
 	}
 
 	@Extension
@@ -248,13 +246,13 @@ public class FortifyUpdate extends FortifyStep {
 
 		@Override
 		protected Void run() throws Exception {
-			getContext().get(TaskListener.class).getLogger().println("Running FortifyUpdate step");
-			if (!getContext().get(FilePath.class).exists()) {
-				getContext().get(FilePath.class).mkdirs();
+			StepContext context = getContext();
+			context.get(TaskListener.class).getLogger().println("Running FortifyUpdate step");
+			if (!context.get(FilePath.class).exists()) {
+				context.get(FilePath.class).mkdirs();
 			}
-			fu.perform(getContext().get(Run.class), getContext().get(FilePath.class), getContext().get(Launcher.class),
-					getContext().get(TaskListener.class));
-
+			fu.perform(context.get(Run.class), context.get(FilePath.class), context.get(EnvVars.class),
+					context.get(Launcher.class), context.get(TaskListener.class));
 			return null;
 		}
 

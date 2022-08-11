@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import hudson.Util;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -35,6 +34,7 @@ import com.fortify.plugin.jenkins.FortifyPlugin;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -62,58 +62,63 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 	 * @param workspace
 	 * @param listener
 	 * @param targetEnvVarName
+	 * @param vars 
 	 * @return found executable
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
 	protected String getExecutable(String filename, Run<?, ?> build, FilePath workspace,
-								   TaskListener listener, String targetEnvVarName) throws InterruptedException, IOException {
+			TaskListener listener, String targetEnvVarName, EnvVars env) throws InterruptedException, IOException {
 		PrintStream logger = listener.getLogger();
-		EnvVars env = build.getEnvironment(listener);
-
 		String home = null;
 		String path = null;
 		boolean isEnvVarSetProperly = true;
-		// check env variables defined in Jenkins master
-		for (Map.Entry<String, String> entry : env.entrySet()) {
-			String envVarName = entry.getKey();
-			String envVarValue = entry.getValue();
-			if (targetEnvVarName != null && targetEnvVarName.equals(envVarName)) {
-				if ("PATH".equalsIgnoreCase(targetEnvVarName)) {
-					path = envVarValue;
-				} else {
-					home = envVarValue;
-					if (endsWithBin(envVarValue)) {
-						logger.println("WARNING: Environment variable " + envVarName + " should not point to bin directory");
-						isEnvVarSetProperly = false;
-					}
+		if (targetEnvVarName != null && !targetEnvVarName.equalsIgnoreCase("PATH")) {
+			home = env.get(targetEnvVarName);
+			if (home != null) {
+				home = home.trim();
+				if (endsWithBin(home)) {
+					logger.println("WARNING: Environment variable " + targetEnvVarName + " should not point to bin directory");
+					isEnvVarSetProperly = false;
 				}
-			} else if ("PATH".equalsIgnoreCase(envVarName)) {
-				path = envVarValue;
 			}
 		}
-
-		String errorMsg = "make sure that either ";
-		if (targetEnvVarName != null) {
-			errorMsg += targetEnvVarName + " environment variable is set" + (!isEnvVarSetProperly ? " properly" : "") + " or ";
+		for (Map.Entry<String, String> entry : env.entrySet()) {
+			String envVarName = entry.getKey();
+			if ("PATH".equalsIgnoreCase(targetEnvVarName)) {
+				path = env.get(envVarName);
+			}
 		}
-		errorMsg += filename + " is on the PATH or in workspace";
-		return findExecutablePath(filename, home, path, workspace, logger, errorMsg);
+		return findExecutablePath(filename, home, path, workspace, logger, targetEnvVarName, isEnvVarSetProperly);
 	}
 
 	private static boolean endsWithBin(String str) {
 		return str.endsWith("bin") || str.endsWith("bin/") || str.endsWith("bin\\");
 	}
 
-	private String findExecutablePath(String filename, String home, String path, FilePath workspace, PrintStream logger, String errorMsg)
+	private String findExecutablePath(String filename, String home, String path, FilePath workspace, PrintStream logger, String targetEnvVarName, boolean isEnvVarSetProperly)
 			throws IOException, InterruptedException {
 		String executablePath = workspace.act(new FindExecutableRemoteService(filename, home, path, workspace));
 		if (executablePath == null) {
-			throw new FileNotFoundException("ERROR: executable not found: " + filename + "; " + errorMsg);
+			throw new FileNotFoundException("ERROR: executable not found: " + filename + "; " + composeEnvVarErrorMessage(filename, targetEnvVarName, isEnvVarSetProperly));
 		} else {
 			logger.printf("Found executable: %s%n", executablePath);
 			return executablePath;
 		}
+	}
+
+	private String composeEnvVarErrorMessage(String filename, String targetEnvVarName, boolean isEnvVarSetProperly) {
+		StringBuilder errorMsg = new StringBuilder();
+		errorMsg.append("make sure that either ");
+		if (targetEnvVarName != null) {
+			errorMsg.append(targetEnvVarName).append(" environment variable is set");
+			if (!isEnvVarSetProperly) {
+				errorMsg.append(" properly");
+			}
+			errorMsg.append(" or ");
+		}
+		errorMsg.append(filename).append(" is on the PATH or in workspace");
+		return errorMsg.toString();
 	}
 
 	protected String resolve(String param, TaskListener listener) {
@@ -142,9 +147,9 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 	}
 
 	@Override
-	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException { //XXX
 		if (build != null && launcher != null && listener != null && build.getWorkspace() != null) {
-			perform(build, build.getWorkspace(), launcher, listener);
+			perform(build, build.getWorkspace(), build.getEnvironment(listener), launcher, listener);
 		}
 		return true;
 	}

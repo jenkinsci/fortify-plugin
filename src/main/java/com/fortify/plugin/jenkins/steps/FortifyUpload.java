@@ -56,6 +56,7 @@ import com.fortify.ssc.restclient.model.Artifact;
 import com.google.common.collect.ImmutableSet;
 
 import hudson.AbortException;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -208,7 +209,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 	}
 
 	@Override
-	public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
+	public void perform(Run<?, ?> run, FilePath workspace, EnvVars vars, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
 		PrintStream log = listener.getLogger();
 		setLastBuild(run);
 		RemoteService service = new RemoteService(getResolvedFpr(listener));
@@ -820,10 +821,10 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 
 		@Override
 		protected Void run() throws Exception {
-			getContext().get(TaskListener.class).getLogger().println("Running FortifyUpload step");
-			upload.perform(getContext().get(Run.class), getContext().get(FilePath.class),
-					getContext().get(Launcher.class), getContext().get(TaskListener.class));
-
+			StepContext context = getContext();
+			context.get(TaskListener.class).getLogger().println("Running FortifyUpload step");
+			upload.perform(context.get(Run.class), context.get(FilePath.class), context.get(EnvVars.class),
+					context.get(Launcher.class), context.get(TaskListener.class));
 			return null;
 		}
 

@@ -75,6 +75,7 @@ public class JavaScanType extends ProjectScanType {
 
 	@Extension @Symbol("fortifyJava")
 	public static final class DescriptorImpl extends ProjectScanTypeDescriptor {
+
 		public DescriptorImpl() {
 			super(JavaScanType.class);
 		}
@@ -84,7 +85,7 @@ public class JavaScanType extends ProjectScanType {
 			return Messages.JavaScanType_DisplayName();
 		}
 
-		public ListBoxModel doFillJavaVersionItems(String value) {
+		public ListBoxModel doFillJavaVersionItems(@QueryParameter String javaVersion) {
 			ListBoxModel items = new ListBoxModel();
 			items.add("5 (obsolete)", "5");
 			items.add("6 (obsolete)", "6");
@@ -98,7 +99,7 @@ public class JavaScanType extends ProjectScanType {
 			items.add("14", "14");
 			items.add("17", "17");
 
-			if ((null == value) || (0 == value.length())) {
+			if ((null == javaVersion) || (0 == javaVersion.length())) {
 				items.get(3).selected = true; // default to Java 8
 			}
 

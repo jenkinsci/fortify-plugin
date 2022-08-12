@@ -15,8 +15,8 @@
     limitations under the License.
  -->
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-	<f:entry title="${%Java source version}" field="javaVersion" help="/plugin/fortify/help-javaSourceVersion.html">
-		<f:select/>
+	<f:entry title="${%Java source version}" help="/plugin/fortify/help-javaSourceVersion.html">
+		<f:select field="javaVersion"/>
 	</f:entry>
 	<f:entry title="${%Java classpath}" field="javaClasspath" help="/plugin/fortify/help-javaClasspath.html">
 		<f:textbox/>

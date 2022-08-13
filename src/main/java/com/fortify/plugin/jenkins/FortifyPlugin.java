@@ -1643,7 +1643,7 @@ public class FortifyPlugin extends Recorder {
 			String orig_tokenId = this.sscTokenCredentialsId;
 
 			String url = req.getParameter("url");
-			String proxyEnabled = req.getParameter("proxyConfig");
+			String proxyEnabled = req.getParameter("isProxy");
 			if (proxyEnabled == null) {
 				proxyEnabled = req.getParameter("_.proxyConfig");
 			}
@@ -1659,7 +1659,7 @@ public class FortifyPlugin extends Recorder {
 			this.sscTokenCredentialsId = tokenId;
 
 			try {
-				FormValidation testConnectionResult = doTestConnection(this.url, this.getToken(), useProxyParam, connectTimeout, readTimeout, writeTimeout);
+				FormValidation testConnectionResult = doTestConnection(this.url, this.getSscTokenCredentialsId(), useProxyParam, connectTimeout, readTimeout, writeTimeout);
 				if (!testConnectionResult.kind.equals(FormValidation.Kind.OK)) {
 					LOGGER.log(Level.WARNING, "Can't retrieve Fortify Issue Template list because of SSC server connection problem: " + testConnectionResult.getLocalizedMessage());
 					return; // don't get templates if server is unavailable
@@ -1714,7 +1714,7 @@ public class FortifyPlugin extends Recorder {
 			this.sscTokenCredentialsId = req.getParameter("sscTokenCredentialsId");
 
 			try {
-				FormValidation testConnectionResult = doTestConnection(this.url, this.getToken(), useProxyParam, connectTimeout, readTimeout, writeTimeout); //XXX verify ctrl or ssc token id is needed
+				FormValidation testConnectionResult = doTestConnection(this.url, this.getSscTokenCredentialsId(), useProxyParam, connectTimeout, readTimeout, writeTimeout); //XXX verify ctrl or ssc token id is needed
 				if (!testConnectionResult.kind.equals(FormValidation.Kind.OK)) {
 					throw new Exception(testConnectionResult.getLocalizedMessage()); // don't get sensor pools if server is unavailable
 				}

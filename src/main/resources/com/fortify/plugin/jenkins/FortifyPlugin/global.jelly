@@ -42,7 +42,7 @@
           <f:editableComboBox id="projectTemplate" name="projectTemplate" field="projectTemplate" clazz="setting-input" items="${descriptor.projectTemplateItems}" />
         </div>
         <div style="float:left">
-          <input value="▼" type="button" id="refreshButton" onclick="refreshTemplateList('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjectTemplates','url,sscTokenCredentialsId,proxyConfig,proxyUrl,proxyCredentialsId')" />
+          <input value="▼" type="button" id="refreshButton" onclick="refreshTemplateList('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjectTemplates','url,sscTokenCredentialsId,isProxy,proxyUrl,proxyCredentialsId')" />
         </div>
         <div style="display:none;" id="refreshSpinner" >
           <img src="${imagesURL}/spinner.gif" /> ${progress}

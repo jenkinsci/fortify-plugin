@@ -215,7 +215,7 @@ public class FortifyUpdate extends FortifyStep {
 
 		@Override
 		public Set<? extends Class<?>> getRequiredContext() {
-			return ImmutableSet.of(Run.class, FilePath.class, Launcher.class, TaskListener.class);
+			return ImmutableSet.of(Run.class, FilePath.class, EnvVars.class, Launcher.class, TaskListener.class);
 		}
 
 		public ListBoxModel doFillLocaleItems(String value) {

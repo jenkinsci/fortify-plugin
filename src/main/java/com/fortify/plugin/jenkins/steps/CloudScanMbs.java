@@ -223,7 +223,7 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
 
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
-            return ImmutableSet.of(Run.class, FilePath.class, Launcher.class, TaskListener.class);
+            return ImmutableSet.of(Run.class, FilePath.class, EnvVars.class, Launcher.class, TaskListener.class);
         }
 
         public FormValidation doCheckBuildID(@QueryParameter String value) {

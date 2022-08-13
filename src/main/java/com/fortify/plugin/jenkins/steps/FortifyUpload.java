@@ -210,6 +210,10 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 
 	@Override
 	public void perform(Run<?, ?> run, FilePath workspace, EnvVars vars, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
+		performAndReturnIssueCount(run, workspace, vars, launcher, listener);
+	}
+
+	public Integer performAndReturnIssueCount(Run<?, ?> run, FilePath workspace, EnvVars vars, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
 		PrintStream log = listener.getLogger();
 		setLastBuild(run);
 		RemoteService service = new RemoteService(getResolvedFpr(listener));
@@ -246,6 +250,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 			run.addAction(buildAction);
 		}
 		buildAction.addAppVersion(run.getParent(), this, appName, appVersion);
+		return summary.getFailedCount();
 	}
 
 	/**
@@ -460,7 +465,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 					|| IssueFolderBean.NAME_HOT.equals(folder.getName())) {
 				List<GroupingValueBean> groupingValues = getGroupingValues(versionId, folder.getId(), null,
 						GroupingValueBean.GROUPING_TYPE_ANALYSIS, listener);
-				log.printf("Got %d grouping values for folder = %s%n", groupingValues.size(), folder.getName());
+				log.printf("Got %d audit values for folder = %s%n", groupingValues.size(), folder.getName());
 
 				for (GroupingValueBean group : groupingValues) {
 					if (GroupingValueBean.ID_NOT_AN_ISSUE.equals(group.getName())) {
@@ -472,7 +477,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 					|| IssueFolderBean.NAME_WARNING.equals(folder.getName())) {
 				List<GroupingValueBean> groupingValues = getGroupingValues(versionId, folder.getId(), null,
 						GroupingValueBean.GROUPING_TYPE_ANALYSIS, listener);
-				log.printf("Got %d grouping values for folder = %s%n", groupingValues.size(), folder.getName());
+				log.printf("Got %d audit values for folder = %s%n", groupingValues.size(), folder.getName());
 
 				for (GroupingValueBean group : groupingValues) {
 					if (GroupingValueBean.ID_NOT_AN_ISSUE.equals(group.getName())) {
@@ -483,7 +488,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 			} else if (IssueFolderBean.NAME_MEDIUM.equals(folder.getName())) {
 				List<GroupingValueBean> groupingValues = getGroupingValues(versionId, folder.getId(), null,
 						GroupingValueBean.GROUPING_TYPE_ANALYSIS, listener);
-				log.printf("Got %d grouping values for folder = %s%n", groupingValues.size(), folder.getName());
+				log.printf("Got %d audit values for folder = %s%n", groupingValues.size(), folder.getName());
 
 				for (GroupingValueBean group : groupingValues) {
 					if (GroupingValueBean.ID_NOT_AN_ISSUE.equals(group.getName())) {
@@ -495,7 +500,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 					|| IssueFolderBean.NAME_INFO.equals(folder.getName())) {
 				List<GroupingValueBean> groupingValues = getGroupingValues(versionId, folder.getId(), null,
 						GroupingValueBean.GROUPING_TYPE_ANALYSIS, listener);
-				log.printf("Got %d grouping values for folder = %s%n", groupingValues.size(), folder.getName());
+				log.printf("Got %d audit values for folder = %s%n", groupingValues.size(), folder.getName());
 
 				for (GroupingValueBean group : groupingValues) {
 					if (GroupingValueBean.ID_NOT_AN_ISSUE.equals(group.getName())) {
@@ -506,7 +511,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 			} else if (IssueFolderBean.ATTRIBUTE_VALUE_ALL.equals(folder.getName())) {
 				List<GroupingValueBean> groupingValues = getGroupingValues(versionId, folder.getId(), null,
 						GroupingValueBean.GROUPING_TYPE_ANALYSIS, listener);
-				log.printf("Got %d grouping values for folder = %s%n", groupingValues.size(), folder.getName());
+				log.printf("Got %d audit values for folder = %s%n", groupingValues.size(), folder.getName());
 
 				totalIssues = folder.getIssueCount();
 
@@ -769,7 +774,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 
 		@Override
 		public Set<? extends Class<?>> getRequiredContext() {
-			return ImmutableSet.of(Run.class, FilePath.class, Launcher.class, TaskListener.class);
+			return ImmutableSet.of(Run.class, FilePath.class, EnvVars.class, Launcher.class, TaskListener.class);
 		}
 
 		public ComboBoxModel getApplicationNameItems() {
@@ -811,7 +816,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 		return tmpFile;
 	}
 
-	private static class Execution extends SynchronousNonBlockingStepExecution<Void> {
+	private static class Execution extends SynchronousNonBlockingStepExecution<Integer> {
 		private FortifyUpload upload;
 
 		protected Execution(FortifyUpload upload, StepContext context) {
@@ -820,12 +825,12 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 		}
 
 		@Override
-		protected Void run() throws Exception {
+		protected Integer run() throws Exception {
 			StepContext context = getContext();
-			context.get(TaskListener.class).getLogger().println("Running FortifyUpload step");
-			upload.perform(context.get(Run.class), context.get(FilePath.class), context.get(EnvVars.class),
-					context.get(Launcher.class), context.get(TaskListener.class));
-			return null;
+			TaskListener listener = context.get(TaskListener.class);
+			listener.getLogger().println("Running FortifyUpload step");
+			return upload.performAndReturnIssueCount(context.get(Run.class), context.get(FilePath.class), context.get(EnvVars.class),
+					context.get(Launcher.class), listener);
 		}
 
 		private static final long serialVersionUID = 1L;

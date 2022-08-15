@@ -28,11 +28,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jenkins.version>2.346.1</jenkins.version>
-        <bom>2.346.x</bom>
-        <bom.version>1556.vfc6a_f216e3c6</bom.version>
-        <jenkins-test-harness.version>1816.v8138d8056949</jenkins-test-harness.version>
+        <jenkins.version>2.249.3</jenkins.version>
+        <bom>2.249.x</bom>
+        <bom.version>950.v396cb834de1e</bom.version>
+        <jenkins-test-harness.version>2.47</jenkins-test-harness.version>
         <disabledTestInjection>true</disabledTestInjection>
+        <hpi.compatibleSinceVersion>20.2.34</hpi.compatibleSinceVersion>
     </properties>
 
     <name>Fortify</name>

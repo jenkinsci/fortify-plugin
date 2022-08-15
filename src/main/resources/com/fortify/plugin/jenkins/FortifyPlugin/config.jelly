@@ -125,6 +125,9 @@
             <f:entry title="Locale" field="locale" help="/plugin/fortify/help-fortifyupdateLocale.html">
               <f:select/>
             </f:entry>
+            <f:entry title="${%Accept public key for SSC server}" field="acceptKey" value="false" help="/plugin/fortify/help-acceptKey.html">
+                <f:checkbox/>
+            </f:entry>
           </f:nested>
         </f:optionalBlock>
         </local:blockWrapper>
@@ -222,6 +225,9 @@
             </f:entry>
             <f:entry title="Locale" field="locale" help="/plugin/fortify/help-fortifyupdateLocale.html">
               <f:select/>
+            </f:entry>
+            <f:entry title="${%Accept public key for SSC server}" field="acceptKey" value="false" help="/plugin/fortify/help-acceptKey.html">
+                <f:checkbox/>
             </f:entry>
           </f:nested>
         </f:optionalBlock>

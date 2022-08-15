@@ -336,6 +336,10 @@ public class FortifyPlugin extends Recorder {
 		return getUpdateContent() ? analysisRunType.getUpdateContent().getLocale() : "";
 	}
 
+	public Boolean getAcceptKey() {
+		return getUpdateContent() ? analysisRunType.getUpdateContent().getAcceptKey() : Boolean.FALSE;
+	}
+
 	@Deprecated
 	public boolean getUpdateUseProxy() {
 		return getUpdateContent() && updateContent.getUpdateUseProxy();
@@ -801,7 +805,7 @@ public class FortifyPlugin extends Recorder {
 	private void performLocalTranslation(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
 		// Update security content
 		if (getUpdateContent()) {
-			FortifyUpdate fu = new FortifyUpdate.Builder().updateServerURL(getUpdateServerUrl()).locale(getLocale()).build();
+			FortifyUpdate fu = new FortifyUpdate.Builder().updateServerURL(getUpdateServerUrl()).locale(getLocale()).acceptKey(getAcceptKey()).build();
 			fu.perform(build, launcher, listener);
 		}
 		// run Fortify SCA clean
@@ -2723,6 +2727,7 @@ public class FortifyPlugin extends Recorder {
 	public static class UpdateContentBlock {
 		private String updateServerUrl;
 		private String locale;
+		private Boolean acceptKey = Boolean.FALSE;
 		private UseProxyBlock useProxy;
 
 		@DataBoundConstructor
@@ -2743,6 +2748,10 @@ public class FortifyPlugin extends Recorder {
 		public String getLocale() { return locale; }
 		@DataBoundSetter
 		public void setLocale(String locale) { this.locale = locale; }
+
+		public Boolean getAcceptKey() { return acceptKey; }
+		@DataBoundSetter
+		public void setAcceptKey(Boolean acceptKey) { this.acceptKey = acceptKey; }
 
 		@Deprecated
 		public boolean getUpdateUseProxy() {

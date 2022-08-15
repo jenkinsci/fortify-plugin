@@ -47,6 +47,7 @@ import hudson.model.TaskListener;
 public class FortifyUpdate extends FortifyStep {
 	private String updateServerURL;
 	private String locale;
+	private Boolean acceptKey = Boolean.FALSE;
 	private transient String proxyURL;
 	private transient String proxyUsername;
 	private transient String proxyPassword;
@@ -73,6 +74,15 @@ public class FortifyUpdate extends FortifyStep {
 	}
 
 	public String getLocale() { return locale; }
+
+	@DataBoundSetter
+	public void setAcceptKey(Boolean accpeptKey) {
+		this.acceptKey = accpeptKey;
+	}
+
+	public Boolean getAcceptKey() {
+		return this.acceptKey;
+	}
 
 	@Deprecated
 	public String getProxyURL() {
@@ -167,6 +177,9 @@ public class FortifyUpdate extends FortifyStep {
 					args.add(updateServerUrl);
 				} else {
 					log.println(Messages.ForitfyUpdate_URL_Protocol_Warning(updateServerUrl));
+				}
+				if (Boolean.TRUE.equals(getAcceptKey())) {
+					args.add("-acceptKey");
 				}
 			} catch (MalformedURLException mue) {
 				log.println(Messages.FortifyUpdate_URL_Invalid(updateServerUrl));
@@ -263,6 +276,7 @@ public class FortifyUpdate extends FortifyStep {
 	public static class Builder {
 		private String updateServerURL;
 		private String locale;
+		private Boolean acceptKey = Boolean.FALSE;
 
 		public Builder() {
 		}
@@ -281,8 +295,15 @@ public class FortifyUpdate extends FortifyStep {
 			return this;
 		}
 
+		public Builder acceptKey(Boolean acceptKey) {
+			this.acceptKey = acceptKey == null ? Boolean.FALSE : acceptKey;
+			return this;
+		}
+
 		public FortifyUpdate build() {
-			return new FortifyUpdate(updateServerURL, locale);
+			FortifyUpdate fortifyUpdate = new FortifyUpdate(updateServerURL, locale);
+			fortifyUpdate.setAcceptKey(acceptKey);
+			return fortifyUpdate;
 		}
 
 	}

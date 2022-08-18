@@ -1,193 +1,168 @@
 package com.fortify.plugin.jenkins;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.AncestorInPath;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-
-import com.cloudbees.plugins.credentials.Credentials;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.CredentialsScope;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.domains.Domain;
-import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
-import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 
 import hudson.Extension;
 import hudson.ProxyConfiguration;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
-import hudson.model.Item;
-import hudson.security.ACL;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import okhttp3.Authenticator;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Route;
 
 public class ProxyConfig extends AbstractDescribableImpl<ProxyConfig> {
 	private static final Logger LOGGER = Logger.getLogger(FortifyPlugin.class.getName());
 
+	// these fields are left only for backwards compatibility
 	private String proxyUrl;
-	private String proxyCredentialsId;
-
-	/** SSC Authentication Token */
-	/** @deprecated use {@link #proxyCredentialsId} */
 	private Secret proxyUsername;
-	/** SSC Authentication Token */
-	/** @deprecated use {@link #proxyCredentialsId} */
 	private Secret proxyPassword;
 
-	private String proxyHost;
-	private int proxyPort;
+	private List<Pattern> noProxyHostPatterns = Collections.emptyList();
+
+	private boolean useJenkins = false;
 
 	@DataBoundConstructor
 	public ProxyConfig(String proxyUrl, Secret proxyUsername, Secret proxyPassword) {
+		Pair<String, Integer> hostAndPort = null;
 		try {
 			proxyUrl = proxyUrl == null ? null : proxyUrl.trim();
 			checkProxyUrlValue(proxyUrl);
 			this.proxyUrl = proxyUrl;
-			setProxyHostAndPort(proxyUrl);
+			hostAndPort = parseProxyHostAndPort(proxyUrl);
 		} catch (FortifyException e) {
 			LOGGER.log(Level.WARNING, "Fortify proxy server configuration error: " + e.getMessage());
 			this.proxyUrl = null;
 		}
-		setProxyUsernameAndPassword(proxyUsername, proxyPassword);
-		trySettingJenkinsProxy(proxyHost, proxyPort, proxyUsername, proxyPassword); //during initial settings migration
+		if (this.proxyUrl != null && hostAndPort != null) {
+			useJenkins = trySettingJenkinsProxy(hostAndPort.getLeft(), hostAndPort.getRight().intValue(), proxyUsername, proxyPassword); //during initial settings migration
+		}
+		if (!useJenkins) {
+			this.proxyUsername = proxyUsername;
+			this.proxyPassword = proxyPassword;
+			//setProxyUsernameAndPassword(proxyUsername, proxyPassword);
+			this.noProxyHostPatterns = Collections.singletonList(Pattern.compile(".*\\.fortify\\.com"));
+		}
 	}
 
-	private void trySettingJenkinsProxy(String proxyHost, int proxyPort, Secret proxyUsername, Secret proxyPassword) {
+	public static Pair<String, Integer> parseProxyHostAndPort(String proxyUrl) {
+		if (proxyUrl == null) {
+			return null;
+		}
+		String[] proxyUrlSplit = proxyUrl.split(":");
+		String proxyHost = proxyUrlSplit[0];
+		int proxyPort = 80;
+		if (proxyUrlSplit.length > 1) {
+			try {
+				proxyPort = Integer.parseInt(proxyUrlSplit[1]);
+			} catch (NumberFormatException nfe) {
+			}
+		}
+		return Pair.of(proxyHost, Integer.valueOf(proxyPort));
+	}
+
+	private boolean trySettingJenkinsProxy(String proxyHost, int proxyPort, Secret proxyUsername, Secret proxyPassword) {
 		Jenkins jenkins = Jenkins.get();
 		if (jenkins != null) {
 			ProxyConfiguration proxy = jenkins.getProxy();
 			if (proxy == null || StringUtils.isBlank(proxy.getName())) {
 				proxy = new ProxyConfiguration(proxyHost, proxyPort, Secret.toString(proxyUsername), Secret.toString(proxyPassword));
+				proxy.setNoProxyHost("*.fortify.com"); // for backwards compatibility
 				jenkins.setProxy(proxy);
 				try {
 					proxy.save();
+					return true;
 				} catch (IOException e) {
 				}
 			}
 		}
+		return false;
 	}
 
-	private void setProxyUsernameAndPassword(Secret proxyUsername, Secret proxyPassword) {
-		String id = "fortify-proxy-id";
-		final Credentials fortifyToken = new UsernamePasswordCredentialsImpl(CredentialsScope.GLOBAL,
-				id, "fortify plugin migration generated proxy credentials",
-				Secret.toString(proxyUsername), Secret.toString(proxyPassword));
-		try {
-			CredentialsProvider.lookupStores(Jenkins.get()).iterator().next().addCredentials(Domain.global(), fortifyToken);
-		} catch (IOException e) {
-			LOGGER.log(Level.WARNING, "Fortify proxy credentials registration error: " + e.getMessage());
-		}
-		this.proxyCredentialsId = id;
+	private ProxyConfig() {
+		this.useJenkins = true;
 	}
 
-	public ProxyConfig(String host, int port, String proxyUsername, Secret proxyPassword) {
-		try {
-			this.proxyHost = host;
-			this.proxyPort = port;
-			String url = host == null ? null : host.trim() + ":" + (port >= 0 && port < 65536 ?  String.valueOf(port) : "80");
-			checkProxyUrlValue(url);
-			this.proxyUrl = url;
-		} catch (FortifyException e) {
-			LOGGER.log(Level.WARNING, "Fortify proxy server configuration error: " + e.getMessage());
-			this.proxyUrl = null;
+	public String getProxyUrlFor(String url) {
+		if (useJenkins) {
+			Pair<String, Integer> hostPort = getJenkinsProxyHostPostFor(url);
+			return hostPort == null ? "" : hostPort.getLeft() + ':' + hostPort.getRight().intValue();
 		}
-		this.proxyUsername = Secret.fromString(proxyUsername);
-		this.proxyPassword = proxyPassword;
-	}
-
-	public ProxyConfig(String proxyUrl, String proxyCredentialsId) {
-		try {
-			proxyUrl = proxyUrl == null ? null : proxyUrl.trim();
-			checkProxyUrlValue(proxyUrl);
-			this.proxyUrl = proxyUrl;
-			setProxyHostAndPort(proxyUrl);
-		} catch (FortifyException e) {
-			LOGGER.log(Level.WARNING, "Fortify proxy server configuration error: " + e.getMessage());
-			this.proxyUrl = null;
-		}
-		this.proxyCredentialsId = proxyCredentialsId;
-	}
-
-	// for backwards compatibility
-	private Object readResolve() {
-		if (this.proxyUsername != null || this.proxyPassword != null) {
-			this.setProxyUsernameAndPassword(this.proxyUsername, this.proxyPassword);
-		}
-		return this;
-	}
-
-	private void setProxyHostAndPort(String proxyUrl) {
-		if (proxyUrl == null) {
-			return;
-		}
-		String[] proxyUrlSplit = proxyUrl.split(":");
-		this.proxyHost = proxyUrlSplit[0];
-		this.proxyPort = 80;
-		if (proxyUrlSplit.length > 1) {
-			try {
-				this.proxyPort = Integer.parseInt(proxyUrlSplit[1]);
-			} catch (NumberFormatException nfe) {
+		for (Pattern next : noProxyHostPatterns) {
+			if (next.matcher(url).matches()) {
+				return "";
 			}
 		}
-	}
-
-	public String getProxyUrl() {
 		return proxyUrl;
 	}
 
-	public String getProxyCredentialsId() {
-		return proxyCredentialsId;
+	private Pair<String, Integer> getJenkinsProxyHostPostFor(String url) {
+		ProxyConfiguration proxyConfiguration = getJenkinsProxyInstanceOrNull();
+		if (proxyConfiguration != null) {
+			String host = proxyConfiguration.getName();
+			if (!StringUtils.isBlank(host)) {
+				if (!StringUtils.isBlank(url)) {
+					for (Pattern next : proxyConfiguration.getNoProxyHostPatterns()) {
+						if (next.matcher(url).matches()) {
+							return null;
+						}
+					}
+				}
+				int port = proxyConfiguration.getPort();
+				if (port <= 0) {
+					port = 80;
+				}
+				return Pair.of(host, Integer.valueOf(port));
+			}
+		}
+		return null;
 	}
 
-	/** @deprecated use {@link #getProxyCredentialsId()} */
+	private ProxyConfiguration getJenkinsProxyInstanceOrNull() {
+		Jenkins instance = Jenkins.getInstanceOrNull(); // getInstance() can return null if we happen to execute this code in a Jenkins agent.
+		if (instance != null && instance.proxy != null) {
+			ProxyConfiguration jenkinsProxy = instance.proxy;
+			return jenkinsProxy;
+		}
+		return null;
+	}
+
 	public Secret getProxyUsername() {
+		if (useJenkins) {
+			ProxyConfiguration proxyConfiguration = getJenkinsProxyInstanceOrNull();
+			if (proxyConfiguration != null) {
+				return Secret.fromString(proxyConfiguration.getUserName());
+			}
+		}
 		return proxyUsername;
 	}
 
-	String getProxyUsernameValueOrNull() {
-		UsernamePasswordCredentials c = getCredentialsFrom(getProxyCredentialsId(), getProxyUrl());
-		return c == null ? null : c.getUsername();
-	}
-
-	/** @deprecated use {@link #getProxyCredentialsId()} */
 	public Secret getProxyPassword() {
+		if (useJenkins) {
+			ProxyConfiguration proxyConfiguration = getJenkinsProxyInstanceOrNull();
+			if (proxyConfiguration != null) {
+				return proxyConfiguration.getSecretPassword();
+			}
+		}
 		return proxyPassword;
-	}
-
-	String getProxyPasswordValueOrNull() {
-		UsernamePasswordCredentials c = getCredentialsFrom(getProxyCredentialsId(), getProxyUrl());
-		return c == null ? null : Secret.toString(c.getPassword());
-	}
-
-	public String getProxyHost() {
-		return proxyHost;
-	}
-
-	public int getProxyPort() {
-		return proxyPort;
-	}
-
-	private static UsernamePasswordCredentials getCredentialsFrom(String tokenId, String url) throws FortifyException {
-		UsernamePasswordCredentials c = StringUtils.isBlank(tokenId) ? null : CredentialsMatchers.firstOrNull(CredentialsProvider
-				.lookupCredentials(UsernamePasswordCredentials.class, Jenkins.get(), ACL.SYSTEM, 
-						StringUtils.isBlank(url) ? Collections.emptyList() : URIRequirementBuilder.fromUri(url).build()),
-						CredentialsMatchers.withId(tokenId));
-		return c;
 	}
 
 	private static void checkProxyUrlValue(String proxyUrl) throws FortifyException {
@@ -211,6 +186,48 @@ public class ProxyConfig extends AbstractDescribableImpl<ProxyConfig> {
 		}
 	}
 
+	public OkHttpClient decorateClient(OkHttpClient client, String url) {
+		OkHttpClient result = client;
+		String proxyUrl = getProxyUrlFor(url);
+		if (!StringUtils.isBlank(proxyUrl)) {
+			Pair<String, Integer> hostPort = parseProxyHostAndPort(proxyUrl);
+			Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hostPort.getLeft(), hostPort.getRight().intValue()));
+			result = result.newBuilder().proxy(proxy).build();
+		}
+		Secret proxyUsername = getProxyUsername();
+		Secret proxyPassword = getProxyPassword();
+		if (proxyUsername != null && proxyPassword != null) {
+			final String proxyUsernameString = proxyUsername.getPlainText();
+			final String proxyPasswordString = proxyPassword.getPlainText();
+			if (!(StringUtils.isEmpty(proxyUsernameString) && StringUtils.isEmpty(proxyPasswordString))) {
+				Authenticator proxyAuthenticator = new Authenticator() {
+					boolean proxyAuthAttempted = false;
+					@Override
+					public Request authenticate(Route route, Response response) throws IOException {
+						if (proxyAuthAttempted) {
+							return null;
+						} else {
+							proxyAuthAttempted = true;
+						}
+						String credential = okhttp3.Credentials.basic(proxyUsernameString, proxyPasswordString);
+						return response.request().newBuilder().header("Proxy-Authorization", credential).build();
+					}
+				};
+				result = result.newBuilder().proxyAuthenticator(proxyAuthenticator).build();
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Gets proxy config that asks Jenkins for its proxy configuration every time.
+	 *
+	 * @return a Proxy proxy object for Jenkins proxy :).
+	 */
+	public static ProxyConfig getJenkinsProxyConfig() {
+		return new ProxyConfig();
+	}
+
 	@Extension
 	public static final class DescriptorImpl extends Descriptor<ProxyConfig> {
 		@Override
@@ -220,46 +237,6 @@ public class ProxyConfig extends AbstractDescribableImpl<ProxyConfig> {
 		@Override
 		public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
 			return super.configure(req, json);
-		}
-
-		public ListBoxModel doFillProxyCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String proxyCredentialsId, @QueryParameter String proxyUrl) {
-			StandardListBoxModel result = new StandardListBoxModel();
-			if (item == null) {
-				if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
-					return result.includeCurrentValue(proxyCredentialsId);
-				}
-			} else {
-				if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
-					return result.includeCurrentValue(proxyCredentialsId);
-				}
-			}
-			return result.includeEmptyValue().includeCurrentValue(proxyCredentialsId)
-					.includeMatchingAs(ACL.SYSTEM, item, StandardUsernamePasswordCredentials.class, 
-							StringUtils.isBlank(proxyUrl) ? Collections.emptyList() : URIRequirementBuilder.fromUri(proxyUrl).build(), 
-							StringUtils.isBlank(proxyCredentialsId) ? CredentialsMatchers.always() : CredentialsMatchers.withId(proxyCredentialsId));
-		}
-
-		public FormValidation doCheckProxyCredentialsId(@QueryParameter String value, @QueryParameter String proxyUrl) {
-			if (value != null && value.trim().length() > 0) {
-				try {
-					UsernamePasswordCredentials c = getCredentialsFrom(value, proxyUrl);
-					if (c == null) {
-						return FormValidation.warning("Cannot get credentials for " + value);
-					}
-				} catch (FortifyException e) {
-					return FormValidation.warning(e.getMessage());
-				}
-			}
-			return FormValidation.ok();
-		}
-
-		public FormValidation doCheckProxyUrl(@QueryParameter String value) {
-			try {
-				checkProxyUrlValue(value.trim());
-			} catch (FortifyException e) {
-				return FormValidation.warning(e.getMessage());
-			}
-			return FormValidation.ok();
 		}
 	}
 }

@@ -16,28 +16,59 @@
 package com.fortify.plugin.jenkins.fortifyclient;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import com.fortify.ssc.restclient.api.*;
-import com.fortify.ssc.restclient.model.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 
+import com.fortify.plugin.jenkins.ProxyConfig;
 import com.fortify.ssc.restclient.ApiClient;
 import com.fortify.ssc.restclient.ApiException;
-import okhttp3.Authenticator;
-import okhttp3.Credentials;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.Route;
+import com.fortify.ssc.restclient.api.ArtifactControllerApi;
+import com.fortify.ssc.restclient.api.ArtifactOfProjectVersionControllerApi;
+import com.fortify.ssc.restclient.api.AttributeDefinitionControllerApi;
+import com.fortify.ssc.restclient.api.AttributeOfProjectVersionControllerApi;
+import com.fortify.ssc.restclient.api.CloudPoolControllerApi;
+import com.fortify.ssc.restclient.api.FilterSetOfProjectVersionControllerApi;
+import com.fortify.ssc.restclient.api.FolderOfProjectVersionControllerApi;
+import com.fortify.ssc.restclient.api.IssueGroupOfProjectVersionControllerApi;
+import com.fortify.ssc.restclient.api.IssueOfProjectVersionControllerApi;
+import com.fortify.ssc.restclient.api.IssueSelectorSetOfProjectVersionControllerApi;
+import com.fortify.ssc.restclient.api.IssueTemplateControllerApi;
+import com.fortify.ssc.restclient.api.ProjectControllerApi;
+import com.fortify.ssc.restclient.api.ProjectVersionControllerApi;
+import com.fortify.ssc.restclient.api.ProjectVersionOfProjectControllerApi;
+import com.fortify.ssc.restclient.model.ApiResultArtifact;
+import com.fortify.ssc.restclient.model.ApiResultIssueFilterSelectorSet;
+import com.fortify.ssc.restclient.model.ApiResultIssueTemplate;
+import com.fortify.ssc.restclient.model.ApiResultListAttributeDefinition;
+import com.fortify.ssc.restclient.model.ApiResultListCloudPool;
+import com.fortify.ssc.restclient.model.ApiResultListFilterSet;
+import com.fortify.ssc.restclient.model.ApiResultListFolder;
+import com.fortify.ssc.restclient.model.ApiResultListIssueTemplate;
+import com.fortify.ssc.restclient.model.ApiResultListProject;
+import com.fortify.ssc.restclient.model.ApiResultListProjectVersion;
+import com.fortify.ssc.restclient.model.ApiResultListProjectVersionIssue;
+import com.fortify.ssc.restclient.model.ApiResultListProjectVersionIssueGroup;
+import com.fortify.ssc.restclient.model.ApiResultProjectVersion;
+import com.fortify.ssc.restclient.model.Artifact;
+import com.fortify.ssc.restclient.model.Attribute;
+import com.fortify.ssc.restclient.model.AttributeDefinition;
+import com.fortify.ssc.restclient.model.AttributeOption;
+import com.fortify.ssc.restclient.model.CloudPool;
+import com.fortify.ssc.restclient.model.FilterSet;
+import com.fortify.ssc.restclient.model.Folder;
+import com.fortify.ssc.restclient.model.IssueSelector;
+import com.fortify.ssc.restclient.model.IssueTemplate;
+import com.fortify.ssc.restclient.model.Project;
+import com.fortify.ssc.restclient.model.ProjectVersion;
+import com.fortify.ssc.restclient.model.ProjectVersionIssue;
+import com.fortify.ssc.restclient.model.ProjectVersionIssueGroup;
 
 public class ApiClientWrapper {
 	private static final String AUTH_HEADER_TOKEN = "FortifyToken";
@@ -69,24 +100,9 @@ public class ApiClientWrapper {
 		}
 	}
 
-	public void setProxy(String proxyHost, int proxyPort, final String proxyUsername, final String proxyPassword) {
-		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-		apiClient.setHttpClient(apiClient.getHttpClient().newBuilder().proxy(proxy).build());
-		if (!(StringUtils.isEmpty(proxyUsername) && StringUtils.isEmpty(proxyPassword))) {
-			Authenticator proxyAuthenticator = new Authenticator() {
-				boolean proxyAuthAttempted = false;
-				@Override
-				public Request authenticate(Route route, Response response) throws IOException {
-					if (proxyAuthAttempted) {
-						return null;
-					} else {
-						proxyAuthAttempted = true;
-					}
-					String credential = Credentials.basic(proxyUsername, proxyPassword);
-					return response.request().newBuilder().header("Proxy-Authorization", credential).build();
-				}
-			};
-			apiClient.setHttpClient(apiClient.getHttpClient().newBuilder().proxyAuthenticator(proxyAuthenticator).build());
+	public void setProxy(ProxyConfig proxyConfig, String uri) {
+		if (proxyConfig != null) {
+			apiClient.setHttpClient(proxyConfig.decorateClient(apiClient.getHttpClient(), uri));
 		}
 	}
 

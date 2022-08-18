@@ -23,13 +23,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fortify.ssc.restclient.model.*;
 import org.apache.commons.lang.StringUtils;
 
+import com.fortify.plugin.jenkins.ProxyConfig;
 import com.fortify.plugin.jenkins.bean.GroupingProfile;
 import com.fortify.plugin.jenkins.bean.IssueBean;
 import com.fortify.plugin.jenkins.bean.ProjectDataEntry;
 import com.fortify.ssc.restclient.ApiException;
+import com.fortify.ssc.restclient.model.Artifact;
+import com.fortify.ssc.restclient.model.CloudPool;
+import com.fortify.ssc.restclient.model.FilterSet;
+import com.fortify.ssc.restclient.model.Folder;
+import com.fortify.ssc.restclient.model.FolderDto;
+import com.fortify.ssc.restclient.model.IssueSelector;
+import com.fortify.ssc.restclient.model.IssueTemplate;
+import com.fortify.ssc.restclient.model.Project;
+import com.fortify.ssc.restclient.model.ProjectVersion;
+import com.fortify.ssc.restclient.model.ProjectVersionIssue;
+import com.fortify.ssc.restclient.model.ProjectVersionIssueGroup;
 
 /**
  * FortifyClient is basically a wrapper around SSC's REST client API
@@ -58,15 +69,10 @@ public class FortifyClient {
 	 * @param token
 	 *            e.g. the AuditToken
 	 */
-	public void init(String uri, String token, Integer connectTimeoutSeconds, Integer readTimeoutSeconds,
-					 Integer writeTimeoutSeconds) throws ApiException {
-		apiClientWrapper = new ApiClientWrapper(uri, token, connectTimeoutSeconds, readTimeoutSeconds, writeTimeoutSeconds);
-	}
-
-	public void init(String uri, String token, String proxyHost, int proxyPort, String proxyUsername, String proxyPassword,
+	public void init(String uri, String token, ProxyConfig proxyConfig,
 					 Integer connectTimeoutSeconds, Integer readTimeoutSeconds, Integer writeTimeoutSeconds) throws ApiException {
-		init(uri, token, connectTimeoutSeconds, readTimeoutSeconds, writeTimeoutSeconds);
-		apiClientWrapper.setProxy(proxyHost, proxyPort, proxyUsername, proxyPassword);
+		apiClientWrapper = new ApiClientWrapper(uri, token, connectTimeoutSeconds, readTimeoutSeconds, writeTimeoutSeconds);
+		apiClientWrapper.setProxy(proxyConfig, uri);
 	}
 
 	/**

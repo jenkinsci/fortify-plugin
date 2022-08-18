@@ -23,6 +23,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -81,7 +82,6 @@ import hudson.BulkChange;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.Plugin;
-import hudson.ProxyConfiguration;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
@@ -336,8 +336,8 @@ public class FortifyPlugin extends Recorder {
 		return getUpdateContent() ? analysisRunType.getUpdateContent().getLocale() : "";
 	}
 
-	public Boolean getAcceptKey() {
-		return getUpdateContent() ? analysisRunType.getUpdateContent().getAcceptKey() : Boolean.FALSE;
+	public boolean getAcceptKey() {
+		return getUpdateContent() ? analysisRunType.getUpdateContent().getAcceptKey() : false;
 	}
 
 	@Deprecated
@@ -857,21 +857,6 @@ public class FortifyPlugin extends Recorder {
 		}
 	}
 
-	/**
-	 * Gets proxy settings defined globally for current Jenkins instance.
-	 *
-	 * @return Jenkins proxy settings converted to an internal object.
-	 */
-	public static ProxyConfig getProxyConfig() {
-		ProxyConfig internalProxy = null;
-		Jenkins instance = Jenkins.getInstanceOrNull(); // getInstance() can return null if we happen to execute this code in a Jenkins agent.
-		if (instance != null && instance.proxy != null) {
-			ProxyConfiguration jenkinsProxy = instance.proxy;
-			internalProxy = new ProxyConfig(jenkinsProxy.name, jenkinsProxy.port, jenkinsProxy.getUserName(), jenkinsProxy.getSecretPassword());
-		}
-		return internalProxy;
-	}
-
 	public static <T> T runWithFortifyClient(String token, FortifyClient.Command<T> cmd) throws Exception {
 		if (cmd != null) {
 			String url = DESCRIPTOR.getUrl();
@@ -882,17 +867,8 @@ public class FortifyPlugin extends Recorder {
 					contextClassLoader = Thread.currentThread().getContextClassLoader();
 					Thread.currentThread().setContextClassLoader(FortifyPlugin.class.getClassLoader());
 					client = new FortifyClient();
-					ProxyConfig proxyConfig = null;
-					Boolean isProxy = DESCRIPTOR.getIsProxy();
-					if (isProxy != null && isProxy.booleanValue()) {
-						proxyConfig = getProxyConfig();
-					}
-					if (proxyConfig == null || StringUtils.isBlank(proxyConfig.getProxyUrl())) {
-						client.init(url, token, DESCRIPTOR.getConnectTimeout(), DESCRIPTOR.getReadTimeout(), DESCRIPTOR.getWriteTimeout());
-					} else {
-						client.init(url, token, proxyConfig.getProxyHost(), proxyConfig.getProxyPort(), Secret.toString(proxyConfig.getProxyUsername()), Secret.toString(proxyConfig.getProxyPassword()),
-								DESCRIPTOR.getConnectTimeout(), DESCRIPTOR.getReadTimeout(), DESCRIPTOR.getWriteTimeout());
-					}
+					ProxyConfig proxyConfig = DESCRIPTOR.getProxyConfig();
+					client.init(url, token, proxyConfig, DESCRIPTOR.getConnectTimeout(), DESCRIPTOR.getReadTimeout(), DESCRIPTOR.getWriteTimeout());
 				}
 				return cmd.runWith(client);
 			} catch (ApiException e) {
@@ -941,13 +917,13 @@ public class FortifyPlugin extends Recorder {
 		/** @deprecated use {@link #proxyConfig} */
 		private transient Secret proxyPassword;
 
-		private Boolean isProxy;
+		private boolean isProxy;
 
 		/** SSC proxy */
 		@CheckForNull
 		private ProxyConfig proxyConfig;
 
-		/** @deprecated use {@link #sscTokenId} */
+		/** @deprecated use {@link #sscTokenCredentialsId} */
 		private transient Secret token;
 
 		/** SSC Authentication Token Credentials Id */
@@ -986,7 +962,7 @@ public class FortifyPlugin extends Recorder {
 		/** ScanCentral Controller URL */
 		private String ctrlUrl;
 
-		/** @deprecated use {@link #ctrlTokenId} */
+		/** @deprecated use {@link #ctrlTokenCredentialsId} */
 		private transient Secret ctrlToken;
 
 		/** ScanCentral Controller Authentication Token Credentials Id */
@@ -1003,13 +979,19 @@ public class FortifyPlugin extends Recorder {
 		// for backwards compatibility
 		private Object readResolve() {
 			if (this.token != null) {
-				this.setToken(Secret.toString(token));
+				this.setToken(Secret.toString(this.token));
+				this.token = null;
 			}
 			if (this.ctrlToken != null) {
-				this.setCtrlToken(Secret.toString(ctrlToken));
+				this.setCtrlToken(Secret.toString(this.ctrlToken));
+				this.ctrlToken = null;
 			}
 			if (this.useProxy) {
-				this.proxyConfig = new ProxyConfig(proxyUrl, proxyUsername, proxyPassword); //XXX
+				this.proxyConfig = new ProxyConfig(this.proxyUrl, this.proxyUsername, this.proxyPassword);
+				this.proxyUrl = null;
+				this.proxyUsername = null;
+				this.proxyPassword = null;
+				this.useProxy = false;
 			}
 			if (this.proxyConfig != null) {
 				this.isProxy = true;
@@ -1045,45 +1027,49 @@ public class FortifyPlugin extends Recorder {
 		// backwards compatibility
 		/** @deprecated use {@link #getProxyConfig()} */
 		public boolean getUseProxy() {
-			return proxyConfig != null && proxyConfig.getProxyUrl() != null;
+			return proxyConfig != null && proxyConfig.getProxyUrlFor(null) != null;
 		}
 
 		// backwards compatibility
 		/** @deprecated use {@link #getProxyConfig()} */
 		public String getProxyUrl() {
-			return proxyConfig != null ? proxyConfig.getProxyUrl() : null;
+			return proxyConfig != null ? proxyConfig.getProxyUrlFor(null) : null;
 		}
 
 		// backwards compatibility
 		/** @deprecated use {@link #getProxyConfig()} */
 		public String getProxyUsername() {
-			return proxyConfig != null ? proxyConfig.getProxyUsernameValueOrNull() : null;
+			return proxyConfig != null ? Secret.toString(proxyConfig.getProxyUsername()) : null;
 		}
 
 		// backwards compatibility
 		/** @deprecated use {@link #getProxyConfig()} */
 		public String getProxyPassword() {
-			return proxyConfig != null ? proxyConfig.getProxyPasswordValueOrNull() : null;
+			return proxyConfig != null ? Secret.toString(proxyConfig.getProxyPassword()) : null;
 		}
 
-		// backwards compatibility
-		/** @deprecated use {@link #getIsProxy()} */
 		public ProxyConfig getProxyConfig() {
 			return proxyConfig;
 		}
 
 		@DataBoundSetter
-		public void setIsProxy(Boolean isProxy) {
-			this.isProxy = (isProxy == null) ? Boolean.FALSE : isProxy;
+		public void setIsProxy(boolean isProxy) {
+			this.isProxy = isProxy;
+			if (this.isProxy) {
+				this.proxyConfig = ProxyConfig.getJenkinsProxyConfig();
+			} else {
+				this.proxyConfig = null;
+			}
 		}
 
-		public Boolean getIsProxy() {
+		public boolean getIsProxy() {
 			return isProxy;
 		}
 
 		@DataBoundSetter
 		public void setProxyConfig(ProxyConfig proxyConfig) {
 			this.proxyConfig = proxyConfig;
+			this.isProxy = proxyConfig != null;
 		}
 
 		public String getToken() {
@@ -1381,8 +1367,8 @@ public class FortifyPlugin extends Recorder {
 					.includeMatchingAs(ACL.SYSTEM, item, FortifyApiToken.class, URIRequirementBuilder.fromUri(url).build(), CredentialsMatchers.instanceOf(FortifyApiToken.class));
 		}
 
-		public FormValidation doTestConnection(@QueryParameter String url, @QueryParameter String sscTokenCredentialsId, 
-				@QueryParameter Boolean isProxy, @QueryParameter Integer connectTimeout, @QueryParameter Integer readTimeout, @QueryParameter Integer writeTimeout) {
+		public FormValidation doTestConnection(@QueryParameter String url, @QueryParameter String sscTokenCredentialsId, @QueryParameter Boolean isProxy,
+				@QueryParameter Integer connectTimeout, @QueryParameter Integer readTimeout, @QueryParameter Integer writeTimeout) {
 			String sscUrl = url == null ? "" : url.trim();
 			try {
 				checkUrlValue(sscUrl);
@@ -1408,12 +1394,13 @@ public class FortifyPlugin extends Recorder {
 
 			// backup original values
 			String orig_url = this.url;
-			Boolean orig_isProxy = this.isProxy;
 			Integer orig_connectTimeout = this.connectTimeout;
 			Integer orig_readTimeout = this.readTimeout;
 			Integer orig_writeTimeout = this.writeTimeout;
+			Boolean orig_isProxy = this.isProxy;
+			ProxyConfig orig_proxyConfig = this.proxyConfig;
+			setIsProxy(isProxy);
 			this.url = sscUrl;
-			this.isProxy = isProxy;
 			this.connectTimeout = connectTimeout;
 			this.readTimeout = readTimeout;
 			this.writeTimeout = writeTimeout;
@@ -1435,7 +1422,8 @@ public class FortifyPlugin extends Recorder {
 				return FormValidation.errorWithMarkup("Cannot connect to SSC server. " + message);
 			} finally {
 				this.url = orig_url;
-				this.isProxy = orig_isProxy;
+				setIsProxy(orig_isProxy);
+				this.proxyConfig = orig_proxyConfig;
 				this.connectTimeout = orig_connectTimeout;
 				this.readTimeout = orig_readTimeout;
 				this.writeTimeout = orig_writeTimeout;
@@ -1467,8 +1455,7 @@ public class FortifyPlugin extends Recorder {
 									CredentialsMatchers.instanceOf(FortifyApiToken.class));
 		}
 
-		public FormValidation doTestCtrlConnection(@QueryParameter String ctrlUrl, @QueryParameter String tokenId, 
-				@QueryParameter boolean proxyConfig, @QueryParameter String proxyUrl, @QueryParameter String proxyCredentialsId) throws IOException {
+		public FormValidation doTestCtrlConnection(@QueryParameter String ctrlUrl, @QueryParameter String ctrlTokenCredentialsId, @QueryParameter Boolean isProxy) throws IOException {
 			String controllerUrl = ctrlUrl == null ? "" : ctrlUrl.trim();
 			try {
 				checkCtrlUrlValue(controllerUrl);
@@ -1478,9 +1465,17 @@ public class FortifyPlugin extends Recorder {
 
 			// backup original values
 			String orig_url = this.ctrlUrl;
-
 			this.ctrlUrl = controllerUrl;
+
+			//scancentral does not support proxy for now
+//			Boolean orig_isProxy = this.isProxy;
+//			ProxyConfig orig_proxyConfig = this.proxyConfig;
+//			setIsProxy(isProxy);
+
 			OkHttpClient client = new OkHttpClient();
+//			if (proxyConfig != null) {
+//				client = proxyConfig.decorateClient(client);
+//			}
 
 			Request request = new Request.Builder().url(controllerUrl).build();
 			Response response = null;
@@ -1498,6 +1493,8 @@ public class FortifyPlugin extends Recorder {
 				return FormValidation.error(t, "Cannot connect to Controller");
 			} finally {
 				this.ctrlUrl = orig_url;
+//				setIsProxy(orig_isProxy);
+//				this.proxyConfig = orig_proxyConfig;
 				if (body != null) {
 					body.close();
 				}
@@ -1643,18 +1640,18 @@ public class FortifyPlugin extends Recorder {
 		public void doRefreshProjectTemplates(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
 			// backup original values
 			String orig_url = this.url;
-			ProxyConfig orig_proxy = proxyConfig;
+			ProxyConfig orig_proxyConfig = this.proxyConfig;
+			Boolean orig_isProxy = this.isProxy;
 			String orig_tokenId = this.sscTokenCredentialsId;
 
 			String url = req.getParameter("url");
 			String proxyEnabled = req.getParameter("isProxy");
 			if (proxyEnabled == null) {
-				proxyEnabled = req.getParameter("_.proxyConfig");
+				proxyEnabled = req.getParameter("_.isProxy");
 			}
-			boolean useProxyParam = "true".equalsIgnoreCase(proxyEnabled);
-			String proxyUrl = req.getParameter("proxyUrl");
-			String proxyCredentialsId = req.getParameter("proxyCredentialsId");
-			this.proxyConfig = useProxyParam ? new ProxyConfig(proxyUrl == null ? "" : proxyUrl.trim(), proxyCredentialsId) : null;
+			Boolean useProxyParam = Boolean.valueOf("true".equalsIgnoreCase(proxyEnabled));
+			setIsProxy(useProxyParam);
+
 			Integer connectTimeout = Integer.getInteger(req.getParameter("connectTimeout"));
 			Integer readTimeout= Integer.getInteger(req.getParameter("readTimeout"));
 			Integer writeTimeout= Integer.getInteger(req.getParameter("writeTimeout"));
@@ -1691,7 +1688,8 @@ public class FortifyPlugin extends Recorder {
 				throw e;
 			} finally {
 				this.url = orig_url;
-				this.proxyConfig = orig_proxy;
+				setIsProxy(orig_isProxy);
+				this.proxyConfig = orig_proxyConfig;
 				this.sscTokenCredentialsId = orig_tokenId;
 			}
 		}
@@ -1699,26 +1697,12 @@ public class FortifyPlugin extends Recorder {
 		public void doRefreshSensorPools(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
 			// backup original values
 			String orig_url = this.url;
-			ProxyConfig orig_proxyConfig = this.proxyConfig;
-			String orig_token = this.sscTokenCredentialsId;
 
 			String url = req.getParameter("url");
 			this.url = url != null ? url.trim() : "";
-			String proxyEnabled = req.getParameter("proxyConfig");
-			if (proxyEnabled == null) {
-				proxyEnabled = req.getParameter("_.proxyConfig");
-			}
-			boolean useProxyParam = "true".equalsIgnoreCase(proxyEnabled);
-			String proxyUrl = req.getParameter("proxyUrl");
-			String proxyCredentialsId = req.getParameter("proxyCredentialsId");
-			this.proxyConfig = useProxyParam ? new ProxyConfig(proxyUrl == null ? "" : proxyUrl.trim(), proxyCredentialsId) : null;
-			Integer connectTimeout = Integer.getInteger(req.getParameter("connectTimeout"));
-			Integer readTimeout= Integer.getInteger(req.getParameter("readTimeout"));
-			Integer writeTimeout= Integer.getInteger(req.getParameter("writeTimeout"));
-			this.sscTokenCredentialsId = req.getParameter("sscTokenCredentialsId");
 
 			try {
-				FormValidation testConnectionResult = doTestConnection(this.url, this.getSscTokenCredentialsId(), useProxyParam, connectTimeout, readTimeout, writeTimeout); //XXX verify ctrl or ssc token id is needed
+				FormValidation testConnectionResult = doTestConnection(this.url, this.getSscTokenCredentialsId(), this.getIsProxy(), connectTimeout, readTimeout, writeTimeout); //XXX verify ctrl or ssc token id is needed
 				if (!testConnectionResult.kind.equals(FormValidation.Kind.OK)) {
 					throw new Exception(testConnectionResult.getLocalizedMessage()); // don't get sensor pools if server is unavailable
 				}
@@ -1745,8 +1729,6 @@ public class FortifyPlugin extends Recorder {
 				throw e;
 			} finally {
 				this.url = orig_url;
-				this.proxyConfig = orig_proxyConfig;
-				this.sscTokenCredentialsId = orig_token;
 			}
 		}
 
@@ -1780,6 +1762,7 @@ public class FortifyPlugin extends Recorder {
 				// Would not be necessary by https://github.com/jenkinsci/jenkins/pull/3669
 				proxyConfig = null;
 				url = null;
+				isProxy = false;
 				sscTokenCredentialsId = null;
 				projectTemplate = null;
 				breakdownPageSize = DEFAULT_PAGE_SIZE;
@@ -1949,7 +1932,15 @@ public class FortifyPlugin extends Recorder {
 						ProjectTemplateBean proj = new ProjectTemplateBean(entry.getKey(), entry.getValue());
 						list.add(proj);
 					}
-					Collections.sort(list);
+					Collections.sort(list, new Comparator<ProjectTemplateBean>() {
+						@Override
+						public int compare(ProjectTemplateBean o1, ProjectTemplateBean o2) {
+							if (o1 != null && o2 != null) {
+								return o1.getName().compareTo(o2.getName());
+							}
+							return 0;
+						}
+					});
 					return list;
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -1995,7 +1986,15 @@ public class FortifyPlugin extends Recorder {
 					SensorPoolBean proj = new SensorPoolBean(entry.getKey(), entry.getValue());
 					list.add(proj);
 				}
-				Collections.sort(list);
+				Collections.sort(list, new Comparator<SensorPoolBean>() {
+					@Override
+					public int compare(SensorPoolBean o1, SensorPoolBean o2) {
+						if (o1 != null && o2 != null) {
+							return o1.getName().compareTo(o2.getName());
+						}
+						return 0;
+					}
+				});
 				return list;
 			} catch (Throwable e) {
 				e.printStackTrace();
@@ -2727,7 +2726,7 @@ public class FortifyPlugin extends Recorder {
 	public static class UpdateContentBlock {
 		private String updateServerUrl;
 		private String locale;
-		private Boolean acceptKey = Boolean.FALSE;
+		private boolean acceptKey = Boolean.FALSE;
 		private UseProxyBlock useProxy;
 
 		@DataBoundConstructor
@@ -2749,9 +2748,9 @@ public class FortifyPlugin extends Recorder {
 		@DataBoundSetter
 		public void setLocale(String locale) { this.locale = locale; }
 
-		public Boolean getAcceptKey() { return acceptKey; }
+		public boolean getAcceptKey() { return acceptKey; }
 		@DataBoundSetter
-		public void setAcceptKey(Boolean acceptKey) { this.acceptKey = acceptKey; }
+		public void setAcceptKey(boolean acceptKey) { this.acceptKey = acceptKey; }
 
 		@Deprecated
 		public boolean getUpdateUseProxy() {

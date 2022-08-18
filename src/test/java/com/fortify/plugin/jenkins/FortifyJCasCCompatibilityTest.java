@@ -1,12 +1,15 @@
 package com.fortify.plugin.jenkins;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.jvnet.hudson.test.RestartableJenkinsRule;
 
+import hudson.ProxyConfiguration;
 import hudson.util.Secret;
 import io.jenkins.plugins.casc.misc.RoundTripAbstractTest;
+import jenkins.model.Jenkins;
 
 public class FortifyJCasCCompatibilityTest extends RoundTripAbstractTest {
 
@@ -46,11 +49,13 @@ public class FortifyJCasCCompatibilityTest extends RoundTripAbstractTest {
 				Integer.valueOf(40), descriptor.getBreakdownPageSize());
 		assertEquals(String.format("Wrong app version list limit. Expected %s but received %s", Integer.valueOf(80), descriptor.getAppVersionListLimit()),
 				Integer.valueOf(80), descriptor.getAppVersionListLimit());
-		assertTrue("Proxy should be used", descriptor.getUseProxy());
-		assertEquals(String.format("Wrong proxy authentication. Username expected %s but received %s", "fakeuser",
-				descriptor.getProxyUsername()), "fakeuser", descriptor.getProxyUsername());
-		assertEquals(String.format("Wrong proxy credentials id. Username expected %s but received %s", "fortify-proxy-id",
-				descriptor.getProxyConfig().getProxyCredentialsId()), "fortify-proxy-id", descriptor.getProxyConfig().getProxyCredentialsId());
+		assertTrue("Proxy should be used", descriptor.getIsProxy());
+		assertEquals(String.format("Wrong Fortify proxy configuration. Username expected %s but received %s", "fakeuser",
+				Secret.toString(descriptor.getProxyConfig().getProxyUsername())), "fakeuser", Secret.toString(descriptor.getProxyConfig().getProxyUsername()));
+		ProxyConfiguration proxy = Jenkins.getInstanceOrNull().proxy;
+		assertNotNull("Failed to configure Jenkins proxy upon migration", proxy);
+		assertEquals(String.format("Wrong Jenkins proxy configuration. Username expected %s but received %s", "fakeuser",
+				proxy.getUserName()), "fakeuser", proxy.getUserName());
 		assertEquals(String.format("Local scan setting is incorrect. Expected %s but received %s", true, descriptor.isDisableLocalScans()),
 				true, descriptor.isDisableLocalScans());
 	}

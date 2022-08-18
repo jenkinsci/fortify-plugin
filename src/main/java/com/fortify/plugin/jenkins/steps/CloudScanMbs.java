@@ -15,9 +15,33 @@
  *******************************************************************************/
 package com.fortify.plugin.jenkins.steps;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
+import org.jenkinsci.plugins.workflow.steps.StepExecution;
+import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
+
 import com.fortify.plugin.jenkins.FortifyPlugin;
 import com.google.common.collect.ImmutableSet;
-import hudson.*;
+
+import hudson.AbortException;
+import hudson.EnvVars;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -25,18 +49,6 @@ import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.tasks.SimpleBuildStep;
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
-import org.jenkinsci.plugins.workflow.steps.StepExecution;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
-import org.kohsuke.stapler.*;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Set;
 
 public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildStep {
     private FortifyPlugin.RemoteOptionalConfigBlock remoteOptionalConfig;
@@ -142,60 +154,65 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
             }
         }
 
-        ArrayList<String> args = new ArrayList<String>(2);
-        args.add(cloudscanExec);
+        ArrayList<Pair<String, Boolean>> args = new ArrayList<Pair<String, Boolean>>(20);
+        args.add(Pair.of(cloudscanExec, Boolean.FALSE));
 
         /*
             if SSC is configured, use SSC's configuration to find the Controller
          */
         if (StringUtils.isNotBlank(FortifyPlugin.DESCRIPTOR.getUrl())) {
-            args.add("-sscurl");
-            args.add(FortifyPlugin.DESCRIPTOR.getUrl());
-            args.add("-ssctoken");
-            args.add(FortifyPlugin.DESCRIPTOR.getToken());
+            args.add(Pair.of("-sscurl", Boolean.FALSE));
+            args.add(Pair.of(FortifyPlugin.DESCRIPTOR.getUrl(), Boolean.FALSE));
+            args.add(Pair.of("-ssctoken", Boolean.FALSE));
+            args.add(Pair.of(FortifyPlugin.DESCRIPTOR.getToken(), Boolean.TRUE));
         } else if (StringUtils.isNotBlank(FortifyPlugin.DESCRIPTOR.getCtrlUrl())) {
-            args.add("-url");
-            args.add(FortifyPlugin.DESCRIPTOR.getCtrlUrl());
+            args.add(Pair.of("-url", Boolean.FALSE));
+            args.add(Pair.of(FortifyPlugin.DESCRIPTOR.getCtrlUrl(), Boolean.FALSE));
         } else {
             throw new AbortException("Fortify remote scan execution failed: No SSC or Controller URL found");
         }
-        args.add("start");
-        args.add("-b");
-        args.add(getResolvedBuildID(taskListener));
-        args.add("-project-root");
-        args.add(projectRoot);
+        args.add(Pair.of("start", Boolean.FALSE));
+        args.add(Pair.of("-b", Boolean.FALSE));
+        args.add(Pair.of(getResolvedBuildID(taskListener), Boolean.FALSE));
+        args.add(Pair.of("-project-root", Boolean.FALSE));
+        args.add(Pair.of(projectRoot, Boolean.FALSE));
 
         if (StringUtils.isNotEmpty(getResolvedEmailAddr(taskListener))) {
-            args.add("-email");
-            args.add(getResolvedEmailAddr(taskListener));
+            args.add(Pair.of("-email", Boolean.FALSE));
+            args.add(Pair.of(getResolvedEmailAddr(taskListener), Boolean.TRUE));
         }
         if (StringUtils.isNotEmpty(getResolvedSensorPoolName(taskListener))) {
-            args.add("-pool");
-            args.add(getResolvedSensorPoolName(taskListener));
+            args.add(Pair.of("-pool", Boolean.FALSE));
+            args.add(Pair.of(getResolvedSensorPoolName(taskListener), Boolean.FALSE));
         }
         if (StringUtils.isNotEmpty(getResolvedApplicationName(taskListener))) {
-            args.add("-upload");
-            args.add("-application");
-            args.add(getResolvedApplicationName(taskListener));
-            args.add("-version");
-            args.add(getResolvedApplicationVersion(taskListener));
-            args.add("-uptoken");
-            args.add(FortifyPlugin.DESCRIPTOR.getCtrlToken());
+            args.add(Pair.of("-upload", Boolean.FALSE));
+            args.add(Pair.of("-application", Boolean.FALSE));
+            args.add(Pair.of(getResolvedApplicationName(taskListener), Boolean.FALSE));
+            args.add(Pair.of("-version", Boolean.FALSE));
+            args.add(Pair.of(getResolvedApplicationVersion(taskListener), Boolean.FALSE));
+            args.add(Pair.of("-uptoken", Boolean.FALSE));
+            args.add(Pair.of(FortifyPlugin.DESCRIPTOR.getCtrlToken(), Boolean.TRUE));
         }
         if (StringUtils.isNotEmpty(getResolvedRulepacks(taskListener))) {
-            addAllArguments(args, getResolvedRulepacks(taskListener), "-rules");
+        	addAllArgumentsWithNoMasks(args, getResolvedRulepacks(taskListener), "-rules");
         }
         if (StringUtils.isNotEmpty(getResolvedFilterFile(taskListener))) {
-            addAllArguments(args, getResolvedFilterFile(taskListener), "-filter");
+        	addAllArgumentsWithNoMasks(args, getResolvedFilterFile(taskListener), "-filter");
         }
-        args.add("-scan"); // must have -scan argument for mbs scans
+        args.add(Pair.of("-scan", Boolean.FALSE)); // must have -scan argument for mbs scans
         if (StringUtils.isNotEmpty(getResolvedScanArgs(taskListener))) {
-            args.add(getResolvedScanArgs(taskListener));
+            args.add(Pair.of(getResolvedScanArgs(taskListener), Boolean.FALSE));
         }
 
-        Launcher.ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(filePath).cmds(args).envs(vars)
-                .stdout(taskListener.getLogger()).stderr(taskListener.getLogger());
-        int exitcode = ps.join();
+		List<String> cmds = new ArrayList<String>(args.size());
+		boolean[] masks = new boolean[args.size()];
+		args.stream().forEach(p -> {
+			cmds.add(p.getLeft());
+			masks[args.indexOf(p)] = p.getRight();
+		});
+		Launcher.ProcStarter p = launcher.launch().cmds(cmds).masks(masks).envs(vars).stdout(log).stderr(log).pwd(filePath);
+		int exitcode = p.start().join();
         log.println("Fortify remote scan completed with exit code: " + exitcode);
 
         if (exitcode != 0) {

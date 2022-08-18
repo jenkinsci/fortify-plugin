@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -182,6 +183,13 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		for (String s : Util.tokenize(argsToAdd)) {
 			args.add(flag);
 			args.add(s);
+		}
+	}
+
+	protected void addAllArgumentsWithNoMasks(List<Pair<String, Boolean>> args, String argsToAdd, String flag) {
+		for (String s : Util.tokenize(argsToAdd)) {
+			args.add(Pair.of(flag, Boolean.FALSE));
+			args.add(Pair.of(s, Boolean.FALSE));
 		}
 	}
 }

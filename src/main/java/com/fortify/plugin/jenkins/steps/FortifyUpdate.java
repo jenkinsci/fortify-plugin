@@ -20,10 +20,12 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
-import hudson.util.ListBoxModel;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
@@ -31,7 +33,9 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import com.fortify.plugin.jenkins.FortifyPlugin;
 import com.fortify.plugin.jenkins.Messages;
+import com.fortify.plugin.jenkins.ProxyConfig;
 import com.google.common.collect.ImmutableSet;
 
 import hudson.AbortException;
@@ -39,15 +43,16 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Launcher.ProcStarter;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 
 public class FortifyUpdate extends FortifyStep {
 	private String updateServerURL;
 	private String locale;
-	private Boolean acceptKey = Boolean.FALSE;
+	private boolean acceptKey = false;
 	private transient String proxyURL;
 	private transient String proxyUsername;
 	private transient String proxyPassword;
@@ -76,11 +81,11 @@ public class FortifyUpdate extends FortifyStep {
 	public String getLocale() { return locale; }
 
 	@DataBoundSetter
-	public void setAcceptKey(Boolean accpeptKey) {
+	public void setAcceptKey(boolean accpeptKey) {
 		this.acceptKey = accpeptKey;
 	}
 
-	public Boolean getAcceptKey() {
+	public boolean getAcceptKey() {
 		return this.acceptKey;
 	}
 
@@ -165,21 +170,21 @@ public class FortifyUpdate extends FortifyStep {
 		PrintStream log = listener.getLogger();
 		log.println("Fortify Jenkins plugin v " + VERSION);
 		log.println("Launching fortifyupdate command");
-		ArrayList<String> args = new ArrayList<String>();
+		List<Pair<String, Boolean>> cmdsAndMasks = new LinkedList<Pair<String, Boolean>>();
 		String fortifyUpdate = getFortifyUpdateExecutable(build, workspace, launcher, listener, vars);
-		args.add(fortifyUpdate);
+		cmdsAndMasks.add(Pair.of(fortifyUpdate, Boolean.FALSE));
 		String updateServerUrl = getResolvedUpdateServerURL(listener);
 		if (!"".equals(updateServerUrl)) {
 			try {
 				URL url = new URL(updateServerUrl);
 				if ("http".equalsIgnoreCase(url.getProtocol()) || "https".equalsIgnoreCase(url.getProtocol())) {
-					args.add("-url");
-					args.add(updateServerUrl);
+					cmdsAndMasks.add(Pair.of("-url", Boolean.FALSE));
+					cmdsAndMasks.add(Pair.of(updateServerUrl, Boolean.FALSE));
 				} else {
 					log.println(Messages.ForitfyUpdate_URL_Protocol_Warning(updateServerUrl));
 				}
 				if (Boolean.TRUE.equals(getAcceptKey())) {
-					args.add("-acceptKey");
+					cmdsAndMasks.add(Pair.of("-acceptKey", Boolean.FALSE));
 				}
 			} catch (MalformedURLException mue) {
 				log.println(Messages.FortifyUpdate_URL_Invalid(updateServerUrl));
@@ -188,18 +193,47 @@ public class FortifyUpdate extends FortifyStep {
 
 		String localeStr = getResolvedLocale(listener);
 		if (!"".equals(localeStr)) {
-			args.add("-locale");
-			args.add(localeStr);
+			cmdsAndMasks.add(Pair.of("-locale", Boolean.FALSE));
+			cmdsAndMasks.add(Pair.of(localeStr, Boolean.FALSE));
 		}
-		ProcStarter ps = launcher.decorateByEnv(vars).launch().pwd(workspace).cmds(args).envs(vars)
-				.stdout(listener.getLogger()).stderr(listener.getLogger());
-		int exitcode = ps.join();
+		if (FortifyPlugin.DESCRIPTOR.getIsProxy()) {
+			ProxyConfig proxyConfig = FortifyPlugin.DESCRIPTOR.getProxyConfig();
+			if (proxyConfig != null) {
+				String proxyUrl = proxyConfig.getProxyUrlFor(updateServerUrl);
+				if (!StringUtils.isBlank(proxyUrl)) {
+					Pair<String, Integer> hostAndPort = ProxyConfig.parseProxyHostAndPort(proxyUrl);
+					if (!StringUtils.isBlank(hostAndPort.getLeft())) {
+						cmdsAndMasks.add(Pair.of("-proxyhost", Boolean.FALSE));
+						cmdsAndMasks.add(Pair.of(hostAndPort.getLeft(), Boolean.FALSE));
+						cmdsAndMasks.add(Pair.of("-proxyport", Boolean.FALSE));
+						cmdsAndMasks.add(Pair.of(String.valueOf(hostAndPort.getRight().intValue()), Boolean.FALSE));
+						String username = Secret.toString(proxyConfig.getProxyUsername());
+						if (!StringUtils.isBlank(username)) {
+							cmdsAndMasks.add(Pair.of("-proxyUsername", Boolean.FALSE));
+							cmdsAndMasks.add(Pair.of(username, Boolean.TRUE));
+							String pwd = Secret.toString(proxyConfig.getProxyPassword());
+							if (!StringUtils.isBlank(pwd)) {
+								cmdsAndMasks.add(Pair.of("-proxyPassword", Boolean.FALSE));
+								cmdsAndMasks.add(Pair.of(pwd, Boolean.TRUE));
+							}
+						}
+					}
+				}
+			}
+		}
+		List<String> args = new ArrayList<String>(cmdsAndMasks.size());
+		boolean[] masks = new boolean[cmdsAndMasks.size()];
+		cmdsAndMasks.stream().forEach(p -> {
+			args.add(p.getLeft());
+			masks[cmdsAndMasks.indexOf(p)] = p.getRight();
+		});
+		Launcher.ProcStarter p = launcher.launch().cmds(args).masks(masks).envs(vars).stdout(log).stderr(log).pwd(workspace);
+		int exitcode = p.start().join();
 		log.println(Messages.FortifyUpdate_Result(exitcode));
 		if (exitcode != 0) {
 			build.setResult(Result.FAILURE);
 			throw new AbortException(Messages.FortifyUpdate_Error());
 		}
-
 	}
 
 	private String getFortifyUpdateExecutable(Run<?, ?> build, FilePath workspace, Launcher launcher,

@@ -45,7 +45,7 @@
     </f:entry>
 
     <f:entry title="${%Filter set}" field="filterSet" help="/plugin/fortify/help-filterSet.html">
-      <f:textbox/>
+      <f:select/>
     </f:entry>
 
     <f:entry title="${%Build failure criteria}" field="failureCriteria" help="/plugin/fortify/help-search.html">

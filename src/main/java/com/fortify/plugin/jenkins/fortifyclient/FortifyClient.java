@@ -432,4 +432,21 @@ public class FortifyClient {
 		return groupByGuid;
 	}
 
+	/**
+	 * Retrieve the list of FilterSets for the @verId from SSC
+	 * @param verId
+	 *
+	 * @return Map<String, Map<String, Long>>
+	 * @throws ApiException
+	 */
+	public Map<String, String> getFilterSetListEx(Long verId) throws ApiException {
+		Map<String, String> result = new LinkedHashMap<String, String>();
+		if (verId != null) {
+			List<FilterSet> filterSets = apiClientWrapper.getFilterSetsForAppVersion(verId);
+			for (FilterSet nextFilterSet : filterSets) {
+				result.put(nextFilterSet.getTitle(), nextFilterSet.getGuid());
+			}
+		}
+		return result;
+	}
 }

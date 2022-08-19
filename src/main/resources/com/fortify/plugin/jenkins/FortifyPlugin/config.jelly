@@ -317,7 +317,7 @@
             <div style="clear:both" />
           </f:entry>
           <f:entry field="filterSet" title="Filter set" help="/plugin/fortify/help-filterSet.html">
-            <f:textbox/>
+            <f:select/>
           </f:entry>
           <f:entry field="searchCondition" title="Build failure criteria" help="/plugin/fortify/help-search.html">
             <f:textbox/>
@@ -366,7 +366,7 @@
             <div style="clear:both" />
           </f:entry>
           <f:entry field="filterSet" title="Filter set" help="/plugin/fortify/help-filterSet.html">
-            <f:textbox/>
+            <f:select/>
           </f:entry>
           <f:entry field="searchCondition" title="Build failure criteria" help="/plugin/fortify/help-search.html">
             <f:textbox/>

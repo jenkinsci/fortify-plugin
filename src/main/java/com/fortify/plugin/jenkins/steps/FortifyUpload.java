@@ -69,6 +69,7 @@ import hudson.model.StreamBuildListener;
 import hudson.model.TaskListener;
 import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 
 public class FortifyUpload extends FortifyStep implements Serializable {
 	private static final long serialVersionUID = -8308672776705963290L;
@@ -785,14 +786,16 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 			return FortifyPlugin.DESCRIPTOR.getAppVersionItems(applicationName);
 		}
 
-		public void doRefreshApplications(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
-				throws Exception {
+		public void doRefreshApplications(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
 			FortifyPlugin.DESCRIPTOR.doRefreshProjects(req, rsp, value);
 		}
 
-		public void doRefreshVersions(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
-				throws Exception {
+		public void doRefreshVersions(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
 			FortifyPlugin.DESCRIPTOR.doRefreshVersions(req, rsp, value);
+		}
+
+		public ListBoxModel doFillFilterSetItems(@QueryParameter String appName, @QueryParameter String appVersion) {
+			return FortifyPlugin.DESCRIPTOR.doFillFilterSetItems(appName, appVersion);
 		}
 
 		public FormValidation doCheckAppName(@QueryParameter String value) {

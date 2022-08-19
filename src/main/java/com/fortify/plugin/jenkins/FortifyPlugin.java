@@ -1949,6 +1949,47 @@ public class FortifyPlugin extends Recorder {
 			return Collections.emptyList();
 		}
 
+		public ListBoxModel doFillFilterSetItems(@QueryParameter String appName, @QueryParameter String appVersion) {
+			ListBoxModel standardListBoxModel = new ListBoxModel();
+			standardListBoxModel.add("");
+			Map<String, String> allFilterSets = refreshFilterSetsFor(appName, appVersion);
+			if (allFilterSets != null) {
+				for (Map.Entry<String, String> nextFilterSet : allFilterSets.entrySet()) {
+					standardListBoxModel.add(nextFilterSet.getKey(), nextFilterSet.getValue());
+				}
+			}
+			return standardListBoxModel;
+		}
+
+		private Map<String, String> refreshFilterSetsFor(String appName, String appVersion) {
+			if (!StringUtils.isBlank(appName) && !StringUtils.isBlank(appVersion) && canUploadToSsc()) {
+				try {
+					Map<String, String> map = runWithFortifyClient(getToken(),
+							new FortifyClient.Command<Map<String, String>>() {
+								@Override
+								public Map<String, String> runWith(FortifyClient client) throws Exception {
+									Map<String, Long> appList = client.getProjectList(appName, 1);
+									if (appList != null && appList.size() == 1) {
+										for (Map.Entry<String, Long> nextApp : appList.entrySet()) {
+											Map<String, Long> versionList = client.getVersionListEx(nextApp.getValue(), appVersion, 1);
+											if (versionList != null && versionList.size() == 1) {
+												for (Map.Entry<String, Long> nextVer : versionList.entrySet()) {
+													return client.getFilterSetListEx(nextVer.getValue());
+												}
+											}
+										}
+									}
+									return Collections.emptyMap();
+								}
+							});
+					return map;
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+			}
+			return Collections.emptyMap();
+		}
+
 		public ListBoxModel doFillSensorPoolUUIDItems() {
 			sensorPoolList = getSensorPoolListNoCache();
 

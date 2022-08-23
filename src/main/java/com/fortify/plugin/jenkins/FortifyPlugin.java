@@ -51,7 +51,7 @@ import com.cloudbees.plugins.credentials.domains.Domain;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.fortify.plugin.jenkins.bean.ProjectTemplateBean;
 import com.fortify.plugin.jenkins.bean.SensorPoolBean;
-import com.fortify.plugin.jenkins.credentials.DefaultFortifyApiToken;
+import com.fortify.plugin.jenkins.credentials.StandardFortifyApiToken;
 import com.fortify.plugin.jenkins.credentials.FortifyApiToken;
 import com.fortify.plugin.jenkins.fortifyclient.FortifyClient;
 import com.fortify.plugin.jenkins.fortifyclient.FortifyClient.NoReturn;
@@ -1091,7 +1091,7 @@ public class FortifyPlugin extends Recorder {
 		@DataBoundSetter
 		public void setToken(String token) {
 			String defaultMigratedTokenId = "fortify_api_token";
-			final Credentials fortifyToken = new DefaultFortifyApiToken(CredentialsScope.GLOBAL,
+			final Credentials fortifyToken = new StandardFortifyApiToken(CredentialsScope.GLOBAL,
 					defaultMigratedTokenId,
 					StringUtils.isBlank(token) ? "" : token.trim(),
 					"fortify plugin migration generated ssc token credentials");
@@ -1205,7 +1205,7 @@ public class FortifyPlugin extends Recorder {
 		@DataBoundSetter
 		public void setCtrlToken(String ctrlToken) { 
 			String defaultMigratedCtrlTokenId = "fortify_ctrl_token";
-			final Credentials fortifyCtrlToken = new DefaultFortifyApiToken(CredentialsScope.GLOBAL,
+			final Credentials fortifyCtrlToken = new StandardFortifyApiToken(CredentialsScope.GLOBAL,
 					defaultMigratedCtrlTokenId,
 					StringUtils.isBlank(ctrlToken) ? "" : ctrlToken.trim(),
 					"fortify plugin migration generated ctrl token credentials");

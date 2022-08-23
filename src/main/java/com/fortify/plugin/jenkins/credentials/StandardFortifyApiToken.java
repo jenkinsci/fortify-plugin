@@ -3,13 +3,16 @@ package com.fortify.plugin.jenkins.credentials;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.impl.BaseStandardCredentials;
 import hudson.Extension;
+import hudson.util.FormValidation;
 import hudson.util.Secret;
 import lombok.NonNull;
 
+import org.apache.commons.lang.StringUtils;
 import org.jenkins.ui.icon.Icon;
 import org.jenkins.ui.icon.IconSet;
 import org.jenkins.ui.icon.IconType;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.CheckForNull;
 
@@ -17,7 +20,7 @@ import javax.annotation.CheckForNull;
  * Default implementation of {@link FortifyApiToken} for use by Jenkins {@link com.cloudbees.plugins.credentials.CredentialsProvider}
  * instances that store {@link Secret} locally.
  */
-public class DefaultFortifyApiToken extends BaseStandardCredentials implements FortifyApiToken {
+public class StandardFortifyApiToken extends BaseStandardCredentials implements FortifyApiToken {
 
 	private static final long serialVersionUID = -7103736612075250489L;
 
@@ -25,7 +28,7 @@ public class DefaultFortifyApiToken extends BaseStandardCredentials implements F
     private final Secret token;
 
     @DataBoundConstructor
-    public DefaultFortifyApiToken(@CheckForNull CredentialsScope scope, @CheckForNull String id, @NonNull String token, @CheckForNull String description) {
+    public StandardFortifyApiToken(@CheckForNull CredentialsScope scope, @CheckForNull String id, @NonNull String token, @CheckForNull String description) {
         super(scope, id, description);
         this.token = Secret.fromString(token);
     }
@@ -48,6 +51,13 @@ public class DefaultFortifyApiToken extends BaseStandardCredentials implements F
         @Override
         public String getIconClassName() {
             return "icon-fortify-credentials";
+        }
+
+        public FormValidation doCheckToken(@QueryParameter Secret token) {
+            if (StringUtils.isBlank(Secret.toString(token))) {
+                return FormValidation.error("Token cannot be empty");
+            }
+            return FormValidation.ok();
         }
 
         static {

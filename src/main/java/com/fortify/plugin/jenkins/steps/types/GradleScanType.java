@@ -95,7 +95,7 @@ public class GradleScanType extends ProjectScanType {
 			return Validators.checkFieldNotEmpty(value);
 		}
 
-		public ListBoxModel doFillGradleInstallationNameItems(String value) {
+		public ListBoxModel doFillGradleInstallationNameItems() {
 			GradleInstallation[] installations = getInstallations();
 			ListBoxModel result = new ListBoxModel();
 			result.add("(Default)");

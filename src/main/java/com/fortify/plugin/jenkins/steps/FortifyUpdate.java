@@ -32,6 +32,7 @@ import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 
 import com.fortify.plugin.jenkins.FortifyPlugin;
 import com.fortify.plugin.jenkins.Messages;
@@ -265,7 +266,7 @@ public class FortifyUpdate extends FortifyStep {
 			return ImmutableSet.of(Run.class, FilePath.class, EnvVars.class, Launcher.class, TaskListener.class);
 		}
 
-		public ListBoxModel doFillLocaleItems(String value) {
+		public ListBoxModel doFillLocaleItems(@QueryParameter String locale) {
 			ListBoxModel items = new ListBoxModel();
 			items.add("English", "en");
 			items.add("Chinese Simplified", "zh_CN");
@@ -275,7 +276,7 @@ public class FortifyUpdate extends FortifyStep {
 			items.add("Portuguese (Brazil)", "pt_BR");
 			items.add("Spanish", "es");
 
-			if ((null == value) || (0 == value.length())) {
+			if (StringUtils.isBlank(locale)) {
 				items.get(0).selected = true; // default to en_US
 			}
 

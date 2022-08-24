@@ -2044,7 +2044,7 @@ public class FortifyPlugin extends Recorder {
 			return Collections.emptyList();
 		}
 
-		public ListBoxModel doFillLocaleItems(String value) {
+		public ListBoxModel doFillLocaleItems(@QueryParameter String locale) {
 			ListBoxModel items = new ListBoxModel();
 			items.add("English", "en");
 			items.add("Chinese Simplified", "zh_CN");
@@ -2054,7 +2054,7 @@ public class FortifyPlugin extends Recorder {
 			items.add("Portuguese (Brazil)", "pt_BR");
 			items.add("Spanish", "es");
 
-			if ((null == value) || (0 == value.length())) {
+			if (StringUtils.isBlank(locale)) {
 				items.get(0).selected = true; // default to en_US
 			}
 

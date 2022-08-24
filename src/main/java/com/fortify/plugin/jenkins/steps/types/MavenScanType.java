@@ -67,7 +67,7 @@ public class MavenScanType extends ProjectScanType {
 			return Messages.MavenScanType_DisplayName();
 		}
 
-		public ListBoxModel doFillMavenInstallationNameItems(String value) {
+		public ListBoxModel doFillMavenInstallationNameItems() {
 			MavenInstallation[] installations = getInstallations();
 			ListBoxModel result = new ListBoxModel();
 			result.add("(Default)");

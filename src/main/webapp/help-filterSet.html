@@ -14,11 +14,11 @@
     limitations under the License.
  -->
 <div>
-   A filter set determines which issues are displayed. You can only select a filter set for an application that exists on the server, otherwise leave the field blank to create the application version with default filter set and then configure.
+   A filter set determines which issues are displayed. You can select a filter set for an application that exists on the server. Leave the field blank to use the default filter set configured in Fortify Software Security Center.
   <p>
-    Fortify Security Center provides filter sets based on the issue template configured for the project. By default, every template has "Quick View" (input 32142c2d-3f7f-4863-a1bf-9b1e2f34d2ed) and "Security Auditor View" (input a243b195-0a59-3f8b-1403-d55b7a7d78e6). Your organization might have additional filter sets. If no filter set is specified, the plugin uses the one configured on the server as default.
+    Fortify Security Center provides filter sets based on the issue template configured for the application. By default, every issue template includes the Quick View and Security Auditor View filter sets. Your organization might have additional filter sets.
   </p>
   <p>
-    The build failure criteria, the NVS calculation and the Fortify Assessment page depend on the issues filtered by the filter set. For example, if a Quick View filter set is applied and no issues are found, then the build failure criteria determines that there is no reason to set this build to unstable and the NVS is set to zero. The graph summary also shows zero.
+    The build failure criteria, the NVS calculation, and the Fortify Assessment page depend on the issues filtered by the filter set. For example, if a Quick View filter set is applied and no issues are found, then the build failure criteria determines that there is no reason to set this build to unstable and the NVS is set to zero. The graph summary also shows zero.
   </p> 
 </div>

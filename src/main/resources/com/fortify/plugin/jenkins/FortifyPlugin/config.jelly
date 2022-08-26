@@ -336,7 +336,7 @@
       </f:radioBlock>
       </j:if>
 
-      <f:radioBlock title="Upload existing SCA results to Fortify Software Security Center" value="uploadOnly"
+      <f:radioBlock title="Upload existing Fortify SCA results to Fortify Software Security Center" value="uploadOnly"
         name="analysisRunType" checked="${instance.isUploadOnly()}" help="/plugin/fortify/help-uploadOnly.html">
 
         <f:entry field="scanFile" title="Results file" help="/plugin/fortify/help-fpr.html">

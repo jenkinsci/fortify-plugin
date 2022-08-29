@@ -100,9 +100,9 @@ public class ApiClientWrapper {
 		}
 	}
 
-	public void setProxy(ProxyConfig proxyConfig, String uri) {
+	public void setProxy(ProxyConfig proxyConfig) {
 		if (proxyConfig != null) {
-			apiClient.setHttpClient(proxyConfig.decorateClient(apiClient.getHttpClient(), uri));
+			apiClient.setHttpClient(proxyConfig.decorateClient(apiClient.getHttpClient(), apiClient.getBasePath()));
 		}
 	}
 

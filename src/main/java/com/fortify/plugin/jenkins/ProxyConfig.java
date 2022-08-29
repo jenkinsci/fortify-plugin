@@ -2,7 +2,9 @@ package com.fortify.plugin.jenkins;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.Proxy;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -119,12 +121,8 @@ public class ProxyConfig extends AbstractDescribableImpl<ProxyConfig> {
 		if (proxyConfiguration != null) {
 			String host = proxyConfiguration.getName();
 			if (!StringUtils.isBlank(host)) {
-				if (!StringUtils.isBlank(url)) {
-					for (Pattern next : proxyConfiguration.getNoProxyHostPatterns()) {
-						if (next.matcher(url).matches()) {
-							return null;
-						}
-					}
+				if (!StringUtils.isBlank(url) && isInNoProxyHost(url, proxyConfiguration.getNoProxyHostPatterns())) {
+					return null;
 				}
 				int port = proxyConfiguration.getPort();
 				if (port <= 0) {
@@ -134,6 +132,23 @@ public class ProxyConfig extends AbstractDescribableImpl<ProxyConfig> {
 			}
 		}
 		return null;
+	}
+
+	private boolean isInNoProxyHost(String url, List<Pattern> noProxyHostPatterns) {
+		try {
+			URL parsedUrl = new URL(url);
+			String host = parsedUrl.getHost();
+			if (!StringUtils.isBlank(host)) {
+				for (Pattern next : noProxyHostPatterns) {
+					if (next.matcher(host).matches()) {
+						return true;
+					}
+				}
+			}
+		} catch (MalformedURLException e) {
+			// malformed url, we can't verify it
+		}
+		return false;
 	}
 
 	private ProxyConfiguration getJenkinsProxyInstanceOrNull() {

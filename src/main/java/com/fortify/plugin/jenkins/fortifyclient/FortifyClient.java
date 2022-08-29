@@ -72,7 +72,7 @@ public class FortifyClient {
 	public void init(String uri, String token, ProxyConfig proxyConfig,
 					 Integer connectTimeoutSeconds, Integer readTimeoutSeconds, Integer writeTimeoutSeconds) throws ApiException {
 		apiClientWrapper = new ApiClientWrapper(uri, token, connectTimeoutSeconds, readTimeoutSeconds, writeTimeoutSeconds);
-		apiClientWrapper.setProxy(proxyConfig, uri);
+		apiClientWrapper.setProxy(proxyConfig);
 	}
 
 	/**

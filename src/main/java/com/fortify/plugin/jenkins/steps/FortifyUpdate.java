@@ -175,7 +175,7 @@ public class FortifyUpdate extends FortifyStep {
 		String fortifyUpdate = getFortifyUpdateExecutable(build, workspace, launcher, listener, vars);
 		cmdsAndMasks.add(Pair.of(fortifyUpdate, Boolean.FALSE));
 		String updateServerUrl = getResolvedUpdateServerURL(listener);
-		if (!"".equals(updateServerUrl)) {
+		if (!StringUtils.isBlank(updateServerUrl)) {
 			try {
 				URL url = new URL(updateServerUrl);
 				if ("http".equalsIgnoreCase(url.getProtocol()) || "https".equalsIgnoreCase(url.getProtocol())) {
@@ -193,14 +193,14 @@ public class FortifyUpdate extends FortifyStep {
 		}
 
 		String localeStr = getResolvedLocale(listener);
-		if (!"".equals(localeStr)) {
+		if (!StringUtils.isBlank(localeStr)) {
 			cmdsAndMasks.add(Pair.of("-locale", Boolean.FALSE));
 			cmdsAndMasks.add(Pair.of(localeStr, Boolean.FALSE));
 		}
 		if (FortifyPlugin.DESCRIPTOR.getIsProxy()) {
 			ProxyConfig proxyConfig = FortifyPlugin.DESCRIPTOR.getProxyConfig();
 			if (proxyConfig != null) {
-				String proxyUrl = proxyConfig.getProxyUrlFor(updateServerUrl);
+				String proxyUrl = proxyConfig.getProxyUrlFor(StringUtils.isBlank(updateServerUrl) ? "https://update.fortify.com" : updateServerUrl);
 				if (!StringUtils.isBlank(proxyUrl)) {
 					Pair<String, Integer> hostAndPort = ProxyConfig.parseProxyHostAndPort(proxyUrl);
 					if (!StringUtils.isBlank(hostAndPort.getLeft())) {

@@ -180,7 +180,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 	public Integer getResolvedTimeout(TaskListener listener) {
 		if (getTimeout() != null) {
 			try {
-				return Integer.parseInt(resolve(String.valueOf(getTimeout()), listener));
+				return Integer.parseInt(resolve(getTimeout(), listener));
 			} catch (NumberFormatException e) {
 				return null;
 			}
@@ -340,15 +340,15 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 		long timeoutAfter = System.currentTimeMillis() + timeoutInMillis;
 
 		Integer resolvedPollingInterval = getResolvedPollingInterval(listener);
+		int sleepInMinutes = (resolvedPollingInterval != null) ? resolvedPollingInterval : 1;
+		if (sleepInMinutes == 0) {
+			log.println("Polling interval of 0 disables waiting");
+			return;
+		}
+		int sleepInMillis = sleepInMinutes * 60 * 1000; // wait time is in minute(s)
 		while (!isProcessingComplete) {
-			int sleep = (resolvedPollingInterval != null) ? resolvedPollingInterval : 1;
-			if (sleep == 0) {
-				log.println("Polling unterval of 0 disables polling");
-				break;
-			}
-			log.printf("Sleep for %d minute(s)%n", sleep);
-			sleep = sleep * 60 * 1000; // wait time is in minute(s)
-			long sleepUntil = System.currentTimeMillis() + sleep;
+			log.printf("Sleep for %d minute(s)%n", sleepInMinutes);
+			long sleepUntil = System.currentTimeMillis() + sleepInMillis;
 			while (true) {
 				long diff = sleepUntil - System.currentTimeMillis();
 				if (diff > 0) {
@@ -377,7 +377,13 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 				case ERROR_PROCESSING:
 					throw new AbortException("SSC encountered an error processing the artifact");
 				case REQUIRE_AUTH:
-					log.println("The artifact needs to be approved for processing in SSC.  Will continue to wait...");
+					log.println("The artifact needs to be approved for processing in SSC. Will continue to wait...");
+					break;
+				case SCHED_PROCESSING:
+					log.println("The artifact was scheduled for processing on SSC. Will continue to wait...");
+					break;
+				case PROCESSING:
+					log.println("The artifact is being processed by SSC. Will continue to wait...");
 					break;
 				default:
 					log.println("Unexpected artifact status: " + status.name());
@@ -394,7 +400,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 				throw new AbortException("Failed to retrieve artifact statistics from SSC. " + message);
 			}
 
-			if (timeoutInMinutes != 0) {
+			if (timeoutInMinutes > 0) {
 				long diff = timeoutAfter - System.currentTimeMillis();
 				if (diff <= 0) {
 					setBuildUncompleted(run, log, timeoutInMinutes);

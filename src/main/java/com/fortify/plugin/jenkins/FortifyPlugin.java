@@ -797,6 +797,7 @@ public class FortifyPlugin extends Recorder {
 		upload.setFailureCriteria(getSearchCondition());
 		upload.setFilterSet(getFilterSet());
 		upload.setResultsFile(getScanFile());
+		upload.setTimeout(getTimeout());
 		upload.setPollingInterval(getPollingInterval());
 
 		upload.perform(build, launcher, listener);
@@ -1971,10 +1972,14 @@ public class FortifyPlugin extends Recorder {
 									Map<String, Long> appList = client.getProjectList(appName, 1);
 									if (appList != null && appList.size() == 1) {
 										for (Map.Entry<String, Long> nextApp : appList.entrySet()) {
-											Map<String, Long> versionList = client.getVersionListEx(nextApp.getValue(), appVersion, 1);
-											if (versionList != null && versionList.size() == 1) {
-												for (Map.Entry<String, Long> nextVer : versionList.entrySet()) {
-													return client.getFilterSetListEx(nextVer.getValue());
+											if (nextApp.getKey().equals(appName)) {
+												Map<String, Long> versionList = client.getVersionListEx(nextApp.getValue(), appVersion, 1);
+												if (versionList != null && versionList.size() == 1) {
+													for (Map.Entry<String, Long> nextVer : versionList.entrySet()) {
+														if (nextVer.getKey().equals(appVersion)) {
+															return client.getFilterSetListEx(nextVer.getValue());
+														}
+													}
 												}
 											}
 										}

@@ -191,7 +191,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 	public Integer getResolvedPollingInterval(TaskListener listener) {
 		if (getPollingInterval() != null) {
 			try {
-				return Integer.parseInt(resolve(String.valueOf(getPollingInterval()), listener));
+				return Integer.parseInt(resolve(getPollingInterval(), listener));
 			} catch (NumberFormatException e) {
 				return null;
 			}
@@ -339,8 +339,13 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 		int timeoutInMillis = timeoutInMinutes * 60 * 1000;
 		long timeoutAfter = System.currentTimeMillis() + timeoutInMillis;
 
+		Integer resolvedPollingInterval = getResolvedPollingInterval(listener);
 		while (!isProcessingComplete) {
-			int sleep = (getResolvedPollingInterval(listener) != null) ? getResolvedPollingInterval(listener) : 1;
+			int sleep = (resolvedPollingInterval != null) ? resolvedPollingInterval : 1;
+			if (sleep == 0) {
+				log.println("Polling unterval of 0 disables polling");
+				break;
+			}
 			log.printf("Sleep for %d minute(s)%n", sleep);
 			sleep = sleep * 60 * 1000; // wait time is in minute(s)
 			long sleepUntil = System.currentTimeMillis() + sleep;

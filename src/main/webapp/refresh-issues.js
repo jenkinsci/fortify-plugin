@@ -15,7 +15,7 @@
  *******************************************************************************/
 		var isUpdateEnable = true;
 		
-		function updateByUrl(boxId,urlLink,spinnerUrl) {
+		function updateByUrl(boxId,urlLink,params,spinnerUrl) {
             // first display the "loading..." icon
         	if (isUpdateEnable) {
         		isUpdateEnable = false;
@@ -24,6 +24,7 @@
         		// then actually fetch the HTML
         		new Ajax.Request(urlLink, {
         			method: "post",
+        			parameters: params,
         			onComplete: function(rsp,_) {
         				var issueTable = document.getElementById('issueTable');
         				if (issueTable != null) {
@@ -36,34 +37,40 @@
         }
 
         function updateList(boxId,folder,nextPage,spinnerUrl) {
-            updateByUrl(boxId,contextUrl+"/updateIssueList?folder=" + folder + "&page=" + nextPage,spinnerUrl);
+            var params = {'folder' : folder, 'page' : nextPage};
+            updateByUrl(boxId,contextUrl+"/updateIssueList",params,spinnerUrl);
         }
 
         function updateListWithSort(boxId,folder,nextPage,sortOrd,spinnerUrl) {
-            updateByUrl(boxId,contextUrl+"/updateIssueList?folder=" + folder + "&page=" + nextPage + "&sort=" + sortOrd,spinnerUrl);
+            var params = {'folder' : folder, 'page' : nextPage, 'sort' : sortOrd};
+            updateByUrl(boxId,contextUrl+"/updateIssueList",params,spinnerUrl);
         }
         
         function updatePageSize(boxId,aSize,spinnerUrl) {
-        	updateByUrl(boxId,contextUrl+"/setPageSize?size=" + aSize,spinnerUrl);
+            var params = {'size' : aSize};
+            updateByUrl(boxId,contextUrl+"/setPageSize",params,spinnerUrl);
         }
 
         function showNew(boxId,spinnerUrl) {
-            updateByUrl(boxId,contextUrl+"/showAllNotNew?all=no",spinnerUrl);
+            var params = 'all=no';
+            updateByUrl(boxId,contextUrl+"/showAllNotNew",params,spinnerUrl);
         }
 
         function showAll(boxId,spinnerUrl) {
-            updateByUrl(boxId,contextUrl+"/showAllNotNew?all=yes",spinnerUrl);
+            var params = 'all=yes';
+            updateByUrl(boxId,contextUrl+"/showAllNotNew",params,spinnerUrl);
         }
 
-        function showGrouping(boxId,selectedGrouping,spinnerUrl)
-        {
-            updateByUrl(boxId,contextUrl+"/selectedGrouping?grouping="+selectedGrouping, spinnerUrl);
+        function showGrouping(boxId,selectedGrouping,spinnerUrl) {
+            var params = {'grouping' :  selectedGrouping};
+            updateByUrl(boxId,contextUrl+"/selectedGrouping",params, spinnerUrl);
         }
 
         function scheduleUpdateCheck() {
-            var parameters = {};
-            new Ajax.Request(contextUrl+"/checkUpdates?stamp="+stamp,{
-                method: "get",
+            var params = 'stamp='+stamp;
+            new Ajax.Request(contextUrl+"/checkUpdates",{
+                method: "post",
+                parameters: params,
                 onComplete: function(rsp,_) {
                     var update = rsp.getResponseHeader('go');
                     if(update == "go") {
@@ -80,7 +87,7 @@
         function reloadStatistics() {
             var parameters = {};
             new Ajax.Request(contextUrl+"/ajaxStats",{
-                method: "get",
+                method: "post",
                 onComplete: function(rsp,_) {
                     var scanStatistics = document.getElementById('scanStatistics');
                     if (scanStatistics != null) {
@@ -93,6 +100,7 @@
         function reloadIssues() {
             var parameters = {};
             new Ajax.Request(contextUrl+"/ajaxIssues",{
+                method: "post",
                 parameters: parameters,
                 onComplete: function(rsp) {
                     var issueTable = document.getElementById('issueTable');
@@ -106,6 +114,7 @@
         function reload(url,box) {
             var parameters = {};
             new Ajax.Request(url,{
+                method: "post",
                 parameters: parameters,
                 onComplete: function(rsp) {
                     var issueTable = document.getElementById(box);
@@ -122,8 +131,9 @@
                var box = document.getElementById('firstTimeSpinF');
                box.innerHTML = '<img src="'+spinnerUrl+'" alt=""/>';
                // then actually fetch the HTML
-               var request = new Ajax.Request(contextUrl+"/ajaxIssues?firstTime=yes",{
-                   method: "get",
+               var request = new Ajax.Request(contextUrl+"/ajaxIssues",{
+                   method: "post",
+                   parameters : "firstTime=yes",
                    onComplete: function(rsp,_) {
                        var issueTable = document.getElementById('issueTable');
                        issueTable.innerHTML = rsp.responseText;

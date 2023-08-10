@@ -41,6 +41,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.verb.POST;
 
 import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
@@ -1253,6 +1254,7 @@ public class FortifyPlugin extends Recorder {
 			return FormValidation.ok();
 		}
 
+		@POST
 		public FormValidation doCheckUrl(@QueryParameter String value) {
 			try {
 				checkUrlValue(value == null ? null : value.trim());
@@ -1262,6 +1264,7 @@ public class FortifyPlugin extends Recorder {
 			return FormValidation.ok();
 		}
 
+		@POST
 		public FormValidation doCheckSscTokenCredentialsId(@QueryParameter String value, @QueryParameter String url) {
 			if (StringUtils.isBlank(value) && (StringUtils.isNotBlank(url) && doCheckUrl(url) == FormValidation.ok())) {
 				return FormValidation.warning("Authentication token cannot be empty");
@@ -1269,6 +1272,7 @@ public class FortifyPlugin extends Recorder {
 			return FormValidation.ok();
 		}
 
+		@POST
 		public FormValidation doCheckCtrlTokenCredentialsId(@QueryParameter String value, @QueryParameter String ctrlUrl) {
 			if (StringUtils.isBlank(value) && StringUtils.isNotBlank(ctrlUrl)) {
 				return FormValidation.warning("Controller token cannot be empty");
@@ -1288,7 +1292,9 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
+		@POST
 		public FormValidation doCheckProjectTemplate(@QueryParameter String value) {
+			checkAdministerPermission();
 			try {
 				checkProjectTemplateName(value.trim());
 			} catch (FortifyException e) {
@@ -1337,6 +1343,7 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
+		@POST
 		public FormValidation doCheckCtrlUrl(@QueryParameter String value, @QueryParameter String url) {
 			if (StringUtils.isBlank(value)) {
 				if (StringUtils.isNotBlank(url) && (doCheckUrl(url) == FormValidation.ok())) {
@@ -1353,6 +1360,7 @@ public class FortifyPlugin extends Recorder {
 			return FormValidation.ok();
 		}
 
+		@POST
 		public ListBoxModel doFillSscTokenCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String sscTokenCredentialsId, @QueryParameter String url) {
 			StandardListBoxModel result = new StandardListBoxModel();
 			if (item == null) {
@@ -1368,8 +1376,14 @@ public class FortifyPlugin extends Recorder {
 					.includeMatchingAs(ACL.SYSTEM, item, FortifyApiToken.class, URIRequirementBuilder.fromUri(url).build(), CredentialsMatchers.instanceOf(FortifyApiToken.class));
 		}
 
+		@POST
 		public FormValidation doTestConnection(@QueryParameter String url, @QueryParameter String sscTokenCredentialsId, @QueryParameter Boolean isProxy,
 				@QueryParameter Integer connectTimeout, @QueryParameter Integer readTimeout, @QueryParameter Integer writeTimeout) {
+			checkAdministerPermission();
+			return testSscConnection(url, sscTokenCredentialsId, isProxy, connectTimeout, readTimeout, writeTimeout);
+		}
+
+		private FormValidation testSscConnection(final String url, final String sscTokenCredentialsId, final Boolean isProxy, final Integer connectTimeout, final Integer readTimeout, final Integer writeTimeout) {
 			String sscUrl = url == null ? "" : url.trim();
 			try {
 				checkUrlValue(sscUrl);
@@ -1418,9 +1432,9 @@ public class FortifyPlugin extends Recorder {
 			} catch (Throwable t) {
 				String message = t.getMessage();
 				if (message != null && message.contains("Access Denied")) {
-					return FormValidation.errorWithMarkup("Invalid token. (" + message + ")");
+					return FormValidation.error("Invalid token. (" + removeHtmlFormatting(message) + ")");
 				}
-				return FormValidation.errorWithMarkup("Cannot connect to SSC server. " + message);
+				return FormValidation.error("Cannot connect to SSC server. " + removeHtmlFormatting(message));
 			} finally {
 				this.url = orig_url;
 				setIsProxy(orig_isProxy);
@@ -1431,6 +1445,14 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
+		private String removeHtmlFormatting(String html) {
+			if (html != null) {
+				// we're using the simplest approach here in order not to introduce a new library dependency in this release
+				return html.replaceAll("<[^>]*>", "");
+			}
+			return "";
+		}
+
 		private FortifyApiToken getTokenFrom(String tokenId, String url) throws FortifyException {
 			FortifyApiToken c = tokenId == null ? null : CredentialsMatchers.firstOrNull(
 					CredentialsProvider.lookupCredentials(FortifyApiToken.class, Jenkins.get(), ACL.SYSTEM, 
@@ -1439,6 +1461,7 @@ public class FortifyPlugin extends Recorder {
 			return c;
 		}
 
+		@POST
 		public ListBoxModel doFillCtrlTokenCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String ctrlTokenCredentialsId, @QueryParameter String ctrlUrl) {
 			StandardListBoxModel result = new StandardListBoxModel();
 			if (item == null) {
@@ -1456,7 +1479,9 @@ public class FortifyPlugin extends Recorder {
 									CredentialsMatchers.instanceOf(FortifyApiToken.class));
 		}
 
+		@POST
 		public FormValidation doTestCtrlConnection(@QueryParameter String ctrlUrl, @QueryParameter String ctrlTokenCredentialsId, @QueryParameter Boolean isProxy) throws IOException {
+			checkAdministerPermission();
 			String controllerUrl = ctrlUrl == null ? "" : ctrlUrl.trim();
 			try {
 				checkCtrlUrlValue(controllerUrl);
@@ -1549,6 +1574,10 @@ public class FortifyPlugin extends Recorder {
 					if (ctrlUrl.endsWith("/")) {
 						ctrlUrl = ctrlUrl.substring(0, ctrlUrl.length()-1);
 					}
+					int hash = ctrlUrl.indexOf("%23");
+					if (hash > 0) {
+						ctrlUrl = ctrlUrl.substring(0, hash);
+					}
 					if (!StringUtils.endsWith(ctrlUrl,"/scancentral-ctrl") && !StringUtils.endsWith(ctrlUrl,"/cloud-ctrl")) {
 						throw new FortifyException(new Message(Message.ERROR, "Invalid context"));
 					}
@@ -1561,7 +1590,13 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public void doRefreshProjects(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
+		@POST
+		public void doRefreshProjects(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value, @AncestorInPath Item item) throws Exception {
+			if (item != null) {
+				item.checkPermission(Item.CONFIGURE);
+			} else {
+				Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+			}
 			try {
 				String typedText = sanitizeUnicodeControls(req.getParameter("typedText"));
 				// always retrieve data from SSC
@@ -1587,7 +1622,13 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public void doRefreshVersions(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
+		@POST
+		public void doRefreshVersions(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value, @AncestorInPath Item item) throws Exception {
+			if (item != null) {
+				item.checkPermission(Item.CONFIGURE);
+			} else {
+				Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+			}
 			try {
 				String selectedApp = sanitizeUnicodeControls(req.getParameter("selectedPrj"));
 				String typedText = sanitizeUnicodeControls(req.getParameter("typedText"));
@@ -1638,7 +1679,9 @@ public class FortifyPlugin extends Recorder {
 			return stringValue.replace("\"", "\\\"");
 		}
 
+		@POST
 		public void doRefreshProjectTemplates(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
+			checkAdministerPermission();
 			// backup original values
 			String orig_url = this.url;
 			ProxyConfig orig_proxyConfig = this.proxyConfig;
@@ -1661,7 +1704,7 @@ public class FortifyPlugin extends Recorder {
 			this.sscTokenCredentialsId = tokenId;
 
 			try {
-				FormValidation testConnectionResult = doTestConnection(this.url, this.getSscTokenCredentialsId(), useProxyParam, connectTimeout, readTimeout, writeTimeout);
+				FormValidation testConnectionResult = testSscConnection(this.url, this.getSscTokenCredentialsId(), useProxyParam, connectTimeout, readTimeout, writeTimeout);
 				if (!testConnectionResult.kind.equals(FormValidation.Kind.OK)) {
 					LOGGER.log(Level.WARNING, "Can't retrieve Fortify Issue Template list because of SSC server connection problem: " + testConnectionResult.getLocalizedMessage());
 					return; // don't get templates if server is unavailable
@@ -1695,7 +1738,13 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
+		private static void checkAdministerPermission() {
+			Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+		}
+
+		@POST
 		public void doRefreshSensorPools(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
+			checkAdministerPermission();
 			// backup original values
 			String orig_url = this.url;
 
@@ -1703,7 +1752,7 @@ public class FortifyPlugin extends Recorder {
 			this.url = url != null ? url.trim() : "";
 
 			try {
-				FormValidation testConnectionResult = doTestConnection(this.url, this.getSscTokenCredentialsId(), this.getIsProxy(), connectTimeout, readTimeout, writeTimeout); //XXX verify ctrl or ssc token id is needed
+				FormValidation testConnectionResult = testSscConnection(this.url, this.getSscTokenCredentialsId(), this.getIsProxy(), connectTimeout, readTimeout, writeTimeout); //XXX verify ctrl or ssc token id is needed
 				if (!testConnectionResult.kind.equals(FormValidation.Kind.OK)) {
 					throw new Exception(testConnectionResult.getLocalizedMessage()); // don't get sensor pools if server is unavailable
 				}
@@ -1733,7 +1782,13 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public void doCreateNewProject(final StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
+		@POST
+		public void doCreateNewProject(final StaplerRequest req, StaplerResponse rsp, @QueryParameter String value, @AncestorInPath Item item) throws Exception {
+			if (item != null) {
+				item.checkPermission(Item.CONFIGURE);
+			} else {
+				Jenkins.get().checkPermission(Jenkins.ADMINISTER);
+			}
 			try {
 				runWithFortifyClient(getToken(), new FortifyClient.Command<FortifyClient.NoReturn>() {
 					@Override
@@ -1749,7 +1804,7 @@ public class FortifyPlugin extends Recorder {
 				e.printStackTrace();
 			}
 
-			doRefreshProjects(req, rsp, value);
+			doRefreshProjects(req, rsp, value, item);
 		}
 
 		private boolean isSettingUpdated = false;
@@ -1798,25 +1853,41 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public ComboBoxModel doFillAppNameItems() {
-			Map<String, Long> allPrj = getAllProjects(null);
+		@POST
+		public ComboBoxModel doFillAppNameItems(@AncestorInPath Item item) {
+			Map<String, Long> allPrj;
+			if (item != null) {
+				item.checkPermission(Item.CONFIGURE);
+				allPrj = getAllProjects(null);
+			} else {
+				allPrj = Collections.emptyMap();
+			}
 			return new ComboBoxModel(allPrj.keySet());
 		}
 
-		public ComboBoxModel getAppNameItems() {
-			return doFillAppNameItems();
+		@POST
+		public ComboBoxModel getAppNameItems(@AncestorInPath Item item) {
+			return doFillAppNameItems(item);
 		}
 
-		public ComboBoxModel doFillAppVersionItems(@QueryParameter String appName) {
-			Map<String, Long> allPrjVersions = getVersionsFor(appName);
-			if (null == allPrjVersions) {
-				return new ComboBoxModel(Collections.<String>emptyList());
+		@POST
+		public ComboBoxModel doFillAppVersionItems(@QueryParameter String appName, @AncestorInPath Item item) {
+			Map<String, Long> allPrjVersions;
+			if (item != null) {
+				item.checkPermission(Item.CONFIGURE);
+				allPrjVersions = getVersionsFor(appName);
+				if (null == allPrjVersions) {
+					return new ComboBoxModel(Collections.<String>emptyList());
+				}
+			} else {
+				allPrjVersions = Collections.emptyMap();
 			}
 			return new ComboBoxModel(allPrjVersions.keySet());
 		}
 
-		public ComboBoxModel getAppVersionItems(@QueryParameter String appName) {
-			return doFillAppVersionItems(appName);
+		@POST
+		public ComboBoxModel getAppVersionItems(@QueryParameter String appName, @AncestorInPath Item item) {
+			return doFillAppVersionItems(appName, item);
 		}
 
 		private Map<String, Long> getAllProjects(String query) {
@@ -1878,11 +1949,15 @@ public class FortifyPlugin extends Recorder {
 			}
 		}
 
-		public AutoCompletionCandidates doAutoCompleteAppName(@QueryParameter String value) {
+		@POST
+		public AutoCompletionCandidates doAutoCompleteAppName(@QueryParameter String value, @AncestorInPath Item item) {
 			AutoCompletionCandidates c = new AutoCompletionCandidates();
-			for (String nextApp : getAllProjects(value).keySet()) {
-				if (nextApp.toLowerCase(Locale.ENGLISH).startsWith(value.toLowerCase(Locale.ENGLISH))) {
-					c.add(nextApp);
+			if (item != null) {
+				item.checkPermission(Item.CONFIGURE);
+				for (String nextApp : getAllProjects(value).keySet()) {
+					if (nextApp.toLowerCase(Locale.ENGLISH).startsWith(value.toLowerCase(Locale.ENGLISH))) {
+						c.add(nextApp);
+					}
 				}
 			}
 			return c;
@@ -1895,20 +1970,28 @@ public class FortifyPlugin extends Recorder {
 		 * @return A list of Issue template and ID
 		 * @throws ApiException
 		 */
-		public ComboBoxModel doFillProjectTemplateItems() {
-			if (projTemplateList.isEmpty()) {
-				projTemplateList = getProjTemplateListNoCache();
+		@POST
+		public ComboBoxModel doFillProjectTemplateItems(@AncestorInPath Item item) {
+			List<String> names;
+			if (item != null) {
+				item.checkPermission(Item.CONFIGURE);
+				if (projTemplateList.isEmpty()) {
+					projTemplateList = getProjTemplateListNoCache();
+				}
+				names = new ArrayList<String>(projTemplateList.size());
+				for (ProjectTemplateBean b : projTemplateList) {
+					names.add(b.getName());
+				}
+			} else {
+				names = Collections.emptyList();
 			}
 
-			List<String> names = new ArrayList<String>(projTemplateList.size());
-			for (ProjectTemplateBean b : projTemplateList) {
-				names.add(b.getName());
-			}
 			return new ComboBoxModel(names);
 		}
 
-		public ComboBoxModel getProjectTemplateItems() {
-			return doFillProjectTemplateItems();
+		@POST
+		public ComboBoxModel getProjectTemplateItems(@AncestorInPath Item item) {
+			return doFillProjectTemplateItems(item);
 		}
 
 		public List<ProjectTemplateBean> getProjTemplateListList() {
@@ -1950,13 +2033,17 @@ public class FortifyPlugin extends Recorder {
 			return Collections.emptyList();
 		}
 
-		public ListBoxModel doFillFilterSetItems(@QueryParameter String appName, @QueryParameter String appVersion) {
+		@POST
+		public ListBoxModel doFillFilterSetItems(@QueryParameter String appName, @QueryParameter String appVersion, @AncestorInPath Item item) {
 			ListBoxModel standardListBoxModel = new ListBoxModel();
-			standardListBoxModel.add("");
-			Map<String, String> allFilterSets = refreshFilterSetsFor(appName, appVersion);
-			if (allFilterSets != null) {
-				for (Map.Entry<String, String> nextFilterSet : allFilterSets.entrySet()) {
-					standardListBoxModel.add(nextFilterSet.getKey(), nextFilterSet.getValue());
+			if (item != null) {
+				item.checkPermission(Item.CONFIGURE);
+				standardListBoxModel.add("");
+				Map<String, String> allFilterSets = refreshFilterSetsFor(appName, appVersion);
+				if (allFilterSets != null) {
+					for (Map.Entry<String, String> nextFilterSet : allFilterSets.entrySet()) {
+						standardListBoxModel.add(nextFilterSet.getKey(), nextFilterSet.getValue());
+					}
 				}
 			}
 			return standardListBoxModel;
@@ -1995,16 +2082,17 @@ public class FortifyPlugin extends Recorder {
 			return Collections.emptyMap();
 		}
 
-		public ListBoxModel doFillSensorPoolUUIDItems() {
-			sensorPoolList = getSensorPoolListNoCache();
-
+		@POST
+		public ListBoxModel doFillSensorPoolUUIDItems(@AncestorInPath Item item) {
 			List<ListBoxModel.Option> optionList = new ArrayList<>();
-
-			for (SensorPoolBean sensorPoolBean : sensorPoolList) {
-				ListBoxModel.Option option = new ListBoxModel.Option(sensorPoolBean.getName(), sensorPoolBean.getUuid());
-				optionList.add(option);
+			if (item != null) {
+				item.checkPermission(Item.CONFIGURE);
+				sensorPoolList = getSensorPoolListNoCache();
+				for (SensorPoolBean sensorPoolBean : sensorPoolList) {
+					ListBoxModel.Option option = new ListBoxModel.Option(sensorPoolBean.getName(), sensorPoolBean.getUuid());
+					optionList.add(option);
+				}
 			}
-
 			return new ListBoxModel(optionList);
 		}
 

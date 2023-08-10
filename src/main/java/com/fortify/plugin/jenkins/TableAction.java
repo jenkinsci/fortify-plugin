@@ -31,6 +31,7 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
+import org.kohsuke.stapler.verb.POST;
 
 import com.fortify.plugin.jenkins.bean.IssueBean;
 import com.fortify.plugin.jenkins.bean.IssueFolderBean;
@@ -371,6 +372,7 @@ public class TableAction implements Action {
 		return folders;
 	}
 
+	@POST
 	public void doSetPageSize(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
 		String size = req.getParameter("size");
 		Integer hadValue = (Integer) req.getSession().getAttribute("pageSize");
@@ -399,9 +401,9 @@ public class TableAction implements Action {
 
 	}
 
-	// we removed that functionality because it stopped working with the REST client
-	// API, need to re-think a little
+	@POST
 	public void doShowAllNotNew(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
+		// we removed that functionality because it stopped working with the REST client API, need to re-think a little
 		String all = req.getParameter("all");
 		if (StringUtils.isBlank(all)) {
 			return;
@@ -422,6 +424,7 @@ public class TableAction implements Action {
 		doAjaxIssues(req, rsp);
 	}
 
+	@POST
 	public void doUpdateIssueList(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
 		String viewName = req.getParameter("folder");
 		if (StringUtils.isBlank(viewName)) {
@@ -446,6 +449,7 @@ public class TableAction implements Action {
 		doAjaxIssues(req, rsp);
 	}
 
+	@POST
 	public void doAjaxIssues(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException {
 		Object currView = req.getSession().getAttribute("currentView");
 		if ("yes".equalsIgnoreCase(req.getParameter("firstTime")) || currView == null) {
@@ -468,6 +472,7 @@ public class TableAction implements Action {
 		req.getView(this, "issueCountTable.jelly").forward(req, rsp);
 	}
 
+	@POST
 	public synchronized void doCheckUpdates(StaplerRequest req, StaplerResponse rsp)
 			throws IOException, ServletException {
 		long lastChanged = getLastChanged();

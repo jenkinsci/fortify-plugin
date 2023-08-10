@@ -34,11 +34,13 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.verb.POST;
 
 import com.fortify.plugin.jenkins.FPRSummary;
 import com.fortify.plugin.jenkins.FortifyPlugin;
@@ -63,6 +65,7 @@ import hudson.Launcher;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Item;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.StreamBuildListener;
@@ -789,24 +792,29 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 			return ImmutableSet.of(Run.class, FilePath.class, EnvVars.class, Launcher.class, TaskListener.class);
 		}
 
-		public ComboBoxModel getApplicationNameItems() {
-			return FortifyPlugin.DESCRIPTOR.getAppNameItems();
+		@POST
+		public ComboBoxModel getApplicationNameItems(@AncestorInPath Item item) {
+			return FortifyPlugin.DESCRIPTOR.getAppNameItems(item);
 		}
 
-		public ComboBoxModel getApplicationVersionItems(@QueryParameter String applicationName) {
-			return FortifyPlugin.DESCRIPTOR.getAppVersionItems(applicationName);
+		@POST
+		public ComboBoxModel getApplicationVersionItems(@QueryParameter String applicationName, @AncestorInPath Item item) {
+			return FortifyPlugin.DESCRIPTOR.getAppVersionItems(applicationName, item);
 		}
 
-		public void doRefreshApplications(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
-			FortifyPlugin.DESCRIPTOR.doRefreshProjects(req, rsp, value);
+		@POST
+		public void doRefreshApplications(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value, @AncestorInPath Item item) throws Exception {
+			FortifyPlugin.DESCRIPTOR.doRefreshProjects(req, rsp, value, item);
 		}
 
-		public void doRefreshVersions(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
-			FortifyPlugin.DESCRIPTOR.doRefreshVersions(req, rsp, value);
+		@POST
+		public void doRefreshVersions(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value, @AncestorInPath Item item) throws Exception {
+			FortifyPlugin.DESCRIPTOR.doRefreshVersions(req, rsp, value, item);
 		}
 
-		public ListBoxModel doFillFilterSetItems(@QueryParameter String appName, @QueryParameter String appVersion) {
-			return FortifyPlugin.DESCRIPTOR.doFillFilterSetItems(appName, appVersion);
+		@POST
+		public ListBoxModel doFillFilterSetItems(@QueryParameter String appName, @QueryParameter String appVersion, @AncestorInPath Item item) {
+			return FortifyPlugin.DESCRIPTOR.doFillFilterSetItems(appName, appVersion, item);
 		}
 
 		public FormValidation doCheckAppName(@QueryParameter String value) {

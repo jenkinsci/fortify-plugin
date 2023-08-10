@@ -27,7 +27,7 @@
   <f:section title="Fortify Assessment">
     <f:section title="Software Security Center configuration">
       <f:entry title="SSC URL" field="url" help="/plugin/fortify/help-sscUrl.html">
-        <f:textbox name="url" id="url"/>
+        <f:textbox name="url" id="url" checkMethod="post"/>
       </f:entry>
 
       <f:entry field="sscTokenCredentialsId" title="Authentication token" help="/plugin/fortify/help-sscAuthToken.html">
@@ -41,7 +41,7 @@
       <f:entry title="Issue template" help="/plugin/fortify/help-sscProjTemplate.html">
         <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
         <div style="float:left;width:80%;">
-          <f:editableComboBox id="projectTemplate" name="projectTemplate" field="projectTemplate" clazz="setting-input" items="${descriptor.projectTemplateItems}" />
+          <f:editableComboBox id="projectTemplate" name="projectTemplate" field="projectTemplate" clazz="setting-input" items="${descriptor.projectTemplateItems}" checkMethod="post"/>
         </div>
         <div style="float:left">
           <input value="▼" type="button" id="refreshButton" onclick="refreshTemplateList('${rootURL}/descriptor/${descriptor.clazz.name}/refreshProjectTemplates','url,sscTokenCredentialsId,isProxy')" />
@@ -72,7 +72,7 @@
 
     <f:section title="Controller configuration">
       <f:entry title="Controller URL" help="/plugin/fortify/help-controllerUrl.html">
-        <f:textbox name="ctrlUrl" field="ctrlUrl" id="ctrlUrl"/>
+        <f:textbox name="ctrlUrl" field="ctrlUrl" id="ctrlUrl" checkMethod="post"/>
       </f:entry>
 
       <f:entry field="ctrlTokenCredentialsId" title="Controller token" help="/plugin/fortify/help-controllerToken.html">

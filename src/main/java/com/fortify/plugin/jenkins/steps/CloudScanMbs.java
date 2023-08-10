@@ -28,11 +28,14 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import hudson.model.Item;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.verb.POST;
 
 import com.fortify.plugin.jenkins.FortifyPlugin;
 import com.google.common.collect.ImmutableSet;
@@ -247,26 +250,31 @@ public class CloudScanMbs extends FortifyCloudScanStep implements SimpleBuildSte
             return Validators.checkFieldNotEmpty(value);
         }
 
-        public void doRefreshProjects(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
+        @POST
+        public void doRefreshProjects(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value, @AncestorInPath Item item)
                 throws Exception {
-            FortifyPlugin.DESCRIPTOR.doRefreshProjects(req, rsp, value);
+            FortifyPlugin.DESCRIPTOR.doRefreshProjects(req, rsp, value, item);
         }
 
-        public void doRefreshVersions(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value)
+        @POST
+        public void doRefreshVersions(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value, @AncestorInPath Item item)
                 throws Exception {
-            FortifyPlugin.DESCRIPTOR.doRefreshVersions(req, rsp, value);
+            FortifyPlugin.DESCRIPTOR.doRefreshVersions(req, rsp, value, item);
         }
 
-        public ComboBoxModel doFillAppNameItems() {
-            return FortifyPlugin.DESCRIPTOR.doFillAppNameItems();
+        @POST
+        public ComboBoxModel doFillAppNameItems(@AncestorInPath Item item) {
+            return FortifyPlugin.DESCRIPTOR.doFillAppNameItems(item);
         }
 
-        public ComboBoxModel doFillAppVersionItems(@QueryParameter String appName) {
-            return FortifyPlugin.DESCRIPTOR.doFillAppVersionItems(appName);
+        @POST
+        public ComboBoxModel doFillAppVersionItems(@QueryParameter String appName, @AncestorInPath Item item) {
+            return FortifyPlugin.DESCRIPTOR.doFillAppVersionItems(appName, item);
         }
 
-        public ListBoxModel doFillSensorPoolUUIDItems() {
-            return FortifyPlugin.DESCRIPTOR.doFillSensorPoolUUIDItems();
+        @POST
+        public ListBoxModel doFillSensorPoolUUIDItems(@AncestorInPath Item item) {
+            return FortifyPlugin.DESCRIPTOR.doFillSensorPoolUUIDItems(item);
         }
 
     }

@@ -11,19 +11,19 @@ This is the official Jenkins plugin for Fortify Static Code Analyzer (SCA) and F
 | Plugin Information                                                                          |
 |---------------------------------------------------------------------------------------------|
 
-The plugin adds the ability to perform security analysis with Micro Focus Fortify Static Code Analyzer, upload results to Micro Focus Fortify Software Security Center, show analysis results summary, and set build failure criteria based on analysis results.
+The plugin adds the ability to perform security analysis with Fortify Static Code Analyzer, upload results to Fortify Software Security Center, show analysis results summary, and set build failure criteria based on analysis results.
 
 ### Summary
 
-Use the Fortify Jenkins Plugin in your continuous integration builds to identify security issues in your source code with Fortify Static Code Analyzer. After the Fortify Static Code Analyzer analysis is complete, you can upload the results to a Fortify Software Security Center server. The Fortify Jenkins Plugin also enables you to view the analysis result details within Jenkins. It provides metrics for each build and an overview of the results, without requiring you to log into Fortify Software Security Center.
+Use the Fortify Jenkins Plugin in your continuous integration builds to identify security issues in your source code using Fortify Static Code Analyzer. After the Fortify Static Code Analyzer analysis is complete, you can upload the results to a Fortify Software Security Center server. The Fortify Jenkins Plugin also enables you to view the analysis result details within Jenkins. It provides metrics for each build and an overview of the results, without requiring you to log into Fortify Software Security Center.
 
 ### Documentation
 
 You can find official plugin documentation here: https://www.microfocus.com/documentation/fortify-jenkins-plugin/
 
-For more information about Fortify SCA, visit https://www.microfocus.com/cyberres/application-security/static-code-analyzer.
+For more information about Fortify Static Code Analyzer, visit https://www.microfocus.com/cyberres/application-security/static-code-analyzer.
 
-For more information about Fortify SSC, visit https://www.microfocus.com/cyberres/application-security/software-security-center.
+For more information about Fortify Software Security Center, visit https://www.microfocus.com/cyberres/application-security/software-security-center.
 
 ### Features
 

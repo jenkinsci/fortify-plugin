@@ -5,7 +5,6 @@ import com.cloudbees.plugins.credentials.impl.BaseStandardCredentials;
 import hudson.Extension;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
-import lombok.NonNull;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkins.ui.icon.Icon;
@@ -15,6 +14,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 /**
  * Default implementation of {@link FortifyApiToken} for use by Jenkins {@link com.cloudbees.plugins.credentials.CredentialsProvider}
@@ -24,16 +24,16 @@ public class StandardFortifyApiToken extends BaseStandardCredentials implements 
 
 	private static final long serialVersionUID = -7103736612075250489L;
 
-    @NonNull
+    @Nonnull
     private final Secret token;
 
     @DataBoundConstructor
-    public StandardFortifyApiToken(@CheckForNull CredentialsScope scope, @CheckForNull String id, @NonNull String token, @CheckForNull String description) {
+    public StandardFortifyApiToken(@CheckForNull CredentialsScope scope, @CheckForNull String id, @Nonnull String token, @CheckForNull String description) {
         super(scope, id, description);
         this.token = Secret.fromString(token);
     }
 
-    @NonNull
+    @Nonnull
     @Override
     public Secret getToken() {
         return this.token;
@@ -42,7 +42,7 @@ public class StandardFortifyApiToken extends BaseStandardCredentials implements 
     @Extension
     public static class DefaultFortifyApiTokenDescriptor extends BaseStandardCredentials.BaseStandardCredentialsDescriptor {
 
-        @NonNull
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "Fortify Connection Token";

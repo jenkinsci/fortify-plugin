@@ -5,21 +5,22 @@ import com.cloudbees.plugins.credentials.NameWith;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import hudson.Util;
 import hudson.util.Secret;
-import lombok.NonNull;
 
 import java.io.IOException;
+
+import javax.annotation.Nonnull;
 
 @NameWith(value = FortifyApiToken.NameProvider.class, priority = 1)
 public interface FortifyApiToken extends StandardCredentials {
 
-    @NonNull
+    @Nonnull
     Secret getToken() throws IOException, InterruptedException;
 
     class NameProvider extends CredentialsNameProvider<FortifyApiToken> {
 
-        @NonNull
+        @Nonnull
         @Override
-        public String getName(@NonNull final FortifyApiToken credentials) {
+        public String getName(@Nonnull final FortifyApiToken credentials) {
             final String description = Util.fixEmptyAndTrim(credentials.getDescription());
             return credentials.getId() + "/*fortify*" + (description != null ? " (" + description + ")" : "");
         }

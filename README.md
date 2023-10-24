@@ -84,6 +84,8 @@ For this example, the value of FORTIFY\_HOME is `/var/Jenkins_home/Fortify/Forti
 Older versions of this plugin might not be safe to use. Review the following warnings before using an earlier version:
 
 -   [Credentials stored in plain text](https://jenkins.io/security/advisory/2020-01-29/#SECURITY-1565)
+-   [CSRF vulnerability and missing permission checks allow capturing credentials](https://www.jenkins.io/security/advisory/2023-08-16/#SECURITY-3115)
+-   [HTML injection vulnerability](https://www.jenkins.io/security/advisory/2023-08-16/#SECURITY-3140)
 
 ### Feedback welcome
 

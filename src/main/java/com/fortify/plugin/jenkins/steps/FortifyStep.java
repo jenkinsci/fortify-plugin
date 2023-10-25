@@ -129,15 +129,20 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		if (lastBuild == null) {
 			return param;
 		}
-		listener = listener == null ? new StreamBuildListener(System.out, Charset.defaultCharset()) : listener;
 		try {
-			// TODO: see at lastBuild.getBuildVariableResolver()
-			final EnvVars vars = lastBuild.getEnvironment(listener);
-			return vars.expand(param);
-		} catch (IOException e) {
-			// do nothing
-		} catch (InterruptedException e) {
-			// do nothing
+			// if we can parse it as an Integer, then there's no need to resolve the variable
+			Integer.parseInt(param);
+		} catch (NumberFormatException e1) {
+			listener = listener == null ? new StreamBuildListener(System.out, Charset.defaultCharset()) : listener;
+			try {
+				// TODO: see at lastBuild.getBuildVariableResolver()
+				final EnvVars vars = lastBuild.getEnvironment(listener);
+				return vars.expand(param);
+			} catch (IOException e2) {
+				// do nothing
+			} catch (InterruptedException e3) {
+				// do nothing
+			}
 		}
 		return param;
 	}

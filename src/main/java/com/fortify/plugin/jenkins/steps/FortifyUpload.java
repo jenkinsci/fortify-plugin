@@ -225,7 +225,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 		Long artifactId = uploadToSSC(summary, workspace, listener);
 		pollFprProcessing(run, artifactId, listener);
 
-		log.println("Retrieving build statistics from SSC");
+		log.println("Retrieving build statistics from Fortify Software Security Center");
 		calculateFprStatistics(summary, listener);
 
 		log.printf("Calculated NVS=%f, failedCount=%d%n", summary.getNvs(), summary.getFailedCount());
@@ -291,7 +291,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 		if (!StringUtils.isBlank(getResolvedAppName(listener)) && !StringUtils.isBlank(getResolvedAppVersion(listener))
 				&& FortifyPlugin.DESCRIPTOR.canUploadToSsc()) {
 			// the FPR may be in remote slave, we need to call launcher to do this for me
-			log.printf("Uploading analysis results file to SSC at %s to application '%s' and application version '%s'%n",
+			log.printf("Uploading analysis results file to Fortify Software Security Center at %s to application '%s' and application version '%s'%n",
 					FortifyPlugin.DESCRIPTOR.getUrl(), getResolvedAppName(listener), getResolvedAppVersion(listener));
 			try {
 				final Long projectId = createNewOrGetProject(listener);
@@ -306,11 +306,11 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 				log.printf("Analysis results uploaded successfully. artifact id = %d%n", artifactId);
 				return artifactId;
 			} catch (Throwable t) {
-				log.println("Error uploading to SSC: " + FortifyPlugin.DESCRIPTOR.getUrl());
+				log.println("Error uploading to Fortify Software Security Center: " + FortifyPlugin.DESCRIPTOR.getUrl());
 				String message = t.getMessage();
 				log.println(message);
 				t.printStackTrace(log);
-				throw new AbortException("Error uploading to SSC: " + message);
+				throw new AbortException("Error uploading to Fortify Software Security Center: " + message);
 			} finally {
 				// if this is a remote FPR, I need to delete the local temp FPR after use
 				if (summary.getFprFile().isRemote()) {
@@ -378,15 +378,15 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 					isProcessingComplete = true;
 					break;
 				case ERROR_PROCESSING:
-					throw new AbortException("SSC encountered an error processing the artifact");
+					throw new AbortException("Fortify Software Security Center encountered an error processing the artifact");
 				case REQUIRE_AUTH:
-					log.println("The artifact needs to be approved for processing in SSC. Will continue to wait...");
+					log.println("The artifact needs to be approved for processing in Fortify Software Security Center. Will continue to wait...");
 					break;
 				case SCHED_PROCESSING:
-					log.println("The artifact was scheduled for processing on SSC. Will continue to wait...");
+					log.println("The artifact was scheduled for processing on Fortify Software Security Center. Will continue to wait...");
 					break;
 				case PROCESSING:
-					log.println("The artifact is being processed by SSC. Will continue to wait...");
+					log.println("The artifact is being processed by Fortify Software Security Center. Will continue to wait...");
 					break;
 				default:
 					log.println("Unexpected artifact status: " + status.name());
@@ -400,7 +400,7 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 				String message = t.getMessage();
 				log.println("Error checking artifact status. " + message);
 				t.printStackTrace(log);
-				throw new AbortException("Failed to retrieve artifact statistics from SSC. " + message);
+				throw new AbortException("Failed to retrieve artifact statistics from Fortify Software Security Center. " + message);
 			}
 
 			if (timeoutInMinutes > 0) {
@@ -417,8 +417,8 @@ public class FortifyUpload extends FortifyStep implements Serializable {
 		final String appArtifactsURL = getAppArtifactsURL(projectVersionId);
 
 		run.setResult(Result.NOT_BUILT);
-		run.setDescription("A timeout has been reached when checking SSC for status of artifacts, this could happen " +
-				"on long running processing jobs and does not mean that the build failed. You can check the status in SSC here: " +
+		run.setDescription("A timeout has been reached when checking Fortify Software Security Center for status of artifacts, this could happen " +
+				"on long running processing jobs and does not mean that the build failed. You can check the status in Fortify Software Security Center here: " +
 				appArtifactsURL);
 		throw new AbortException("Timeout of " + timeoutInMinutes + " minute(s) is reached.");
 	}

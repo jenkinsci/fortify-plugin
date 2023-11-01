@@ -1,5 +1,5 @@
 /*******************************************************************************
- * (c) Copyright 2019 Micro Focus or one of its affiliates.
+ * Copyright 2023 Open Text.
  *
  * Licensed under the MIT License (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 function refreshProjectNames(url, elm)
 {
     var typedText = elm.parentNode.previousSibling.querySelector("input.project-name").value;
-
     //var spinner = document.getElementById('refreshSpinner');
     var spinner = elm.parentNode.nextSibling;
     spinner.style.display="block";
@@ -33,53 +32,38 @@ function refreshProjectNames(url, elm)
     buttonVer = buttonVer.querySelector("input.project-version");
     buttonVer.disabled=true;
 
-    var parameters = { typedText };
-
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function(rsp) {
-            spinner.style.display="none";
-            var jsr = tryParseJSON(rsp.responseText);
-            if (!jsr) {
-                return;
-            }
-            //var select = document.getElementById('projectName');
-            var select = elm.parentNode.previousSibling.querySelector("input.project-name");
-            var oldSelect = select.value;
-            if (select) {
-                var items = new Array();
-                var selectedIndex = 0;
-                // add new values
-                for(var i=0; i<jsr.list.length; i++) {
-                    var item = jsr.list[i];
-                    items.push(DOMPurify.sanitize(item.name));
-                    if (oldSelect==item.name) {
-                        selectedIndex = items.length-1;
-                    }
+    fetch(url + `?typedText=${encodeURIComponent(typedText)}`, {
+        method: 'POST',
+        headers: crumb.wrap({
+            'Content-Type': 'text/plain'
+        })
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        spinner.style.display="none";
+        var select = elm.parentNode.previousSibling.querySelector("input.project-name");
+        var oldSelect = select.value;
+        if (select) {
+            var items = new Array();
+            var selectedIndex = 0;
+            // add new values
+            for (var i=0; i<data.list.length; i++) {
+                var item = data.list[i];
+                items.push(DOMPurify.sanitize(item.name));
+                if (oldSelect == item.name) {
+                    selectedIndex = items.length-1;
                 }
-                updateComboBox(select.comboBox, items, selectedIndex);
             }
-
-            buttonVer.value = ''; // clear version selection
-
-            buttonName.disabled=false;
-            buttonVer.disabled=false;
+            updateComboBox(select.comboBox, items, selectedIndex);
         }
+        buttonVer.value = ''; // clear version selection
+        buttonName.disabled=false;
+        buttonVer.disabled=false;
+    })
+    .catch((error) => {
+    // Handle any errors
     });
 }
-
-function tryParseJSON(jsonString){
-    try {
-        // this is better than using eval(), provides some escaping, see Bug 55768
-        var o = JSON.parse(jsonString);
-        if (o && typeof o === "object") {
-            return o;
-        }
-    } catch (e) {
-        // ignore
-    }
-    return false;
-};
 
 //to refresh the SSC application version list
 function refreshProjectVersions(url, elm)
@@ -96,22 +80,21 @@ function refreshProjectVersions(url, elm)
 
     var typedText = elm.parentNode.previousSibling.querySelector("input.project-version").value;
 
-    var parameters = { selectedPrj, typedText };
-
     //var buttonVer = document.getElementById('refreshPrjVerButton');
     var buttonVer = elm;
     buttonVer.disabled=true;
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function(rsp) {
+    fetch(url + `?selectedPrj=${encodeURIComponent(selectedPrj)}&typedText=${encodeURIComponent(typedText)}`, {
+        method: 'POST',
+        headers: crumb.wrap({
+            'Content-Type': 'text/plain'
+        })
+    })
+    .then((response) => response.json())
+    .then((data) => {
             spinner.style.display="none";
             buttonVer.disabled=false;
 
-            var jsr = tryParseJSON(rsp.responseText);
-            if (!jsr) {
-                return;
-            }
             //var select = document.getElementById('projectVersion');
             var select = elm.parentNode.previousSibling.querySelector("input.project-version");
             //var selectedPrj = document.getElementById('projectName').value;
@@ -125,8 +108,8 @@ function refreshProjectVersions(url, elm)
                 var items = new Array();
                 var selectedIndex = 0;
                 // add new values
-                for(var i=0; i<jsr.list.length; i++) {
-                    var item = jsr.list[i];
+                for(var i=0; i<data.list.length; i++) {
+                    var item = data.list[i];
                     if (item.prj == selectedPrj || selectedPrj === "") {
                         items.push(DOMPurify.sanitize(item.name));
                         if (oldSelect==item.name) {
@@ -136,29 +119,34 @@ function refreshProjectVersions(url, elm)
                 }
                 updateComboBox(select.comboBox, items, selectedIndex);
             }
-        }
+    })
+    .catch((error) => {
+    // Handle any errors
     });
 }
 
 function refreshTemplateList(url,paramList)
 {
-    var parameters = {};
-    paramList.split(',').each(function(name) {
+    const parameters = [];
+    paramList.split(',').forEach(function(name) {
         var p = document.getElementById(name);
-        if (p==null) {
+        if (p == null) {
             p = document.getElementsByName(name);
             if (p != null && p.length > 0) {
                 p = p[0];
             } else {
-                p = document.getElementsByName("_."+name);
+                p = document.getElementsByName("_." + name);
                 if (p != null && p.length > 0) {
                     p = p[0];
                 }
             }
         }
-        if(p!=null) {
-            if(p.type=="checkbox")  parameters[name] = p.checked;
-            else                    parameters[name] = p.value;
+        if (p != null) {
+            if (p.type == "checkbox") {
+                parameters.push(`${encodeURIComponent(name)}=${encodeURIComponent(p.checked)}`);
+            } else {
+                parameters.push(`${encodeURIComponent(name)}=${encodeURIComponent(p.value)}`);
+            }
         }
     });
 
@@ -167,22 +155,23 @@ function refreshTemplateList(url,paramList)
     var button = document.getElementById('refreshButton');
     button.disabled=true;
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function(rsp) {
+    fetch(url + "?" + parameters.join('&'), {
+        method: 'POST',
+        headers: crumb.wrap({
+            'Content-Type': 'text/plain'
+        })
+    })
+    .then((response) => response.json())
+    .then((data) => {
             spinner.style.display="none";
-            var jsr = tryParseJSON(rsp.responseText);
-            if (!jsr) {
-                return;
-            }
             var select = document.getElementById('projectTemplate');
             var oldSelect = select.value;
             if ( select ) {
                 var items = new Array();
                 var selectedIndex = 0;
                 // add new values
-                for(var i=0; i<jsr.list.length; i++) {
-                    var item = jsr.list[i];
+                for(var i=0; i<data.list.length; i++) {
+                    var item = data.list[i];
                     items.push(item.name);
                     if (oldSelect==item.name) {
                         selectedIndex = items.length-1;
@@ -190,7 +179,9 @@ function refreshTemplateList(url,paramList)
                 }
                 updateComboBox(select.comboBox, items, selectedIndex);
             }
-        }
+    })
+    .catch((error) => {
+    // Handle any errors
     });
     button.disabled=false;
 }
@@ -224,8 +215,6 @@ function updateComboBox(comboBox, items, selectedIndex) {
 }
 
 function refreshSensorPools(url, elm) {
-    var parameters = {};
-
     //var poolsButton = document.getElementById('refreshSensorPoolsButton');
     var poolsButton = elm;
     poolsButton.disabled=true;
@@ -234,15 +223,15 @@ function refreshSensorPools(url, elm) {
     var spinner = elm.parentNode.nextSibling;
     spinner.style.display="block";
 
-    new Ajax.Request(url, {
-        parameters: parameters,
-        onComplete: function(rsp) {
+    fetch(url, {
+        method: 'POST',
+        headers: crumb.wrap({
+            'Content-Type': 'text/plain'
+        })
+    })
+    .then((response) => response.json())
+    .then((data) => {
             spinner.style.display="none";
-
-            var jsr = tryParseJSON(rsp.responseText);
-            if (!jsr) {
-                return;
-            }
             //var select = document.getElementById('sensorPoolName');
             var select = elm.parentNode.previousSibling.querySelector("input.sensor-pool-name");
             var oldSelect = select.value;
@@ -250,8 +239,8 @@ function refreshSensorPools(url, elm) {
                 var items = new Array();
                 var selectedIndex = 0;
                 // add new values
-                for(var i=0; i<jsr.list.length; i++) {
-                    var item = jsr.list[i];
+                for(var i=0; i<data.list.length; i++) {
+                    var item = data.list[i];
                     items.push(item.name);
                     if (oldSelect==item.name) {
                         selectedIndex = items.length-1;
@@ -261,7 +250,9 @@ function refreshSensorPools(url, elm) {
             }
 
             poolsButton.disabled=false;
-        }
+    })
+    .catch((error) => {
+    // Handle any errors
     });
 }
 

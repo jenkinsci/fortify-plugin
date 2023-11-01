@@ -1,5 +1,5 @@
 /*******************************************************************************
- * (c) Copyright 2020 Micro Focus or one of its affiliates.
+ * Copyright 2020-2023 Open Text.
  * 
  * Licensed under the MIT License (the "License");
  * you may not use this file except in compliance with the License.
@@ -862,12 +862,9 @@ public class FortifyPlugin extends Recorder {
 	public static <T> T runWithFortifyClient(String token, FortifyClient.Command<T> cmd) throws Exception {
 		if (cmd != null) {
 			String url = DESCRIPTOR.getUrl();
-			ClassLoader contextClassLoader = null;
 			try {
 				FortifyClient client = null;
 				synchronized (syncObj) {
-					contextClassLoader = Thread.currentThread().getContextClassLoader();
-					Thread.currentThread().setContextClassLoader(FortifyPlugin.class.getClassLoader());
 					client = new FortifyClient();
 					ProxyConfig proxyConfig = DESCRIPTOR.getProxyConfig();
 					client.init(url, token, proxyConfig, DESCRIPTOR.getConnectTimeout(), DESCRIPTOR.getReadTimeout(), DESCRIPTOR.getWriteTimeout());
@@ -892,10 +889,6 @@ public class FortifyPlugin extends Recorder {
 
 				}
 				throw new ApiException(message, e, e.getCode(), e.getResponseHeaders());
-			} finally {
-				if (contextClassLoader != null) {
-					Thread.currentThread().setContextClassLoader(contextClassLoader);
-				}
 			}
 		}
 		return null;
@@ -1613,7 +1606,7 @@ public class FortifyPlugin extends Recorder {
 				}
 				buf.insert(0, "{ \"list\" : [\n");
 				buf.append("]}");
-				rsp.setContentType("application/json;charset=utf-8");
+				rsp.setContentType("application/json;charset=UTF-8");
 				// we are using DOMPurify to sanitize the input on the javascript side to prevent XSS, see refresh-projects.js
 				rsp.getWriter().print(buf.toString());
 			} catch (Exception e) {
@@ -1640,7 +1633,7 @@ public class FortifyPlugin extends Recorder {
 				buf.append(appVersionToJson(selectedApp, appVersions));
 				buf.insert(0, "{ \"list\" : [\n");
 				buf.append("]}");
-				rsp.setContentType("application/json;charset=utf-8");
+				rsp.setContentType("application/json;charset=UTF-8");
 				// we are also using DOMPurify to sanitize the input on the javascript side to prevent XSS, see refresh-projects.js
 				rsp.getWriter().print(buf.toString());
 			} catch (Exception e) {
@@ -1725,7 +1718,7 @@ public class FortifyPlugin extends Recorder {
 				}
 				buf.append("]}");
 				// send HTML data directly
-				rsp.setContentType("text/html;charset=UTF-8");
+				rsp.setContentType("application/json;charset=UTF-8");
 				rsp.getWriter().print(buf.toString());
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -1772,7 +1765,7 @@ public class FortifyPlugin extends Recorder {
 				}
 				buf.append("]}");
 				// send HTML data directly
-				rsp.setContentType("text/html;charset=UTF-8");
+				rsp.setContentType("application/json;charset=UTF-8");
 				rsp.getWriter().print(buf.toString());
 			} catch (Exception e) {
 				e.printStackTrace();

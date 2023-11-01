@@ -1,5 +1,5 @@
 /*******************************************************************************
- * (c) Copyright 2019 Micro Focus or one of its affiliates. 
+ * Copyright 2023 Open Text.
  * 
  * Licensed under the MIT License (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-		var isUpdateEnable = true;
-		
-		function updateByUrl(boxId,urlLink,params,spinnerUrl) {
+        var isUpdateEnable = true;
+        function updateByUrl(boxId,urlLink,params,spinnerUrl) {
             // first display the "loading..." icon
-        	if (isUpdateEnable) {
-        		isUpdateEnable = false;
-        		var box = document.getElementById(boxId);
-        		box.innerHTML = '<img src="' + spinnerUrl + '" alt=""/>';
-        		// then actually fetch the HTML
-        		new Ajax.Request(urlLink, {
-        			method: "post",
-        			parameters: params,
-        			onComplete: function(rsp,_) {
-        				var issueTable = document.getElementById('issueTable');
-        				if (issueTable != null) {
-        					issueTable.innerHTML = rsp.responseText;
-        				}
-        				isUpdateEnable = true;
-        			}
-        		});
-        	}
+            if (isUpdateEnable) {
+                isUpdateEnable = false;
+                var box = document.getElementById(boxId);
+                box.innerHTML = '<img src="' + spinnerUrl + '" alt=""/>';
+                const parameters = [];
+                for (const key in params) {
+                    if (params.hasOwnProperty(key)) {
+                        parameters.push(`${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`);
+                    }
+                }
+                 // then actually fetch the HTML
+                fetch(urlLink + "?" + parameters.join('&'), {
+                    method: 'POST',
+                    headers: crumb.wrap({
+                        'Content-Type': 'text/plain'
+                    })
+                })
+                .then(response => response.text())
+                .then(text => {
+                    var issueTable = document.getElementById('issueTable');
+                    if (issueTable != null) {
+                        issueTable.innerHTML = text;
+                    }
+                    isUpdateEnable = true;
+                })
+                .catch((error) => {
+                    // Handle any errors
+                });
+            }
         }
 
         function updateList(boxId,folder,nextPage,spinnerUrl) {
@@ -67,12 +78,14 @@
         }
 
         function scheduleUpdateCheck() {
-            var params = 'stamp='+stamp;
-            new Ajax.Request(contextUrl+"/checkUpdates",{
-                method: "post",
-                parameters: params,
-                onComplete: function(rsp,_) {
-                    var update = rsp.getResponseHeader('go');
+            fetch(contextUrl + "/checkUpdates?stamp=" + stamp, {
+                method: 'POST',
+                headers: crumb.wrap({
+                    'Content-Type': 'text/plain'
+                })
+            }).then(function(rsp) {
+                if (rsp.ok) {
+                    var update = rsp.headers.get('go');
                     if(update == "go") {
                         stamp = new Date().getTime();
                         reloadStatistics();
@@ -85,43 +98,59 @@
         }
 
         function reloadStatistics() {
-            var parameters = {};
-            new Ajax.Request(contextUrl+"/ajaxStats",{
-                method: "post",
-                onComplete: function(rsp,_) {
-                    var scanStatistics = document.getElementById('scanStatistics');
-                    if (scanStatistics != null) {
-                        scanStatistics.innerHTML = rsp.responseText;
-                    }
+            fetch(contextUrl + "/ajaxStats", {
+                method: 'POST',
+                headers: crumb.wrap({
+                    'Content-Type': 'text/plain'
+                })
+            })
+            .then(response => response.text())
+            .then(text => {
+                var scanStatistics = document.getElementById('scanStatistics');
+                if (scanStatistics != null) {
+                    scanStatistics.innerHTML = text;
                 }
+            })
+            .catch((error) => {
+                // Handle any errors
             });
         }
 
         function reloadIssues() {
-            var parameters = {};
-            new Ajax.Request(contextUrl+"/ajaxIssues",{
-                method: "post",
-                parameters: parameters,
-                onComplete: function(rsp) {
-                    var issueTable = document.getElementById('issueTable');
-                    if (issueTable != null) {
-                        issueTable.innerHTML = rsp.responseText;
-                    }
+            fetch(contextUrl + "/ajaxIssues", {
+                method: 'POST',
+                headers: crumb.wrap({
+                    'Content-Type': 'text/plain'
+                })
+            })
+            .then(response => response.text())
+            .then(text => {
+                var issueTable = document.getElementById('issueTable');
+                if (issueTable != null) {
+                    issueTable.innerHTML = text;
                 }
+            })
+            .catch((error) => {
+                // Handle any errors
             });
         }
 
         function reload(url,box) {
-            var parameters = {};
-            new Ajax.Request(url,{
-                method: "post",
-                parameters: parameters,
-                onComplete: function(rsp) {
-                    var issueTable = document.getElementById(box);
-                    if (issueTable != null) {
-                        issueTable.innerHTML = rsp.responseText;
-                    }
+            fetch(url, {
+                method: 'POST',
+                headers: crumb.wrap({
+                    'Content-Type': 'text/plain'
+                })
+            })
+            .then(response => response.text())
+            .then(text => {
+                var issueTable = document.getElementById(box);
+                if (issueTable != null) {
+                    issueTable.innerHTML = text;
                 }
+            })
+            .catch((error) => {
+                // Handle any errors
             });
         }
 
@@ -131,17 +160,22 @@
                var box = document.getElementById('firstTimeSpinF');
                box.innerHTML = '<img src="'+spinnerUrl+'" alt=""/>';
                // then actually fetch the HTML
-               var request = new Ajax.Request(contextUrl+"/ajaxIssues",{
-                   method: "post",
-                   parameters : "firstTime=yes",
-                   onComplete: function(rsp,_) {
-                       var issueTable = document.getElementById('issueTable');
-                       issueTable.innerHTML = rsp.responseText;
-                       // next update
-                       // window.setTimeout(loadIssues, 5000);
-                       window.setTimeout(scheduleUpdateCheck, 10000);
-                   }
-               });
+                fetch(contextUrl + "/ajaxIssues?firstTime=yes", {
+                    method: 'POST',
+                    headers: crumb.wrap({
+                        'Content-Type': 'text/plain'
+                    })
+                })
+                .then(response => response.text())
+                .then(text => {
+                   var issueTable = document.getElementById('issueTable');
+                   issueTable.innerHTML = text;
+                   // next update
+                   window.setTimeout(scheduleUpdateCheck, 10000);
+                })
+                .catch((error) => {
+                    // Handle any errors
+                });
             }
             window.setTimeout(loadIssues, 0);
         }

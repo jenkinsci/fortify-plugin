@@ -1,5 +1,5 @@
 <!--
-    (c) Copyright 2019-2021 Micro Focus or one of its affiliates. 
+    Copyright 2019-2023 Open Text.
 
     Licensed under the MIT License (the "License");
     you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.44</version>
+        <version>4.73</version>
     </parent>
 
     <artifactId>fortify</artifactId>
@@ -28,9 +28,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jenkins.version>2.249.3</jenkins.version>
-        <bom>2.249.x</bom>
-        <bom.version>950.v396cb834de1e</bom.version>
+        <jenkins.version>2.361.4</jenkins.version>
+        <bom>2.361.x</bom>
+        <bom.version>2102.v854b_fec19c92</bom.version>
         <jenkins-test-harness.version>2.47</jenkins-test-harness.version>
         <disabledTestInjection>true</disabledTestInjection>
         <hpi.compatibleSinceVersion>20.2.34</hpi.compatibleSinceVersion>
@@ -127,7 +127,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>gradle</artifactId>
-            <version>1.37.1</version>
+            <version>1.40</version>
         </dependency>
 
         <!-- for Credentials support -->
@@ -174,9 +174,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-cps-global-lib</artifactId>
-            <!--artifactId>pipeline-groovy-lib</artifactId-->
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>pipeline-groovy-lib</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -205,6 +204,14 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>4.12.0</version>
+            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+            <version>2.1.2</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>

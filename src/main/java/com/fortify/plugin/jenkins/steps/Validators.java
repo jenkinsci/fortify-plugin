@@ -1,5 +1,5 @@
 /*******************************************************************************
- * (c) Copyright 2019 Micro Focus or one of its affiliates. 
+ * Copyright 2019-2023 Open Text.
  * 
  * Licensed under the MIT License (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import com.fortify.plugin.jenkins.Messages;
 
 import hudson.util.FormValidation;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;

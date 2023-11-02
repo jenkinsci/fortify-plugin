@@ -19,7 +19,8 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.73</version>
+        <version>4.44</version>
+        <relativePath />
     </parent>
 
     <artifactId>fortify</artifactId>
@@ -28,9 +29,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jenkins.version>2.361.4</jenkins.version>
-        <bom>2.361.x</bom>
-        <bom.version>2102.v854b_fec19c92</bom.version>
+        <jenkins.version>2.249.3</jenkins.version>
+        <bom>2.249.x</bom>
+        <bom.version>950.v396cb834de1e</bom.version>
         <jenkins-test-harness.version>2.47</jenkins-test-harness.version>
         <disabledTestInjection>true</disabledTestInjection>
         <hpi.compatibleSinceVersion>20.2.34</hpi.compatibleSinceVersion>
@@ -171,11 +172,6 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jenkins.plugins</groupId>
-            <artifactId>pipeline-groovy-lib</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

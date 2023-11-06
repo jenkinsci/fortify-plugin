@@ -32,10 +32,13 @@ function refreshProjectNames(url, elm)
     buttonVer = buttonVer.querySelector("input.project-version");
     buttonVer.disabled=true;
 
-    fetch(url + `?typedText=${encodeURIComponent(typedText)}`, {
+    fetch(url, {
         method: 'POST',
         headers: crumb.wrap({
-            'Content-Type': 'text/plain'
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }),
+        body: new URLSearchParams({
+            typedText: typedText,
         })
     })
     .then((response) => response.json())
@@ -61,7 +64,7 @@ function refreshProjectNames(url, elm)
         buttonVer.disabled=false;
     })
     .catch((error) => {
-    // Handle any errors
+        console.error(error);
     });
 }
 
@@ -84,10 +87,14 @@ function refreshProjectVersions(url, elm)
     var buttonVer = elm;
     buttonVer.disabled=true;
 
-    fetch(url + `?selectedPrj=${encodeURIComponent(selectedPrj)}&typedText=${encodeURIComponent(typedText)}`, {
+    fetch(url, {
         method: 'POST',
         headers: crumb.wrap({
-            'Content-Type': 'text/plain'
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }),
+        body: new URLSearchParams({
+            selectedPrj: selectedPrj,
+            typedText: typedText,
         })
     })
     .then((response) => response.json())
@@ -121,7 +128,7 @@ function refreshProjectVersions(url, elm)
             }
     })
     .catch((error) => {
-    // Handle any errors
+        console.error(error);
     });
 }
 
@@ -143,9 +150,9 @@ function refreshTemplateList(url,paramList)
         }
         if (p != null) {
             if (p.type == "checkbox") {
-                parameters.push(`${encodeURIComponent(name)}=${encodeURIComponent(p.checked)}`);
+                parameters[name] = p.checked;
             } else {
-                parameters.push(`${encodeURIComponent(name)}=${encodeURIComponent(p.value)}`);
+                parameters[name] = p.value;
             }
         }
     });
@@ -155,11 +162,12 @@ function refreshTemplateList(url,paramList)
     var button = document.getElementById('refreshButton');
     button.disabled=true;
 
-    fetch(url + "?" + parameters.join('&'), {
+    fetch(url, {
         method: 'POST',
         headers: crumb.wrap({
-            'Content-Type': 'text/plain'
-        })
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }),
+        body: new URLSearchParams(parameters)
     })
     .then((response) => response.json())
     .then((data) => {
@@ -181,7 +189,7 @@ function refreshTemplateList(url,paramList)
             }
     })
     .catch((error) => {
-    // Handle any errors
+        console.error(error);
     });
     button.disabled=false;
 }
@@ -252,7 +260,7 @@ function refreshSensorPools(url, elm) {
             poolsButton.disabled=false;
     })
     .catch((error) => {
-    // Handle any errors
+        console.error(error);
     });
 }
 

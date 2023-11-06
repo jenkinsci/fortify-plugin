@@ -22,10 +22,13 @@
     <script defer="true">
         var stamp = new Date().getTime();
         function checkGraphUpdate() {
-            fetch("${action.urlName}/checkUpdates?stamp="+stamp, {
+            fetch("${action.urlName}/checkUpdates", {
                 method: 'POST',
                 headers: crumb.wrap({
-                    'Content-Type': 'text/plain'
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }),
+                body: new URLSearchParams({
+                    stamp: stamp,
                 })
             }).then(function(rsp) {
                 if (rsp.ok) {

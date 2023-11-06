@@ -20,18 +20,13 @@
                 isUpdateEnable = false;
                 var box = document.getElementById(boxId);
                 box.innerHTML = '<img src="' + spinnerUrl + '" alt=""/>';
-                const parameters = [];
-                for (const key in params) {
-                    if (params.hasOwnProperty(key)) {
-                        parameters.push(`${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`);
-                    }
-                }
                  // then actually fetch the HTML
-                fetch(urlLink + "?" + parameters.join('&'), {
+                fetch(urlLink, {
                     method: 'POST',
                     headers: crumb.wrap({
-                        'Content-Type': 'text/plain'
-                    })
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }),
+                    body: new URLSearchParams(params)
                 })
                 .then(response => response.text())
                 .then(text => {
@@ -42,7 +37,7 @@
                     isUpdateEnable = true;
                 })
                 .catch((error) => {
-                    // Handle any errors
+                    console.error(error);
                 });
             }
         }
@@ -81,7 +76,10 @@
             fetch(contextUrl + "/checkUpdates?stamp=" + stamp, {
                 method: 'POST',
                 headers: crumb.wrap({
-                    'Content-Type': 'text/plain'
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }),
+                body: new URLSearchParams({
+                    stamp: stamp,
                 })
             }).then(function(rsp) {
                 if (rsp.ok) {
@@ -94,6 +92,9 @@
                     // next update in 10 sec
                     window.setTimeout(scheduleUpdateCheck, 10000);
                 }
+            })
+            .catch((error) => {
+                console.error(error);
             });
         }
 
@@ -112,7 +113,7 @@
                 }
             })
             .catch((error) => {
-                // Handle any errors
+                console.error(error);
             });
         }
 
@@ -131,7 +132,7 @@
                 }
             })
             .catch((error) => {
-                // Handle any errors
+                console.error(error);
             });
         }
 
@@ -150,7 +151,7 @@
                 }
             })
             .catch((error) => {
-                // Handle any errors
+                console.error(error);
             });
         }
 
@@ -160,10 +161,13 @@
                var box = document.getElementById('firstTimeSpinF');
                box.innerHTML = '<img src="'+spinnerUrl+'" alt=""/>';
                // then actually fetch the HTML
-                fetch(contextUrl + "/ajaxIssues?firstTime=yes", {
+               fetch(contextUrl + "/ajaxIssues", {
                     method: 'POST',
                     headers: crumb.wrap({
-                        'Content-Type': 'text/plain'
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }),
+                    body: new URLSearchParams({
+                        firstTime: yes,
                     })
                 })
                 .then(response => response.text())
@@ -174,7 +178,7 @@
                    window.setTimeout(scheduleUpdateCheck, 10000);
                 })
                 .catch((error) => {
-                    // Handle any errors
+                    console.error(error);
                 });
             }
             window.setTimeout(loadIssues, 0);

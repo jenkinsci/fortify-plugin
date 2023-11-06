@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.CheckForNull;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
@@ -78,6 +76,7 @@ import com.fortify.plugin.jenkins.steps.types.OtherScanType;
 import com.fortify.plugin.jenkins.steps.types.ProjectScanType;
 import com.fortify.ssc.restclient.ApiException;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.AbortException;
 import hudson.BulkChange;
 import hudson.Extension;
@@ -88,6 +87,8 @@ import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.AutoCompletionCandidates;
 import hudson.model.BuildListener;
+import hudson.model.Describable;
+import hudson.model.Descriptor;
 import hudson.model.Item;
 import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
@@ -98,6 +99,7 @@ import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -126,7 +128,7 @@ import okhttp3.ResponseBody;
  * </ul>
  *
  */
-public class FortifyPlugin extends Recorder {
+public class FortifyPlugin extends Recorder implements Describable<Publisher> {
 	private static String pluginVersion;
 
 	public static String getPluginVersion() {

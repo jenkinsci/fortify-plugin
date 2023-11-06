@@ -4,14 +4,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.jvnet.hudson.test.RestartableJenkinsRule;
+import io.jenkins.plugins.casc.misc.ConfiguredWithCode;
+import io.jenkins.plugins.casc.misc.JenkinsConfiguredWithCodeRule;
+import org.junit.Rule;
+import org.junit.Test;
 
 import hudson.ProxyConfiguration;
 import hudson.util.Secret;
-import io.jenkins.plugins.casc.misc.RoundTripAbstractTest;
 import jenkins.model.Jenkins;
 
-public class FortifyJCasCCompatibilityTest extends RoundTripAbstractTest {
+public class FortifyJCasCCompatibilityTest {
+
+	@Rule
+	public final JenkinsConfiguredWithCodeRule jenkinsConfiguredWithRule = new JenkinsConfiguredWithCodeRule();
 
 	/*
 	 * Resource: /com.fortify.plugin.jenkins/src/test/resources/com/fortify/plugin/jenkins/configuration-as-code.yaml
@@ -31,9 +36,10 @@ public class FortifyJCasCCompatibilityTest extends RoundTripAbstractTest {
 	 *     ctrlUrl: "https://qa-cs-r-ctrl.prgqa.hpecorp.net:8443/scancentral-ctrl/"
 	 *     ctrlToken: "iamclient!"
 	 */
-	@Override
-	protected void assertConfiguredAsExpected(RestartableJenkinsRule restartableJenkinsRule, String s) {
-		FortifyPlugin.DescriptorImpl descriptor = FortifyPlugin.DESCRIPTOR;
+	@Test
+	@ConfiguredWithCode("com/fortify/plugin/jenkins/configuration-as-code.yml")
+	public void assertConfiguredAsExpected() {
+		final FortifyPlugin.DescriptorImpl descriptor = (FortifyPlugin.DescriptorImpl) jenkinsConfiguredWithRule.jenkins.getDescriptorOrDie(FortifyPlugin.class);
 		assertTrue("Fortify plugin can not be found", descriptor != null);
 		assertEquals(String.format("Wrong SSC URL. Expected %s but received %s", "https://qa-plg-ssc3.prgqa.hpecorp.net:8443/ssc", descriptor.getUrl()),
 				"https://qa-plg-ssc3.prgqa.hpecorp.net:8443/ssc", descriptor.getUrl());
@@ -59,10 +65,4 @@ public class FortifyJCasCCompatibilityTest extends RoundTripAbstractTest {
 		assertEquals(String.format("Local scan setting is incorrect. Expected %s but received %s", true, descriptor.isDisableLocalScans()),
 				true, descriptor.isDisableLocalScans());
 	}
-
-	@Override
-	protected String stringInLogExpected() {
-		return "";
-	}
-
 }

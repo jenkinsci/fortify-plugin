@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.44</version>
+        <version>4.53</version>
         <relativePath />
     </parent>
 
@@ -28,11 +28,11 @@
     <packaging>hpi</packaging>
 
     <properties>
+        <gitHubRepo>jenkinsci/fortify-plugin</gitHubRepo>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jenkins.version>2.249.3</jenkins.version>
-        <bom>2.249.x</bom>
-        <bom.version>950.v396cb834de1e</bom.version>
-        <jenkins-test-harness.version>2.47</jenkins-test-harness.version>
+        <jenkins.version>2.361.4</jenkins.version>
+        <bom>2.361.x</bom>
+        <bom.version>1706.vc166d5f429f8</bom.version>
         <disabledTestInjection>true</disabledTestInjection>
         <hpi.compatibleSinceVersion>20.2.34</hpi.compatibleSinceVersion>
     </properties>
@@ -49,9 +49,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com:jenkinsci/fortify-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:jenkinsci/fortify-plugin.git</developerConnection>
-        <url>https://github.com/jenkinsci/fortify-plugin</url>
+        <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
+        <developerConnection>scm:git:https://github.com/${gitHubRepo}.git</developerConnection>
+        <url>https://github.com/${gitHubRepo}</url>
         <tag>v22.2.39</tag>
     </scm>
 
@@ -139,59 +139,19 @@
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>credentials-binding</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
             <scope>compile</scope>
         </dependency>
 
         <!-- for local testing -->
         <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials-binding</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.jenkins.configuration-as-code</groupId>
             <artifactId>test-harness</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-support</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-scm-step</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-cps</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-job</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-basic-steps</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-multibranch</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-durable-task-step</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -205,19 +165,11 @@
         </dependency>
 
         <dependency>
-            <groupId>jakarta.mail</groupId>
-            <artifactId>jakarta.mail-api</artifactId>
-            <version>2.1.2</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
-        <!--TODO: replace direct dependency with a plugin dependency after updating jenkins.version-->
-        <!--dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>jakarta-mail-api</artifactId>
             <version>2.0.1-3</version>
             <scope>compile</scope>
-        </dependency-->
+        </dependency>
 
     </dependencies>
 
@@ -237,16 +189,6 @@
                     <configuration>
                         <failOnError>false</failOnError>
                     </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.jenkins-ci.tools</groupId>
-                <artifactId>maven-hpi-plugin</artifactId>
-                <configuration>
-                    <loggers>
-                        <!-- for local pipeline testing -->
-                        <org.jenkinsci.plugins.workflow>FINE</org.jenkinsci.plugins.workflow>
-                    </loggers>
-                </configuration>
             </plugin>
         </plugins>
     </build>

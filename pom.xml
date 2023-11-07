@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.53</version>
+        <version>4.66</version>
         <relativePath />
     </parent>
 
@@ -30,9 +30,9 @@
     <properties>
         <gitHubRepo>jenkinsci/fortify-plugin</gitHubRepo>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jenkins.version>2.361.4</jenkins.version>
-        <bom>2.361.x</bom>
-        <bom.version>1706.vc166d5f429f8</bom.version>
+        <jenkins.version>2.387.3</jenkins.version>
+        <bom>2.387.x</bom>
+        <bom.version>2423.vce598171d115 </bom.version>
         <disabledTestInjection>true</disabledTestInjection>
         <hpi.compatibleSinceVersion>20.2.34</hpi.compatibleSinceVersion>
     </properties>
@@ -108,6 +108,12 @@
             <version>23.1.2</version>
             <type>jar</type>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>jakarta.annotation</groupId>
+                    <artifactId>jakarta.annotation-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- for Jenkins Pipelines -->

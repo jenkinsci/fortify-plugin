@@ -190,12 +190,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                    <configuration>
-                        <failOnError>false</failOnError>
-                    </configuration>
-            </plugin>
         </plugins>
     </build>
 

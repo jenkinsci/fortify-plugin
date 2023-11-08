@@ -199,7 +199,7 @@ public class ProjectCreationService {
 	}
 
 	/**
-	 * Get the Application Version Id for given appName & appVersionName, if it
+	 * Get the Application Version Id for given appName &amp; appVersionName, if it
 	 * exists
 	 *
 	 * @return Long appVersionId

@@ -109,9 +109,6 @@ public class ApiClientWrapper {
 	/**
 	 * Returns list of Applications in SSC. Returns empty list of no Applications
 	 * are found.
-	 *
-	 * @return List<Project>
-	 * @throws ApiException
 	 */
 	public List<Project> getApplications(String query, int limit) throws ApiException {
 		List<Project> appList = new ArrayList<Project>();
@@ -128,9 +125,6 @@ public class ApiClientWrapper {
 	/**
 	 * Returns list of Application Versions in SSC. Returns empty list of no
 	 * Applications Versions are found.
-	 *
-	 * @return List<ProjectVersion>
-	 * @throws ApiException
 	 */
 	public List<ProjectVersion> getAllApplicationVersions(String query, int limit) throws ApiException {
 		List<ProjectVersion> appVersionList = new ArrayList<ProjectVersion>();
@@ -147,9 +141,6 @@ public class ApiClientWrapper {
 
 	/**
 	 * Returns list of Application Versions for a particular Application in SSC.
-	 *
-	 * @return List<ProjectVersion>
-	 * @throws ApiException
 	 */
 	public List<ProjectVersion> getApplicationVersionsFor(long applicationId, String query, int limit) throws ApiException {
 		List<ProjectVersion> appVersionList = new ArrayList<ProjectVersion>();
@@ -167,9 +158,6 @@ public class ApiClientWrapper {
 	/**
 	 * Returns list of Attribute Definitions in SSC. Returns empty list if no
 	 * Attribute Definitions are found.
-	 *
-	 * @return List<AttributeDefinition>
-	 * @throws ApiException
 	 */
 	public List<AttributeDefinition> getAttributeDefinitions() throws ApiException {
 		List<AttributeDefinition> attrDefinitionList = new ArrayList<AttributeDefinition>();
@@ -185,9 +173,6 @@ public class ApiClientWrapper {
 	/**
 	 * Returns list of Issue Templates in SSC. Returns empty list if no Issue
 	 * Templates are found.
-	 *
-	 * @return List<IssueTemplate>
-	 * @throws ApiException
 	 */
 	public List<IssueTemplate> getIssueTemplates() throws ApiException {
 		List<IssueTemplate> issueTemplateList = new ArrayList<IssueTemplate>();
@@ -202,8 +187,6 @@ public class ApiClientWrapper {
 
 	/**
 	 * Returns a list of CloudScan Pools in SSC. Returns an empty list if no pools are found.
-	 * @return List<CloudPool>
-	 * @throws ApiException
 	 */
 	public List<CloudPool> getCloudScanPools() throws ApiException {
 		List<CloudPool> cloudPoolList = new ArrayList<>();
@@ -380,9 +363,6 @@ public class ApiClientWrapper {
 	/**
 	 * Get the default Issue Template if defined, otherwise return first one in
 	 * list.
-	 *
-	 * @return IssueTemplate
-	 * @throws ApiException
 	 */
 	private IssueTemplate getDefaultIssueTemplate() throws ApiException {
 		IssueTemplate issueTemplate = null;

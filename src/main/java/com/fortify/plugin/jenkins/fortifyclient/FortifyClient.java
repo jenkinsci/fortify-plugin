@@ -77,9 +77,6 @@ public class FortifyClient {
 
 	/**
 	 * Retrieve the application version list from SSC
-	 *
-	 * @return Map<String, Long>
-	 * @throws ApiException
 	 */
 	public Map<String, Map<String, Long>> getAllVersionListEx(String query, Integer limit) throws ApiException {
 		Map<String, Map<String, Long>> appVersionList = new LinkedHashMap<String, Map<String, Long>>();
@@ -101,10 +98,6 @@ public class FortifyClient {
 
 	/**
 	 * Retrieve the application version list for the @appId from SSC
-	 * @param appId
-	 *
-	 * @return Map<String, Map<String, Long>>
-	 * @throws ApiException
 	 */
 	public Map<String, Long> getVersionListEx(Long appId, String query, int limit) throws ApiException {
 		Map<String, Long> versions = new LinkedHashMap<String, Long>();
@@ -119,9 +112,6 @@ public class FortifyClient {
 
 	/**
 	 * Retrieve the application list from SSC
-	 *
-	 * @return Map<String, Long>
-	 * @throws ApiException
 	 */
 	public Map<String, Long> getProjectList(String query, int limit) throws ApiException {
 		Map<String, Long> projectList = new LinkedHashMap<String, Long>();
@@ -213,8 +203,6 @@ public class FortifyClient {
 	 *
 	 * @param projectVersionId
 	 *            id of the application version to audit
-	 * @return Map<String, IssueBean>
-	 * @throws ApiException
 	 */
 	public Map<String, IssueBean> getIssuesByFolderId(Long projectVersionId, String folderId, int startPage,
 													  int pageSize, String filterSet, String groupingName, String sortOrder, Boolean ShowOnlyNewIssues,
@@ -283,10 +271,9 @@ public class FortifyClient {
 	 *
 	 * @param projectVersionId
 	 *            id of the application version to audit
-	 * @return Map<String, List<String>> map of attribute id -> list of attributes:
+	 * @return map of attribute id -&gt; list of attributes:
 	 *         package, className, function, sourceFilePath, filePath, lineNumber,
 	 *         url, groupName, assignedUser, category, type, confidence, severity
-	 * @throws ApiException
 	 */
 	public Map<String, List<String>> getGroupingValues(Long projectVersionId, String folderId, String filterSet,
 													   String searchCondition, String groupingName, PrintWriter log) throws ApiException {
@@ -299,9 +286,8 @@ public class FortifyClient {
 	 *
 	 * @param versionId
 	 *            id of the application version to audit
-	 * @return Map<String, List<String>> map of folder id -> list of attributes:
+	 * @return map of folder id -&gt; list of attributes:
 	 *         name, description, color, totalIssueCount
-	 * @throws ApiException
 	 */
 	public Map<String, List<String>> getFolderIdToAttributesList(Long versionId, String filterSetGuid, PrintWriter log)
 			throws ApiException {
@@ -434,10 +420,6 @@ public class FortifyClient {
 
 	/**
 	 * Retrieve the list of FilterSets for the @verId from SSC
-	 * @param verId
-	 *
-	 * @return Map<String, Map<String, Long>>
-	 * @throws ApiException
 	 */
 	public Map<String, String> getFilterSetListEx(Long verId) throws ApiException {
 		Map<String, String> result = new LinkedHashMap<String, String>();

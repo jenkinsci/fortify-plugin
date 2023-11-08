@@ -1082,7 +1082,7 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		// backwards compatibility
-		/** @deprecated use {@link #setSscTokenCredentialsId()} */
+		/** @deprecated use {@link #setSscTokenCredentialsId(String)} */
 		@DataBoundSetter
 		public void setToken(String token) {
 			String defaultMigratedTokenId = "fortify_api_token";
@@ -1196,7 +1196,7 @@ public class FortifyPlugin extends Recorder {
 			return ctrlUserToken == null ? "" : ctrlUserToken.getPlainText();
 		}
 
-		/** @deprecated use {@link #setCtrlTokenCredentialsId()} */
+		/** @deprecated use {@link #setCtrlTokenCredentialsId(String)} */
 		@DataBoundSetter
 		public void setCtrlToken(String ctrlToken) { 
 			String defaultMigratedCtrlTokenId = "fortify_ctrl_token";
@@ -1957,11 +1957,11 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		/**
-		 * Get Issue template list from SSC via WS <br/>
+		 * Get Issue template list from SSC via WS
+		 * <p>
 		 * Basically only for global.jelly pull down menu
 		 *
 		 * @return A list of Issue template and ID
-		 * @throws ApiException
 		 */
 		@POST
 		public ComboBoxModel doFillProjectTemplateItems(@AncestorInPath Item item) {

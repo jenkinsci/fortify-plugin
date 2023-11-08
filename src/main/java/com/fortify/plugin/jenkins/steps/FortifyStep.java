@@ -58,15 +58,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 	 * Search for the executable filename in executable home directory or on PATH environment
 	 * variable or in workspace
 	 *
-	 * @param filename
-	 * @param build
-	 * @param workspace
-	 * @param listener
-	 * @param targetEnvVarName
-	 * @param vars 
 	 * @return found executable
-	 * @throws InterruptedException
-	 * @throws IOException
 	 */
 	protected String getExecutable(String filename, Run<?, ?> build, FilePath workspace,
 			TaskListener listener, String targetEnvVarName, EnvVars env) throws InterruptedException, IOException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * (c) Copyright 2019 Micro Focus or one of its affiliates.
+ * Copyright 2019 - 2023 Open Text.
  *
  * Licensed under the MIT License (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nonnull;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -69,6 +67,8 @@ import com.fortify.ssc.restclient.model.Project;
 import com.fortify.ssc.restclient.model.ProjectVersion;
 import com.fortify.ssc.restclient.model.ProjectVersionIssue;
 import com.fortify.ssc.restclient.model.ProjectVersionIssueGroup;
+
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 public class ApiClientWrapper {
 	private static final String AUTH_HEADER_TOKEN = "FortifyToken";
@@ -163,7 +163,7 @@ public class ApiClientWrapper {
 		List<AttributeDefinition> attrDefinitionList = new ArrayList<AttributeDefinition>();
 		AttributeDefinitionControllerApi attrDefinitionControllerApi = new AttributeDefinitionControllerApi(apiClient);
 		ApiResultListAttributeDefinition apiResultListAttrDefinition = attrDefinitionControllerApi
-				.listAttributeDefinition(null, Integer.valueOf(0), Integer.MAX_VALUE, null, null);
+				.listAttributeDefinition(null, Integer.valueOf(0), Integer.MAX_VALUE, null, null, null);
 		for (AttributeDefinition attrDef : apiResultListAttrDefinition.getData()) {
 			attrDefinitionList.add(attrDef);
 		}
@@ -457,7 +457,7 @@ public class ApiClientWrapper {
 		List<Attribute> reqAttributes = new ArrayList<Attribute>();
 		try {
 			ApiResultListAttributeDefinition apiResultListAttributeDefinition = attributeDefinitionControllerApi
-					.listAttributeDefinition(null, 0, 0, required, null);
+					.listAttributeDefinition(null, 0, 0, required, null, null);
 
 			for (AttributeDefinition def : apiResultListAttributeDefinition.getData()) {
 				if (!def.getHasDefault()) {
@@ -514,7 +514,7 @@ public class ApiClientWrapper {
 	 * @return id of the uploaded artifact
 	 * @throws ApiException
 	 */
-	public Long uploadFpr(@Nonnull File fpr, @Nonnull Long appVersionId) throws ApiException {
+	public Long uploadFpr(@NonNull File fpr, @NonNull Long appVersionId) throws ApiException {
 		ArtifactOfProjectVersionControllerApi artifactOfProjectVersionControllerApi = new ArtifactOfProjectVersionControllerApi(
 				apiClient);
 		ApiResultArtifact result = artifactOfProjectVersionControllerApi.uploadArtifactOfProjectVersion(appVersionId,
@@ -522,7 +522,7 @@ public class ApiClientWrapper {
 		return result.getData().getId();
 	}
 
-	public Artifact getArtifactInfo(@Nonnull Long artifactId) throws ApiException {
+	public Artifact getArtifactInfo(@NonNull Long artifactId) throws ApiException {
 		ArtifactControllerApi artifactControllerApi = new ArtifactControllerApi(apiClient);
 		return artifactControllerApi.readArtifact(artifactId, null, null).getData();
 	}

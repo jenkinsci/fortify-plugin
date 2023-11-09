@@ -101,15 +101,9 @@
         <dependency>
             <groupId>com.fortify</groupId>
             <artifactId>ssc-restapi-client</artifactId>
-            <version>23.1.2</version>
+            <version>23.2</version>
             <type>jar</type>
             <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>jakarta.annotation</groupId>
-                    <artifactId>jakarta.annotation-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- for Jenkins Pipelines -->
@@ -119,18 +113,11 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- for Configuration as a Code -->
-        <dependency>
-            <groupId>io.jenkins</groupId>
-            <artifactId>configuration-as-code</artifactId>
-            <scope>compile</scope>
-        </dependency>
-
         <!-- for Gradle Global Tool Configuration support -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>gradle</artifactId>
-            <version>1.40</version>
+            <version>2.9</version>
         </dependency>
 
         <!-- for Credentials support -->
@@ -152,12 +139,17 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.jenkins</groupId>
+            <artifactId>configuration-as-code</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.jenkins.configuration-as-code</groupId>
             <artifactId>test-harness</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- this overrides the version provided with ssc-restapi-client -->
+        <!-- this is also a transitive dependency of ssc-restapi-client -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
@@ -166,9 +158,17 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Email address validation -->
         <dependency>
             <groupId>io.jenkins.plugins</groupId>
             <artifactId>jakarta-mail-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Using lang3.tuple -->
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>commons-lang3-api</artifactId>
             <scope>compile</scope>
         </dependency>
 

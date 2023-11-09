@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.CheckForNull;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
@@ -78,6 +76,7 @@ import com.fortify.plugin.jenkins.steps.types.OtherScanType;
 import com.fortify.plugin.jenkins.steps.types.ProjectScanType;
 import com.fortify.ssc.restclient.ApiException;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.AbortException;
 import hudson.BulkChange;
 import hudson.Extension;

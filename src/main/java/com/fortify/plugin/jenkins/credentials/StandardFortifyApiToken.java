@@ -1,7 +1,25 @@
+/*******************************************************************************
+ * Copyright 2019 - 2023 Open Text. 
+ * 
+ * Licensed under the MIT License (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * https://opensource.org/licenses/MIT
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
 package com.fortify.plugin.jenkins.credentials;
 
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.impl.BaseStandardCredentials;
+
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
@@ -13,9 +31,6 @@ import org.jenkins.ui.icon.IconType;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
 /**
  * Default implementation of {@link FortifyApiToken} for use by Jenkins {@link com.cloudbees.plugins.credentials.CredentialsProvider}
  * instances that store {@link Secret} locally.
@@ -24,16 +39,16 @@ public class StandardFortifyApiToken extends BaseStandardCredentials implements 
 
 	private static final long serialVersionUID = -7103736612075250489L;
 
-    @Nonnull
+    @NonNull
     private final Secret token;
 
     @DataBoundConstructor
-    public StandardFortifyApiToken(@CheckForNull CredentialsScope scope, @CheckForNull String id, @Nonnull String token, @CheckForNull String description) {
+    public StandardFortifyApiToken(@CheckForNull CredentialsScope scope, @CheckForNull String id, @NonNull String token, @CheckForNull String description) {
         super(scope, id, description);
         this.token = Secret.fromString(token);
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public Secret getToken() {
         return this.token;
@@ -42,7 +57,7 @@ public class StandardFortifyApiToken extends BaseStandardCredentials implements 
     @Extension
     public static class DefaultFortifyApiTokenDescriptor extends BaseStandardCredentials.BaseStandardCredentialsDescriptor {
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Fortify Connection Token";

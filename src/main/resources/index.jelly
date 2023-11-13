@@ -15,5 +15,5 @@
     limitations under the License.
  -->
 <div>
-  Adds the ability to perform security analysis with Fortify Static Code Analyzer, upload results to Software Security Center, show analysis results summary, and set build failure criteria based on analysis results. See <a href="https://www.microfocus.com/documentation/fortify-jenkins-plugin/">Using the Micro Focus Fortify Jenkins Plugin</a> guide.
+  Adds the ability to perform security analysis with Fortify Static Code Analyzer, upload results to Software Security Center, show analysis results summary, and set build failure criteria based on analysis results. See <a href="https://www.microfocus.com/documentation/fortify-jenkins-plugin/">Using the Fortify Jenkins Plugin</a> guide.
 </div>

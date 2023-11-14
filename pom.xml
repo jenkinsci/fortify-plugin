@@ -101,9 +101,15 @@
         <dependency>
             <groupId>com.fortify</groupId>
             <artifactId>ssc-restapi-client</artifactId>
-            <version>23.2</version>
+            <version>23.2.1</version>
             <type>jar</type>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>jakarta.annotation</groupId>
+                    <artifactId>jakarta.annotation-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- for Jenkins Pipelines -->

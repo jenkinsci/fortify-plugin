@@ -58,12 +58,12 @@
         }
 
         function showNew(boxId,spinnerUrl) {
-            var params = 'all=no';
+            var params = {'all' : 'no'};
             updateByUrl(boxId,contextUrl+"/showAllNotNew",params,spinnerUrl);
         }
 
         function showAll(boxId,spinnerUrl) {
-            var params = 'all=yes';
+            var params = {'all' : 'yes'};
             updateByUrl(boxId,contextUrl+"/showAllNotNew",params,spinnerUrl);
         }
 
@@ -167,7 +167,7 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }),
                     body: new URLSearchParams({
-                        firstTime: yes,
+                        firstTime: 'yes',
                     })
                 })
                 .then(response => response.text())

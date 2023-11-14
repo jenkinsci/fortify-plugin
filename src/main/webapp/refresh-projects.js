@@ -134,7 +134,7 @@ function refreshProjectVersions(url, elm)
 
 function refreshTemplateList(url,paramList)
 {
-    const parameters = [];
+    var parameters = new URLSearchParams();
     paramList.split(',').forEach(function(name) {
         var p = document.getElementById(name);
         if (p == null) {
@@ -150,9 +150,9 @@ function refreshTemplateList(url,paramList)
         }
         if (p != null) {
             if (p.type == "checkbox") {
-                parameters[name] = p.checked;
+                parameters.append(name, p.checked);
             } else {
-                parameters[name] = p.value;
+                parameters.append(name, p.value);
             }
         }
     });
@@ -167,7 +167,7 @@ function refreshTemplateList(url,paramList)
         headers: crumb.wrap({
             'Content-Type': 'application/x-www-form-urlencoded'
         }),
-        body: new URLSearchParams(parameters)
+        body: parameters
     })
     .then((response) => response.json())
     .then((data) => {

@@ -78,7 +78,7 @@ public abstract class FortifyStep extends Step implements SimpleBuildStep {
 		}
 		for (Map.Entry<String, String> entry : env.entrySet()) {
 			String envVarName = entry.getKey();
-			if ("PATH".equalsIgnoreCase(targetEnvVarName)) {
+			if ("PATH".equalsIgnoreCase(envVarName)) {
 				path = env.get(envVarName);
 			}
 		}

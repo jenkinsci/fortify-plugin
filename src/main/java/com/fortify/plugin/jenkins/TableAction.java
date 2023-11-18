@@ -560,16 +560,16 @@ public class TableAction implements Action {
 		@JavaScriptMethod
 		public String getDisplayName() {
 			int issueCount = showingAllNotNew ? folder.getIssueCount() : folder.getIssueNewCount();
-			if (pageSize == -1) {
-				pageSize = issueCount;
-			}
-			List<IssueBean> issues = getIssues();
-			int hasItems = issues != null ? issues.size() : 0;
-			if (hasItems == 0) {
+			if (issueCount == 0) {
 				return String.format(page == 0 ? "%s (No Issues)" : "%s (No New Issues)", folder.getName());
 			}
-			int firstItem = page * pageSize;
-			int shownItems = firstItem + hasItems;
+			int firstItem = 0;
+			int shownItems = issueCount;
+			if (pageSize != -1) {
+				firstItem = page * pageSize;
+				List<IssueBean> issuesOnPage = getIssues();
+				shownItems = issuesOnPage == null ? 0 : firstItem + issuesOnPage.size();
+			}
 			return String.format("%s (%d to %d out of %d)", folder.getName(), firstItem + 1, shownItems, issueCount);
 		}
 
@@ -618,7 +618,7 @@ public class TableAction implements Action {
 			}
 			if (needsUpdate()) {
 				needsUpdate = Boolean.FALSE;
-				issuesByFolder = manager.getIssuesByFolder(folder.getId(), page, pageSize, sortOrder, sortDownNotUp,
+				issuesByFolder = manager.getIssuesByFolder(folder.getId(), pageSize == -1 ? 0 : page, pageSize == -1 ? folder.getIssueCount() : pageSize, sortOrder, sortDownNotUp,
 						showingAllNotNew, this.getSelectedGrouping(),
 						new StreamBuildListener(System.out, Charset.defaultCharset()));
 			}

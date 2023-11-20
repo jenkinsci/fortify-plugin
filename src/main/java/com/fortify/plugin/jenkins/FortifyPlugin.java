@@ -887,7 +887,7 @@ public class FortifyPlugin extends Recorder {
 					}
 
 				}
-				throw new ApiException(message, e, e.getCode(), e.getResponseHeaders());
+				throw new ApiException(message, e, e.getCode(), e.getResponseHeaders(), e.getResponseBody());
 			}
 		}
 		return null;
@@ -1735,46 +1735,6 @@ public class FortifyPlugin extends Recorder {
 		}
 
 		@POST
-		public void doRefreshSensorPools(StaplerRequest req, StaplerResponse rsp, @QueryParameter String value) throws Exception {
-			checkAdministerPermission();
-			// backup original values
-			String orig_url = this.url;
-
-			String url = req.getParameter("url");
-			this.url = url != null ? url.trim() : "";
-
-			try {
-				FormValidation testConnectionResult = testSscConnection(this.url, this.getSscTokenCredentialsId(), this.getIsProxy(), connectTimeout, readTimeout, writeTimeout); //XXX verify ctrl or ssc token id is needed
-				if (!testConnectionResult.kind.equals(FormValidation.Kind.OK)) {
-					throw new Exception(testConnectionResult.getLocalizedMessage()); // don't get sensor pools if server is unavailable
-				}
-				// always retrieve data from SSC
-				sensorPoolList = getSensorPoolListNoCache();
-				// and then convert it to JSON
-				StringBuilder buf = new StringBuilder();
-				buf.append("{ \"list\" : [\n");
-				for (int i = 0; i < sensorPoolList.size(); i++) {
-					SensorPoolBean b = sensorPoolList.get(i);
-					buf.append("{ \"name\": \"" + escapeJsonValue(b.getName()) + "\", \"uuid\": \"" + escapeJsonValue(b.getUuid()) + "\" }");
-					if (i != sensorPoolList.size() - 1) {
-						buf.append(",\n");
-					} else {
-						buf.append("\n");
-					}
-				}
-				buf.append("]}");
-				// send HTML data directly
-				rsp.setContentType("application/json;charset=UTF-8");
-				rsp.getWriter().print(buf.toString());
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw e;
-			} finally {
-				this.url = orig_url;
-			}
-		}
-
-		@POST
 		public void doCreateNewProject(final StaplerRequest req, StaplerResponse rsp, @QueryParameter String value, @AncestorInPath Item item) throws Exception {
 			if (item != null) {
 				item.checkPermission(Item.CONFIGURE);
@@ -2079,7 +2039,17 @@ public class FortifyPlugin extends Recorder {
 			List<ListBoxModel.Option> optionList = new ArrayList<>();
 			if (item != null) {
 				item.checkPermission(Item.CONFIGURE);
-				sensorPoolList = getSensorPoolListNoCache();
+				try {
+					sensorPoolList = getSensorPoolListNoCache();
+				} catch (Exception e) {
+					String message = e.getMessage();
+					if (message != null && !message.isEmpty() && (e instanceof ApiException) && message.trim().toLowerCase().startsWith("scancentral is not enabled")) {
+						LOGGER.log(Level.INFO, message);
+					} else {
+						LOGGER.log(Level.WARNING, "Error populating ScanCentral Sensor Pool list", e);
+					}
+					return new ListBoxModel();
+				}
 				for (SensorPoolBean sensorPoolBean : sensorPoolList) {
 					ListBoxModel.Option option = new ListBoxModel.Option(sensorPoolBean.getName(), sensorPoolBean.getUuid());
 					optionList.add(option);
@@ -2088,45 +2058,39 @@ public class FortifyPlugin extends Recorder {
 			return new ListBoxModel(optionList);
 		}
 
-		public List<SensorPoolBean> getSensorPoolList() {
+		public List<SensorPoolBean> getSensorPoolList() throws Exception {
 			if (sensorPoolList.isEmpty()) {
 				sensorPoolList = getSensorPoolListNoCache();
 			}
 			return sensorPoolList;
 		}
 
-		private List<SensorPoolBean> getSensorPoolListNoCache() {
+		private List<SensorPoolBean> getSensorPoolListNoCache() throws Exception {
 			if (DESCRIPTOR.getUrl() == null) {
 				return Collections.emptyList();
 			}
-			try {
-				Map<String, String> map = runWithFortifyClient(getToken(),
-						new FortifyClient.Command<Map<String, String>>() {
-							@Override
-							public Map<String, String> runWith(FortifyClient client) throws Exception {
-								return client.getCloudScanPoolList();
-							}
-						});
-				List<SensorPoolBean> list = new ArrayList<SensorPoolBean>(map.size());
-				for (Map.Entry<String, String> entry : map.entrySet()) {
-					SensorPoolBean proj = new SensorPoolBean(entry.getKey(), entry.getValue());
-					list.add(proj);
-				}
-				Collections.sort(list, new Comparator<SensorPoolBean>() {
-					@Override
-					public int compare(SensorPoolBean o1, SensorPoolBean o2) {
-						if (o1 != null && o2 != null) {
-							return o1.getName().compareTo(o2.getName());
+			Map<String, String> map = runWithFortifyClient(getToken(),
+					new FortifyClient.Command<Map<String, String>>() {
+						@Override
+						public Map<String, String> runWith(FortifyClient client) throws Exception {
+							return client.getCloudScanPoolList();
 						}
-						return 0;
-					}
-				});
-				return list;
-			} catch (Throwable e) {
-				e.printStackTrace();
+					});
+			List<SensorPoolBean> list = new ArrayList<SensorPoolBean>(map.size());
+			for (Map.Entry<String, String> entry : map.entrySet()) {
+				SensorPoolBean proj = new SensorPoolBean(entry.getKey(), entry.getValue());
+				list.add(proj);
 			}
-
-			return Collections.emptyList();
+			Collections.sort(list, new Comparator<SensorPoolBean>() {
+				@Override
+				public int compare(SensorPoolBean o1, SensorPoolBean o2) {
+					if (o1 != null && o2 != null) {
+						return o1.getName().compareTo(o2.getName());
+					}
+					return 0;
+				}
+			});
+			return list;
 		}
 
 		public ListBoxModel doFillLocaleItems(@QueryParameter String locale) {

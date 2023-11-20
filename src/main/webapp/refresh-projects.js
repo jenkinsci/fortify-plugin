@@ -197,70 +197,10 @@ function refreshTemplateList(url,paramList)
 function updateComboBox(comboBox, items, selectedIndex) {
     comboBox.field.focus();
     comboBox.field.moveCaretToEnd();
-    /*
-		Workaround for IE. IE has different from other browsers event queue.
-		It leads to incorrect behavior because field.onFocus function is called after setItems and clear the list
-		Zero timeout allows to set items after all event handlers like onFocus are executed
-	*/
-    setTimeout (function() {
-        comboBox.setItems(items);
-        comboBox.select(selectedIndex);
-        /*
-                tdList = comboBox.field.parentElement.parentElement.parentElement.nextElementSibling.getElementsByTagName("td");
-                for (var td = 0; td < tdList.length; td++) {
-                    divList = tdList[td].getElementsByTagName("div");
-                    for (var i = 0; i < divList.length; i++) {
-                        div = divList[i];
-                        if (div.className == "error") {
-                            while (div.childNodes.length > 0) {
-                                div.removeChild(div.childNodes[0]);
-                            }
-                        }
-                    }
-                }
-        */
-    }, 0);
-}
-
-function refreshSensorPools(url, elm) {
-    //var poolsButton = document.getElementById('refreshSensorPoolsButton');
-    var poolsButton = elm;
-    poolsButton.disabled=true;
-
-    //var spinner = document.getElementById('refreshSpinner');
-    var spinner = elm.parentNode.nextSibling;
-    spinner.style.display="block";
-
-    fetch(url, {
-        method: 'POST',
-        headers: crumb.wrap({
-            'Content-Type': 'text/plain'
-        })
-    })
-    .then((response) => response.json())
-    .then((data) => {
-            spinner.style.display="none";
-            //var select = document.getElementById('sensorPoolName');
-            var select = elm.parentNode.previousSibling.querySelector("input.sensor-pool-name");
-            var oldSelect = select.value;
-            if (select) {
-                var items = new Array();
-                var selectedIndex = 0;
-                // add new values
-                for(var i=0; i<data.list.length; i++) {
-                    var item = data.list[i];
-                    items.push(item.name);
-                    if (oldSelect==item.name) {
-                        selectedIndex = items.length-1;
-                    }
-                }
-                updateComboBox(select.comboBox, items, selectedIndex);
-            }
-
-            poolsButton.disabled=false;
-    })
-    .catch((error) => {
-        console.error(error);
+    comboBox.setItems(items);
+    comboBox.select(selectedIndex);
+    comboBox.field.parentNode.addEventListener('focusout', function (e) {
+        fireEvent(comboBox.field, "change"); // to trigger dependent fields to update
     });
 }
 

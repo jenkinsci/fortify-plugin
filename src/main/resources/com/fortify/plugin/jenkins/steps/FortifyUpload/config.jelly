@@ -45,7 +45,7 @@
     </f:entry>
 
     <f:entry title="${%Filter set}" field="filterSet" help="/plugin/fortify/help-filterSet.html">
-      <f:select/>
+      <f:select fillDependsOn="appName appVersion"/>
     </f:entry>
 
     <f:entry title="${%Build failure criteria}" field="failureCriteria" help="/plugin/fortify/help-search.html">

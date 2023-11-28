@@ -100,7 +100,7 @@ public class JavaScanType extends ProjectScanType {
 			items.add("17", "17");
 
 			if ((null == javaVersion) || (0 == javaVersion.length())) {
-				items.get(3).selected = true; // default to Java 8
+				items.get(6).selected = true; // default to Java 11
 			}
 
 			return items;

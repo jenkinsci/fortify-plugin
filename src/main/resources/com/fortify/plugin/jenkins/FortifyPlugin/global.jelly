@@ -39,6 +39,7 @@
       </f:entry>
 
       <f:entry title="Issue template" help="/plugin/fortify/help-sscProjTemplate.html">
+        <script type="text/javascript" src="${rootURL}/plugin/fortify/purify.min.js"/>
         <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
         <div style="float:left;width:80%;">
           <f:editableComboBox id="projectTemplate" name="projectTemplate" field="projectTemplate" clazz="setting-input" items="${descriptor.projectTemplateItems}" checkMethod="post"/>

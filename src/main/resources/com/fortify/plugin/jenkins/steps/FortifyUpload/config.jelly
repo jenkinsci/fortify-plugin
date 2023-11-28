@@ -17,6 +17,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <f:entry title="${%Application name}" help="/plugin/fortify/help-sscProjName.html">
+      <script type="text/javascript" src="${rootURL}/plugin/fortify/purify.min.js"/>
       <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
       <div style="float:left;width:80%;">
         <f:editableComboBox id="projectName" name="appName" field="appName" clazz="setting-input project-name" items="${descriptor.applicationNameItems}" />

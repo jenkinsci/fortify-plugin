@@ -67,6 +67,7 @@
             <f:optionalBlock field="uploadSSC"
                              title="Upload Fortify SCA scan results to Fortify Software Security Center">
                 <f:entry title="Application name" help="/plugin/fortify/help-remoteSscAppName.html">
+                    <script type="text/javascript" src="${rootURL}/plugin/fortify/purify.min.js"/>
                     <script type="text/javascript" src="${rootURL}/plugin/fortify/refresh-projects.js"/>
                     <div style="float:left;width:80%;">
                         <f:editableComboBox id="projectName" field="appName"

@@ -37,7 +37,7 @@
                     isUpdateEnable = true;
                 })
                 .catch((error) => {
-                    console.error(error);
+                    console.error(error.message);
                 });
             }
         }
@@ -94,7 +94,7 @@
                 }
             })
             .catch((error) => {
-                console.error(error);
+                console.error(error.message);
             });
         }
 
@@ -113,7 +113,7 @@
                 }
             })
             .catch((error) => {
-                console.error(error);
+                console.error(error.message);
             });
         }
 
@@ -132,7 +132,7 @@
                 }
             })
             .catch((error) => {
-                console.error(error);
+                console.error(error.message);
             });
         }
 
@@ -151,7 +151,7 @@
                 }
             })
             .catch((error) => {
-                console.error(error);
+                console.error(error.message);
             });
         }
 
@@ -178,7 +178,7 @@
                    window.setTimeout(scheduleUpdateCheck, 10000);
                 })
                 .catch((error) => {
-                    console.error(error);
+                    console.error(error.message);
                 });
             }
             window.setTimeout(loadIssues, 0);

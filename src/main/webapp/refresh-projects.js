@@ -64,7 +64,7 @@ function refreshProjectNames(url, elm)
         buttonVer.disabled=false;
     })
     .catch((error) => {
-        console.error(error);
+        console.error(error.message);
     });
 }
 
@@ -128,7 +128,7 @@ function refreshProjectVersions(url, elm)
             }
     })
     .catch((error) => {
-        console.error(error);
+        console.error(error.message);
     });
 }
 
@@ -189,7 +189,7 @@ function refreshTemplateList(url,paramList)
             }
     })
     .catch((error) => {
-        console.error(error);
+        console.error(error.message);
     });
     button.disabled=false;
 }

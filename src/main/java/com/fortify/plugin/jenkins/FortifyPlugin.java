@@ -1364,8 +1364,7 @@ public class FortifyPlugin extends Recorder {
 					return result.includeCurrentValue(sscTokenCredentialsId);
 				}
 			}
-			return result.includeCurrentValue(sscTokenCredentialsId)
-					.includeMatchingAs(ACL.SYSTEM, item, FortifyApiToken.class, URIRequirementBuilder.fromUri(url).build(), CredentialsMatchers.instanceOf(FortifyApiToken.class));
+			return result.includeMatchingAs(ACL.SYSTEM, item, FortifyApiToken.class, URIRequirementBuilder.fromUri(url).build(), CredentialsMatchers.instanceOf(FortifyApiToken.class)).includeCurrentValue(sscTokenCredentialsId);
 		}
 
 		@POST

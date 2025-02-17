@@ -55,7 +55,7 @@ public class StandardFortifyApiToken extends BaseStandardCredentials implements 
     }
 
     @Extension
-    public static class DefaultFortifyApiTokenDescriptor extends BaseStandardCredentials.BaseStandardCredentialsDescriptor {
+    public static class DefaultFortifyApiTokenDescriptor extends BaseStandardCredentialsDescriptor {
 
         @NonNull
         @Override
@@ -69,8 +69,14 @@ public class StandardFortifyApiToken extends BaseStandardCredentials implements 
         }
 
         public FormValidation doCheckToken(@QueryParameter Secret token) {
-            if (StringUtils.isBlank(Secret.toString(token))) {
-                return FormValidation.error("Token cannot be empty");
+
+            String tokenText = Secret.toString(token);
+            if (TokenUtil.isUuid(tokenText)) {
+                return FormValidation.warning("You are using a decoded token. Decoded tokens are deprecated and will not be supported in future releases!");
+            }
+
+            if (StringUtils.isBlank(tokenText)) {
+                return FormValidation.error("Token cannot be empty!");
             }
             return FormValidation.ok();
         }

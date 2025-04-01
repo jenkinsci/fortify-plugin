@@ -49,7 +49,7 @@
   <f:block>
     <local:blockWrapper>
       <f:radioBlock title="Remote translation &amp; remote scan" value="remote" name="analysisRunType"
-                    checked="${instance.isRemote()}" help="/plugin/fortify/help-RemoteSCATranslationAndScan.html">
+                    checked="${instance.isRemote()}" help="/plugin/fortify/help-remoteSCATranslationAndScan.html">
         <f:dropdownDescriptorSelector title="Application type" field="remoteAnalysisProjectType"
                                       descriptors="${descriptor.remoteAnalysisProjectTypeDescriptors}"/>
         <f:advanced>
@@ -59,12 +59,12 @@
         </f:advanced>
         <f:block>
         <local:blockWrapper>
-        <f:optionalBlock field="remoteOptionalConfig" title="Optional configuration" help="/plugin/fortify/help-RemoteOptionalConfiguration.html">
+        <f:optionalBlock field="remoteOptionalConfig" title="Optional configuration" help="/plugin/fortify/help-remoteOptionalConfiguration.html">
           <f:section class="section-header" title="Controller configuration">
-            <f:entry field="sensorPoolUUID" title="Sensor pool" help="/plugin/fortify/help-RemoteSensorPool.html">
+            <f:entry field="sensorPoolUUID" title="Sensor pool" help="/plugin/fortify/help-remoteSensorPool.html">
               <f:select/>
             </f:entry>
-            <f:entry title="Notification email" help="/plugin/fortify/help-RemoteNotificationEmail.html">
+            <f:entry title="Notification email" help="/plugin/fortify/help-remoteNotificationEmail.html">
               <f:textbox field="notifyEmail"/>
             </f:entry>
           </f:section>
@@ -75,7 +75,7 @@
             <f:entry title="Custom Rulepacks" help="/plugin/fortify/help-scanCustomRulepacks.html">
               <f:textbox field="customRulepacks"/>
             </f:entry>
-            <f:entry title="Fortify SCA scan filter file" help="/plugin/fortify/help-RemoteScanFilterFile.html">
+            <f:entry title="Fortify SCA scan filter file" help="/plugin/fortify/help-remoteScanFilterFile.html">
               <f:textbox field="filterFile"/>
             </f:entry>
           </f:section>

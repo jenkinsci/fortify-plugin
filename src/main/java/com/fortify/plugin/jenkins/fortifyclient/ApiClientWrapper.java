@@ -16,11 +16,11 @@
 package com.fortify.plugin.jenkins.fortifyclient;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.text.MessageFormat;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fortify.plugin.jenkins.credentials.TokenUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 
@@ -91,12 +91,11 @@ public class ApiClientWrapper {
 		if (writeTimeoutSeconds != null) {
 			apiClient.setWriteTimeout(writeTimeoutSeconds * 1000);
 		}
-		try {
-			apiClient.setApiKeyPrefix(AUTH_HEADER_TOKEN);
-			apiClient.setApiKey(Base64.encodeBase64String(token.getBytes("UTF-8")));
-		} catch (UnsupportedEncodingException e) {
-			String msg = MessageFormat.format("[ERROR] Error encoding SSC auth token : {0}", token);
-			throw new ApiException(msg + e.getLocalizedMessage());
+		apiClient.setApiKeyPrefix(AUTH_HEADER_TOKEN);
+		if (!TokenUtil.isUuid(token)) {
+			apiClient.setApiKey(token);
+		} else {
+			apiClient.setApiKey(Base64.encodeBase64String(token.getBytes(StandardCharsets.UTF_8)));
 		}
 	}
 

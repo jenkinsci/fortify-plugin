@@ -92,7 +92,7 @@ public class ApiClientWrapper {
 			apiClient.setWriteTimeout(writeTimeoutSeconds * 1000);
 		}
 		apiClient.setApiKeyPrefix(AUTH_HEADER_TOKEN);
-		if(!TokenUtil.isUuid(token)) {
+		if (!TokenUtil.isUuid(token)) {
 			apiClient.setApiKey(token);
 		} else {
 			apiClient.setApiKey(Base64.encodeBase64String(token.getBytes(StandardCharsets.UTF_8)));

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.fortify.plugin.jenkins.steps.remote.*;
 import hudson.model.Item;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -38,12 +39,6 @@ import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.verb.POST;
 
 import com.fortify.plugin.jenkins.FortifyPlugin;
-import com.fortify.plugin.jenkins.steps.remote.GradleProjectType;
-import com.fortify.plugin.jenkins.steps.remote.MSBuildProjectType;
-import com.fortify.plugin.jenkins.steps.remote.MavenProjectType;
-import com.fortify.plugin.jenkins.steps.remote.PhpProjectType;
-import com.fortify.plugin.jenkins.steps.remote.PythonProjectType;
-import com.fortify.plugin.jenkins.steps.remote.RemoteAnalysisProjectType;
 import com.google.common.collect.ImmutableSet;
 
 import hudson.AbortException;
@@ -96,6 +91,8 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
             return "mvn";
         } else if (getRemoteAnalysisProjectType() instanceof MSBuildProjectType) {
             return "msbuild";
+        } else if (getRemoteAnalysisProjectType() instanceof DotNetProjectType) {
+            return "dotnet";
         } else {
             return "none";
         }
@@ -108,6 +105,8 @@ public class CloudScanStart extends FortifyCloudScanStep implements SimpleBuildS
             return ((MavenProjectType)remoteAnalysisProjectType).getBuildFile();
         } else if (getRemoteAnalysisProjectType() instanceof MSBuildProjectType) {
             return ((MSBuildProjectType)remoteAnalysisProjectType).getDotnetProject();
+        } else if (getRemoteAnalysisProjectType() instanceof DotNetProjectType) {
+            return ((DotNetProjectType)remoteAnalysisProjectType).getDotnetProject();
         } else {
             return "";
         }

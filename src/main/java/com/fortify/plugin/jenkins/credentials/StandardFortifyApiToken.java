@@ -24,7 +24,7 @@ import hudson.Extension;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkins.ui.icon.Icon;
 import org.jenkins.ui.icon.IconSet;
 import org.jenkins.ui.icon.IconType;

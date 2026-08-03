@@ -15,7 +15,7 @@
  *******************************************************************************/
 package com.fortify.plugin.jenkins.steps;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fortify.plugin.jenkins.Messages;
 

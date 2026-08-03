@@ -18,7 +18,7 @@ package com.fortify.plugin.jenkins.bean;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fortify.plugin.jenkins.FortifyPlugin;
 import com.fortify.plugin.jenkins.PathUtils;

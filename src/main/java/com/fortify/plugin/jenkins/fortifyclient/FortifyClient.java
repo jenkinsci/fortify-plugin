@@ -23,7 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fortify.plugin.jenkins.ProxyConfig;
 import com.fortify.plugin.jenkins.bean.GroupingProfile;
